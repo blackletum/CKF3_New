@@ -1,5 +1,8 @@
 # Chicken Fortress 3
 
+# edited by weyouthey and jakulo 
+# not really jakulo he sucks!!! ))
+
 Chicken Fortress 3 is a Half-Life mod that ported the Team Fortress 2 to GoldSRC engine. Currently in alpha version.
 
 Please check [ModDB Page](https://www.moddb.com/mods/chicken-fortress-3) for more info!
