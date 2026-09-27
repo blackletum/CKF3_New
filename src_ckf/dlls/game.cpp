@@ -2,6 +2,7 @@
 #include "eiface.h"
 #include "util.h"
 #include "game.h"
+#include "bot/hl_bot_manager.h"
 
 cvar_t *g_psv_gravity, *g_psv_aim;
 cvar_t *g_footsteps;
@@ -397,6 +398,9 @@ cvar_t sk_player_leg3 = { "sk_player_leg3", "1" };
 
 void GameDLLInit(void)
 {
+	Bot_RegisterCvars();
+	InstallBotControl();
+
 	g_psv_gravity = CVAR_GET_POINTER("sv_gravity");
 	g_psv_aim = CVAR_GET_POINTER("sv_aim");
 	g_footsteps = CVAR_GET_POINTER("mp_footsteps");
