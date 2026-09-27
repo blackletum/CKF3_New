@@ -1,0 +1,136 @@
+﻿C:\Program Files\Microsoft Visual Studio\2022\Community\MSBuild\Microsoft\VC\v170\Microsoft.CppBuild.targets(1133,5): warning MSB4211: The property "GetTargetPathDependsOn" is being set to a value for the first time, but it was already consumed at "C:\Program Files\Microsoft Visual Studio\2022\Community\MSBuild\Current\Bin\amd64\Microsoft.Common.CurrentVersion.targets (2243,5)".
+cl : command line  warning D9035: option 'Gm' has been deprecated and will be removed in a future release
+cl : command line  warning D9030: '/Gm' is incompatible with multiprocessing; ignoring /MP switch
+  zone.cpp
+  Win32Font.cpp
+  VPanelWrapper.cpp
+C:\Users\wen\source\repos\CKF3Alpha_New\src\SourceSDK\tier0\memalloc.h(257,11): error C1083: Cannot open include file: 'typeinfo.h': No such file or directory
+  (compiling source file 'Win32Font.cpp')
+  
+C:\Users\wen\source\repos\CKF3Alpha_New\src\SourceSDK\tier0\memalloc.h(257,11): error C1083: Cannot open include file: 'typeinfo.h': No such file or directory
+  (compiling source file 'VPanelWrapper.cpp')
+  
+  VPanel.cpp
+C:\Users\wen\source\repos\CKF3Alpha_New\src\SourceSDK\tier0\memalloc.h(257,11): error C1083: Cannot open include file: 'typeinfo.h': No such file or directory
+  (compiling source file 'VPanel.cpp')
+  
+  VideoMode.cpp
+C:\Users\wen\source\repos\CKF3Alpha_New\src\SourceSDK\tier0\memalloc.h(257,11): error C1083: Cannot open include file: 'typeinfo.h': No such file or directory
+  (compiling source file 'VideoMode.cpp')
+  
+  Video.cpp
+C:\Users\wen\source\repos\CKF3Alpha_New\src\SourceSDK\tier0\memalloc.h(257,11): error C1083: Cannot open include file: 'typeinfo.h': No such file or directory
+  (compiling source file 'Video.cpp')
+  
+  vgui_key_translation.cpp
+  vgui_internal.cpp
+C:\Users\wen\source\repos\CKF3Alpha_New\src\SourceSDK\tier0\memalloc.h(257,11): error C1083: Cannot open include file: 'typeinfo.h': No such file or directory
+  (compiling source file 'vgui_internal.cpp')
+  
+  WizardSubPanel.cpp
+C:\Users\wen\source\repos\CKF3Alpha_New\src\SourceSDK\tier0\memalloc.h(257,11): error C1083: Cannot open include file: 'typeinfo.h': No such file or directory
+  (compiling source file 'VGUI/vgui_controls/WizardSubPanel.cpp')
+  
+  WizardPanel.cpp
+C:\Users\wen\source\repos\CKF3Alpha_New\src\SourceSDK\tier0\memalloc.h(257,11): error C1083: Cannot open include file: 'typeinfo.h': No such file or directory
+  (compiling source file 'VGUI/vgui_controls/WizardPanel.cpp')
+  
+  URLLabel.cpp
+C:\Users\wen\source\repos\CKF3Alpha_New\src\SourceSDK\tier0\memalloc.h(257,11): error C1083: Cannot open include file: 'typeinfo.h': No such file or directory
+  (compiling source file 'VGUI/vgui_controls/URLLabel.cpp')
+  
+  TreeView.cpp
+C:\Users\wen\source\repos\CKF3Alpha_New\src\SourceSDK\tier0\memalloc.h(257,11): error C1083: Cannot open include file: 'typeinfo.h': No such file or directory
+  (compiling source file 'VGUI/vgui_controls/TreeView.cpp')
+  
+  ToolWindow.cpp
+C:\Users\wen\source\repos\CKF3Alpha_New\src\SourceSDK\tier0\memalloc.h(257,11): error C1083: Cannot open include file: 'typeinfo.h': No such file or directory
+  (compiling source file 'VGUI/vgui_controls/ToolWindow.cpp')
+  
+  Tooltip.cpp
+C:\Users\wen\source\repos\CKF3Alpha_New\src\SourceSDK\tier0\memalloc.h(257,11): error C1083: Cannot open include file: 'typeinfo.h': No such file or directory
+  (compiling source file 'VGUI/vgui_controls/Tooltip.cpp')
+  
+  ToggleButton.cpp
+C:\Users\wen\source\repos\CKF3Alpha_New\src\SourceSDK\tier0\memalloc.h(257,11): error C1083: Cannot open include file: 'typeinfo.h': No such file or directory
+  (compiling source file 'VGUI/vgui_controls/ToggleButton.cpp')
+  
+  TextImage.cpp
+C:\Users\wen\source\repos\CKF3Alpha_New\src\SourceSDK\tier0\memalloc.h(257,11): error C1083: Cannot open include file: 'typeinfo.h': No such file or directory
+  (compiling source file 'VGUI/vgui_controls/TextImage.cpp')
+  
+  TextEntry.cpp
+C:\Users\wen\source\repos\CKF3Alpha_New\src\SourceSDK\tier0\memalloc.h(257,11): error C1083: Cannot open include file: 'typeinfo.h': No such file or directory
+  (compiling source file 'VGUI/vgui_controls/TextEntry.cpp')
+  
+  Splitter.cpp
+C:\Users\wen\source\repos\CKF3Alpha_New\src\SourceSDK\tier0\memalloc.h(257,11): error C1083: Cannot open include file: 'typeinfo.h': No such file or directory
+  (compiling source file 'VGUI/vgui_controls/Splitter.cpp')
+  
+  Slider.cpp
+C:\Users\wen\source\repos\CKF3Alpha_New\src\SourceSDK\tier0\memalloc.h(257,11): error C1083: Cannot open include file: 'typeinfo.h': No such file or directory
+  (compiling source file 'VGUI/vgui_controls/Slider.cpp')
+  
+  SectionedListPanel.cpp
+C:\Users\wen\source\repos\CKF3Alpha_New\src\SourceSDK\tier0\memalloc.h(257,11): error C1083: Cannot open include file: 'typeinfo.h': No such file or directory
+  (compiling source file 'VGUI/vgui_controls/SectionedListPanel.cpp')
+  
+  Generating Code...
+  Compiling...
+  ScrollBarSlider.cpp
+C:\Users\wen\source\repos\CKF3Alpha_New\src\SourceSDK\tier0\memalloc.h(257,11): error C1083: Cannot open include file: 'typeinfo.h': No such file or directory
+  (compiling source file 'VGUI/vgui_controls/ScrollBarSlider.cpp')
+  
+  ScrollBar.cpp
+C:\Users\wen\source\repos\CKF3Alpha_New\src\SourceSDK\tier0\memalloc.h(257,11): error C1083: Cannot open include file: 'typeinfo.h': No such file or directory
+  (compiling source file 'VGUI/vgui_controls/ScrollBar.cpp')
+  
+  ScrollableEditablePanel.cpp
+C:\Users\wen\source\repos\CKF3Alpha_New\src\SourceSDK\tier0\memalloc.h(257,11): error C1083: Cannot open include file: 'typeinfo.h': No such file or directory
+  (compiling source file 'VGUI/vgui_controls/ScrollableEditablePanel.cpp')
+  
+  ScalableImagePanel.cpp
+C:\Users\wen\source\repos\CKF3Alpha_New\src\SourceSDK\tier0\memalloc.h(257,11): error C1083: Cannot open include file: 'typeinfo.h': No such file or directory
+  (compiling source file 'VGUI/vgui_controls/ScalableImagePanel.cpp')
+  
+  RotatingProgressBar.cpp
+C:\Users\wen\source\repos\CKF3Alpha_New\src\SourceSDK\tier0\memalloc.h(257,11): error C1083: Cannot open include file: 'typeinfo.h': No such file or directory
+  (compiling source file 'VGUI/vgui_controls/RotatingProgressBar.cpp')
+  
+  RichText.cpp
+C:\Users\wen\source\repos\CKF3Alpha_New\src\SourceSDK\tier0\memalloc.h(257,11): error C1083: Cannot open include file: 'typeinfo.h': No such file or directory
+  (compiling source file 'VGUI/vgui_controls/RichText.cpp')
+  
+  RadioButton.cpp
+C:\Users\wen\source\repos\CKF3Alpha_New\src\SourceSDK\tier0\memalloc.h(257,11): error C1083: Cannot open include file: 'typeinfo.h': No such file or directory
+  (compiling source file 'VGUI/vgui_controls/RadioButton.cpp')
+  
+  QueryBox.cpp
+C:\Users\wen\source\repos\CKF3Alpha_New\src\SourceSDK\tier0\memalloc.h(257,11): error C1083: Cannot open include file: 'typeinfo.h': No such file or directory
+  (compiling source file 'VGUI/vgui_controls/QueryBox.cpp')
+  
+  PropertySheet.cpp
+C:\Users\wen\source\repos\CKF3Alpha_New\src\SourceSDK\tier0\memalloc.h(257,11): error C1083: Cannot open include file: 'typeinfo.h': No such file or directory
+  (compiling source file 'VGUI/vgui_controls/PropertySheet.cpp')
+  
+  PropertyPage.cpp
+C:\Users\wen\source\repos\CKF3Alpha_New\src\SourceSDK\tier0\memalloc.h(257,11): error C1083: Cannot open include file: 'typeinfo.h': No such file or directory
+  (compiling source file 'VGUI/vgui_controls/PropertyPage.cpp')
+  
+  PropertyDialog.cpp
+C:\Users\wen\source\repos\CKF3Alpha_New\src\SourceSDK\tier0\memalloc.h(257,11): error C1083: Cannot open include file: 'typeinfo.h': No such file or directory
+  (compiling source file 'VGUI/vgui_controls/PropertyDialog.cpp')
+  
+  ProgressBox.cpp
+C:\Users\wen\source\repos\CKF3Alpha_New\src\SourceSDK\tier0\memalloc.h(257,11): error C1083: Cannot open include file: 'typeinfo.h': No such file or directory
+  (compiling source file 'VGUI/vgui_controls/ProgressBox.cpp')
+  
+  ProgressBar.cpp
+C:\Users\wen\source\repos\CKF3Alpha_New\src\SourceSDK\tier0\memalloc.h(257,11): error C1083: Cannot open include file: 'typeinfo.h': No such file or directory
+  (compiling source file 'VGUI/vgui_controls/ProgressBar.cpp')
+  
+  PanelListPanel.cpp
+C:\Users\wen\source\repos\CKF3Alpha_New\src\SourceSDK\tier0\memalloc.h(257,11): error C1083: Cannot open include file: 'typeinfo.h': No such file or directory
+  (compiling source file 'VGUI/vgui_controls/PanelListPanel.cpp')
+  
+  Panel.cpp

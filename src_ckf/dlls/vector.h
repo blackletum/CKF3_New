@@ -30,6 +30,10 @@ public:
 	inline Vector2D operator/(float fl)				const	{ return Vector2D(x/fl, y/fl);}
 	
 	inline float Length(void)						const	{ return sqrt(x*x + y*y);	}
+	inline float LengthSquared(void)		const { return x * x + y * y; }
+
+	inline bool IsLengthLessThan(float length) const { return LengthSquared() < length * length; }
+	inline bool IsLengthGreaterThan(float length) const { return LengthSquared() > length * length; }
 
 	inline Vector2D Normalize (void) const
 	{
@@ -74,12 +78,40 @@ public:
 	inline Vector operator-(const Vector& v) const	{ return Vector(x-v.x, y-v.y, z-v.z);}
 	inline Vector operator*(float fl) const			{ return Vector(x*fl, y*fl, z*fl);	}
 	inline Vector operator/(float fl) const			{ return Vector(x/fl, y/fl, z/fl);	}
-	
+
 	// Methods
 	inline void CopyToArray(float* rgfl) const		{ rgfl[0] = x, rgfl[1] = y, rgfl[2] = z; }
 	inline float Length(void) const					{ return sqrt(x*x + y*y + z*z); }
+	inline float LengthSquared(void) const { return x * x + y * y + z * z; }
+
+	// Cheap length comparisons (no sqrt) 
+	// used by the bot/nav code
+	inline bool IsLengthLessThan(float length) const { return LengthSquared() < length * length; }
+	inline bool IsLengthGreaterThan(float length) const { return LengthSquared() > length * length; }
+
 	operator float *()								{ return &x; } // Vectors will now automatically convert to float * when needed
 	operator const float *() const					{ return &x; } // Vectors will now automatically convert to float * when needed
+
+	// returns its length before normalization
+	// used by the bot/nav code
+	inline float NormalizeInPlace(void)
+	{
+		const float flLen = Length();
+		if (flLen == 0)
+		{
+			x = 0;
+			y = 0;
+			z = 1;
+			return 0;
+		}
+
+		const float flInv = 1 / flLen;
+		x *= flInv;
+		y *= flInv;
+		z *= flInv;
+		return flLen;
+	}
+
 	inline Vector Normalize(void) const
 	{
 		float flLen = Length();

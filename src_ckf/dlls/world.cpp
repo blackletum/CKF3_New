@@ -26,6 +26,7 @@ std::string g_MapInfoText;
 
 extern DLL_GLOBAL int gDisplayTitle;
 extern void W_Precache(void);
+extern void BotPrecache(void);
 
 DLL_DECALLIST gDecals[] =
 {
@@ -472,6 +473,8 @@ void CWorld::Precache(void)
 	TEXTURETYPE_Init();
 	W_Precache();
 	ClientPrecache();
+
+	BotPrecache();
 
 	PRECACHE_SOUND("common/null.wav");
 	PRECACHE_SOUND("items/suitchargeok1.wav");

@@ -1,0 +1,3 @@
+﻿// this WOULD have the rooster fortress bot code, but that does not work here
+// lots of bugs.............
+// this'll be used eventually!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!

@@ -18,6 +18,8 @@
 #include "enginedef.h"
 #include <string>
 
+#include "bot/hl_bot_manager.h"
+
 extern DLL_GLOBAL int g_fTraceLineIgnore;
 extern DLL_GLOBAL int g_fIsTraceLine;
 //extern DLL_GLOBAL ULONG g_ulModelIndexPlayer;
@@ -1832,6 +1834,10 @@ void ServerDeactivate(void)
 		return;
 
 	g_serveractive = 0;
+
+	// free the navigation mesh so it gets rebuilt/reloaded for the next map
+	if (TheHLBots)
+		TheHLBots->ServerDeactivate();
 }
 
 void ServerActivate(edict_t *pEdictList, int edictCount, int clientMax)
@@ -1861,6 +1867,10 @@ void ServerActivate(edict_t *pEdictList, int edictCount, int clientMax)
 	}
 
 	LinkUserMessages();
+
+	// load this map's navigation mesh, if one exists
+	if (TheHLBots)
+		TheHLBots->ServerActivate();
 
 	if (g_pGameRules)
 		g_pGameRules->CheckMapConditions();
@@ -1915,6 +1925,10 @@ void StartFrame(void)
 		g_iSkillLevel = 0;
 
 	g_ulFrameCount++;
+
+	// think the bots, and drive nav mesh generation/editing (bot_nav_* commands)
+	if (TheHLBots)
+		TheHLBots->StartFrame();
 }
 
 unsigned short m_usResetDecals;
@@ -3235,6 +3249,10 @@ int ShouldCollide(edict_t *pentHit, edict_t *pentPass)
 	CBaseEntity *pPass = CBaseEntity::Instance(pentPass);
 	CBaseEntity *pHit = CBaseEntity::Instance(pentHit);
 	if(!pPass || !pHit)
+		return 1;
+
+	void** vptr = *(void***)pPass;
+	if (((uintptr_t)vptr & 0x3) || (uintptr_t)vptr < 0x10000) // crude checks
 		return 1;
 
 	return pPass->FShouldCollide(pHit);
