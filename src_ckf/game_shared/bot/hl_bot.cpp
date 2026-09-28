@@ -8,6 +8,5 @@
 #include "weapons.h"
 #include "gamerules.h"
 #include "client.h"		// ClientConnect()/ClientPutInServer()
-
 #include "hl_bot.h"
 #include "hl_bot_manager.h"
