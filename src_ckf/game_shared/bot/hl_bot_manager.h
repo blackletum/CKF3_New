@@ -8,7 +8,6 @@
 #include "nav_area.h"	// NavEditCmdType
 
 class CBasePlayer;
-class CHLBot;
 
 unsigned int GetNavPlace( void );
 void SetNavPlace( unsigned int place );
@@ -28,6 +27,7 @@ public:
 	void AddServerCommands( void );
 
 	bool IsNavMeshLoaded( void ) const			{ return m_navLoaded; }
+	bool IsNavMeshGenerating(void) const { return m_isGenerating; };
 
 	const char *GetNavMapFilename( void ) const;	// return the filename for this map's .nav file
 
@@ -51,6 +51,7 @@ private:
 };
 
 extern CHLBotManager *TheHLBots;
+
 // for game.cpp
 void Bot_RegisterCvars( void );
 void InstallBotControl( void );

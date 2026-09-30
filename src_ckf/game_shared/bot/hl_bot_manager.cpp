@@ -13,15 +13,18 @@
 // Globals
 //--------------------------------------------------------------------------------------------------------------
 CHLBotManager *TheHLBots = NULL;
+// this also handles nav generation For Some Reason
 
 cvar_t cv_bot_traceview		= { "bot_traceview", "0", FCVAR_SERVER };
 cvar_t cv_bot_stop			= { "bot_stop", "0", FCVAR_SERVER };
 cvar_t cv_bot_show_nav		= { "bot_show_nav", "0", FCVAR_SERVER };
 cvar_t cv_bot_show_danger	= { "bot_show_danger", "0", FCVAR_SERVER };
-cvar_t cv_bot_nav_edit		= { "bot_nav_edit", "0", FCVAR_SERVER };
-cvar_t cv_bot_nav_zdraw		= { "bot_nav_zdraw", "4", FCVAR_SERVER };
+cvar_t cv_bot_nav_edit		= { "nav_edit", "0", FCVAR_SERVER };
+cvar_t cv_bot_nav_zdraw		= { "nav_zdraw", "4", FCVAR_SERVER };
 cvar_t cv_bot_debug			= { "bot_debug", "0", FCVAR_SERVER };
 cvar_t cv_bot_quicksave		= { "bot_quicksave", "0", FCVAR_SERVER };
+
+cvar_t cv_bot_last_area_update_tolerance = { "bot_last_area_update_tolerance", "4.0", FCVAR_SERVER };
 
 void Bot_RegisterCvars( void )
 {
@@ -33,6 +36,7 @@ void Bot_RegisterCvars( void )
 	CVAR_REGISTER( &cv_bot_nav_zdraw );
 	CVAR_REGISTER( &cv_bot_debug );
 	CVAR_REGISTER( &cv_bot_quicksave );
+	CVAR_REGISTER( &cv_bot_last_area_update_tolerance );
 }
 
 static unsigned int s_navPlace = UNDEFINED_PLACE;
@@ -73,28 +77,28 @@ static const struct NavEditCommand
 }
 navEditCommands[] =
 {
-	{ "bot_nav_mark",					EDIT_MARK },
-	{ "bot_nav_mark_unnamed",			EDIT_MARK_UNNAMED },
-	{ "bot_nav_delete",					EDIT_DELETE },
-	{ "bot_nav_split",					EDIT_SPLIT },
-	{ "bot_nav_merge",					EDIT_MERGE },
-	{ "bot_nav_connect",				EDIT_CONNECT },
-	{ "bot_nav_disconnect",				EDIT_DISCONNECT },
-	{ "bot_nav_begin_area",				EDIT_BEGIN_AREA },
-	{ "bot_nav_end_area",				EDIT_END_AREA },
-	{ "bot_nav_splice",					EDIT_SPLICE },
-	{ "bot_nav_crouch",					EDIT_ATTRIB_CROUCH },
-	{ "bot_nav_jump",					EDIT_ATTRIB_JUMP },
-	{ "bot_nav_precise",				EDIT_ATTRIB_PRECISE },
-	{ "bot_nav_no_jump",				EDIT_ATTRIB_NO_JUMP },
-	{ "bot_nav_toggle_place_mode",		EDIT_TOGGLE_PLACE_MODE },
-	{ "bot_nav_toggle_place_painting",	EDIT_TOGGLE_PLACE_PAINTING },
-	{ "bot_nav_place_floodfill",		EDIT_PLACE_FLOODFILL },
-	{ "bot_nav_place_pick",				EDIT_PLACE_PICK },
-	{ "bot_nav_warp",					EDIT_WARP_TO_MARK },
-	{ "bot_nav_corner_select",			EDIT_SELECT_CORNER },
-	{ "bot_nav_corner_raise",			EDIT_RAISE_CORNER },
-	{ "bot_nav_corner_lower",			EDIT_LOWER_CORNER },
+	{ "nav_mark",					EDIT_MARK },
+	{ "nav_mark_unnamed",			EDIT_MARK_UNNAMED },
+	{ "nav_delete",					EDIT_DELETE },
+	{ "nav_split",					EDIT_SPLIT },
+	{ "nav_merge",					EDIT_MERGE },
+	{ "nav_connect",				EDIT_CONNECT },
+	{ "nav_disconnect",				EDIT_DISCONNECT },
+	{ "nav_begin_area",				EDIT_BEGIN_AREA },
+	{ "nav_end_area",				EDIT_END_AREA },
+	{ "nav_splice",					EDIT_SPLICE },
+	{ "nav_crouch",					EDIT_ATTRIB_CROUCH },
+	{ "nav_jump",					EDIT_ATTRIB_JUMP },
+	{ "nav_precise",				EDIT_ATTRIB_PRECISE },
+	{ "nav_no_jump",				EDIT_ATTRIB_NO_JUMP },
+	{ "nav_toggle_place_mode",		EDIT_TOGGLE_PLACE_MODE },
+	{ "nav_toggle_place_painting",	EDIT_TOGGLE_PLACE_PAINTING },
+	{ "nav_place_floodfill",		EDIT_PLACE_FLOODFILL },
+	{ "nav_place_pick",				EDIT_PLACE_PICK },
+	{ "nav_warp",					EDIT_WARP_TO_MARK },
+	{ "nav_corner_select",			EDIT_SELECT_CORNER },
+	{ "nav_corner_raise",			EDIT_RAISE_CORNER },
+	{ "nav_corner_lower",			EDIT_LOWER_CORNER },
 
 	{ NULL, EDIT_NONE }
 };
@@ -154,8 +158,91 @@ void CHLBotManager::ClientDisconnect( CBasePlayer *player )
 	// keep this here mainly just in case something pops up
 }
 
+static bool str_isnumber(const char* s)
+{
+	if (!s || !*s)
+		return false;
+
+	for (; *s; ++s)
+		if (*s < '0' || *s > '9')
+			return false;
+
+	return true;
+}
+
 void CHLBotManager::ServerCommand( const char *pcmd )
 {
+	if (FStrEq(pcmd, "bot_add"))
+	{
+	//	CBot::CreateBot((CMD_ARGC() >= 2) ? CMD_ARGV(1) : NULL);
+	//	CONSOLE_ECHO("bot_add used.\n");
+	//	return;
+	//	this is still in production so keep this here just in case this breaks
+
+		int count = 1;
+		const char* name = NULL;
+
+		// syntax: bot_add [count] [-name <name>]
+		// to be added: -team, -class, -targetdummy
+
+		for (int i = 1; i < CMD_ARGC(); ++i)
+		{
+			const char* arg = CMD_ARGV(i);
+
+			if (FStrEq(arg, "-name"))
+			{
+				if (i + 1 >= CMD_ARGC())
+				{
+					CONSOLE_ECHO("bot_add: -name needs a value.\n");
+					return;
+				}
+				name = CMD_ARGV(++i);
+			}
+			else if (str_isnumber(arg))
+			{
+				count = atoi(arg);
+			}
+			else
+			{
+				CONSOLE_ECHO("Usage: bot_add [count] [-name <name>]\n");
+				return;
+			}
+		}
+
+		if (count < 1)
+			count = 1;
+		if (count > gpGlobals->maxClients)
+			count = gpGlobals->maxClients;
+
+		int made = 0;
+		for (int n = 0; n < count; ++n)
+		{
+			char botName[64];
+			const char* useName = NULL;
+
+			if (name && *name)
+			{
+				if (n == 0)
+					useName = name;
+				else
+				{
+					_snprintf(botName, sizeof(botName), "%s_%d", name, n + 1);
+					botName[sizeof(botName) - 1] = '\0';
+					useName = botName;
+				}
+			}
+
+			if (!CBot::CreateBot(useName))
+				break;		// server full or no free slot
+			// no point continuing
+
+			++made;
+		}
+
+		CONSOLE_ECHO("bot_add: added %d bot(s).\n", made);
+		return;
+	}
+
 	if (FStrEq( pcmd, "bot_nav_generate" ))
 	{
 		BeginNavGeneration();
@@ -220,6 +307,7 @@ void CHLBotManager::AddServerCommand( const char *cmd )
 
 void CHLBotManager::AddServerCommands( void )
 {
+	AddServerCommand( "bot_add" );
 	AddServerCommand( "bot_nav_generate" );
 	AddServerCommand( "bot_nav_save" );
 	AddServerCommand( "bot_nav_load" );
@@ -233,20 +321,69 @@ void CHLBotManager::AddServerCommands( void )
 void CHLBotManager::StartFrame( void )
 {
 	// think all bots
-	/*
-	for( int i = 1; i <= gpGlobals->maxClients; ++i )
+	// KNOWN BUG: for some odd reason, the bot does not spawn well if it spawns after the round has started...
+	for (int i = 1; i <= gpGlobals->maxClients; ++i)
 	{
-		CBasePlayer *player = static_cast<CBasePlayer *>( UTIL_PlayerByIndex( i ) );
+		CBasePlayer* player = static_cast<CBasePlayer*>(UTIL_PlayerByIndex(i));
 
-		if (player == NULL || FNullEnt( player->pev ))
+		if (player == NULL || FNullEnt(player->pev))
+		{
 			continue;
+		}
 
-		if (!(player->pev->flags & FL_FAKECLIENT))
+		if (!player->IsBot())	//(!(player->pev->flags & FL_FAKECLIENT))
+		{
+			// only bots can play
 			continue;
+		}
+
+		// jakulo: This Should Be Fine...
+		// Try not to make the bots use any other class other than CBot
+		// otherwise.... Shit Might Get Weird....
+		CBot* bot = static_cast<CBot*>(player);
+		bot->Think();
+
+		if(bot->m_iJoiningState != JOINED)
+		{
+			BOOL isdead = bot->IsAlive();
+
+			char joiningstate[128];
+			sprintf(joiningstate, "%s", "NULL");
+
+			switch (bot->m_iJoiningState)
+			{
+			case JOINED:
+				sprintf(joiningstate, "%s", "JOINED");
+				break;
+
+			case SHOWLTEXT:
+				sprintf(joiningstate, "%s", "SHOWLTEXT");
+				break;
+
+			case READINGLTEXT:
+				sprintf(joiningstate, "%s", "READINGLTEXT");
+				break;
+
+			case SHOWTEAMSELECT:
+				sprintf(joiningstate, "%s", "SHOWTEAMSELECT");
+				break;
+
+			case PICKINGTEAM:
+				sprintf(joiningstate, "%s", "PICKINGTEAM");
+				break;
+
+			case GETINTOGAME:
+				sprintf(joiningstate, "%s", "GETINTOGAME");
+				break;
+
+			default:
+				sprintf(joiningstate, "%s", "BUGGED JOINSTATE!!!");
+				break;
+			}
+
+			CONSOLE_ECHO("%s stats || dead: %i || class %i newclass %i || joinstate %s \n", STRING(bot->pev->netname), isdead, bot->m_iClass, bot->m_iNewClass, joiningstate);
+		}
 	}
-
-	this works in my rooster fortress bot branch. however, i havent started this yet. thisll be used in a bit
-	*/
 
 	if (m_isGenerating)
 		UpdateNavGeneration();
@@ -257,7 +394,6 @@ void CHLBotManager::StartFrame( void )
 		EditNavAreas( m_editCmd );
 		m_editCmd = EDIT_NONE;
 	}
-	int wow;
 	if (cv_bot_show_danger.value != 0.0f)
 		DrawDanger();
 }

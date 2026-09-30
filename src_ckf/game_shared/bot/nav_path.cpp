@@ -508,6 +508,8 @@ void CNavPathFollower::Update( float deltaT, bool avoidObstacles )
 	{
 		++m_segmentIndex;
 
+		CONSOLE_ECHO("IMPROV DETECTED CLOSEBY, INCREASE NODE\n");
+
 		if (m_segmentIndex >= m_path->GetSegmentCount())
 		{
 			m_improv->OnMoveToSuccess( m_path->GetEndpoint() );
@@ -532,7 +534,6 @@ void CNavPathFollower::Update( float deltaT, bool avoidObstacles )
 	//
 	if (!m_improv->IsUsingLadder())
 	{
-		// because hostage crouching is not really supported by the engine,
 		// if we are standing in a crouch area, we must crouch to avoid collisions
 		if (m_improv->GetLastKnownArea() && 
 			m_improv->GetLastKnownArea()->GetAttributes() & NAV_CROUCH && 
@@ -646,11 +647,18 @@ void CNavPathFollower::Update( float deltaT, bool avoidObstacles )
 			FeelerReflexAdjustment( &m_goal, t * StepHeight );
 		}
 		*/
-
 	}
 
+	float shouldjump = 0.0f;
+
+	if (node->area && (node->area->GetAttributes() & NAV_JUMP))
+		shouldjump = 999.0f;
+	// forces a jump in the pathfollower. alternatively, you could just force it to jump by using PressJump(). this is just to give the variable a reason to be used xddddd
+	else
+		shouldjump = (node->pos.z - m_improv->GetFeet().z);
+
 	// move improv along path
-	m_improv->TrackPath( m_goal, deltaT );
+	m_improv->TrackPath( m_goal, shouldjump );
 }
 
 //--------------------------------------------------------------------------------------------------------------
@@ -1136,8 +1144,8 @@ void CStuckMonitor::Update( CImprov *improv )
 		Vector vel = improv->GetCentroid() - m_lastCentroid;
 
 		// if we are jumping, ignore Z
-		//if (improv->IsJumping())
-		//	vel.z = 0.0f;
+		if (improv->IsJumping())
+			vel.z = 0.0f;
 
 		// ignore Z unless we are on a ladder (which is only Z)
 		if (!improv->IsUsingLadder())

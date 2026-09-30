@@ -36,4 +36,7 @@ extern void CreateInstancedBaselines (void);
 extern int InconsistentFile(const edict_t *player, const char *filename, char *disconnect_message);
 extern int AllowLagCompensation(void);
 
+extern int HandleMenu_ChooseClass(CBasePlayer* pPlayer, int keys);
+extern BOOL HandleMenu_ChooseTeam(CBasePlayer* pPlayer, int keys);
+
 #endif

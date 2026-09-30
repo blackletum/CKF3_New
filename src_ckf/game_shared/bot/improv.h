@@ -10,6 +10,7 @@
 
 class CBaseEntity;
 
+extern cvar_t cv_bot_debug;
 
 //--------------------------------------------------------------------------------------------------------
 /**
@@ -18,7 +19,14 @@ class CBaseEntity;
 class IImprovEvent
 {
 public:
-	virtual void OnMoveToSuccess( const Vector &goal ) { }	///< invoked when an improv reaches its MoveTo goal
+	virtual void OnMoveToSuccess( const Vector &goal )
+	{
+		if (cv_bot_debug.value == 1.0f)
+		{
+			CONSOLE_ECHO_LOGGED("OnMoveToSuccess");
+		}
+
+	}	///< invoked when an improv reaches its MoveTo goal
 
 	enum MoveToFailureType
 	{
@@ -26,7 +34,33 @@ public:
 		FAIL_STUCK,
 		FAIL_FELL_OFF,
 	};
-	virtual void OnMoveToFailure( const Vector &goal, MoveToFailureType reason ) { }	///< invoked when an improv fails to reach a MoveTo goal
+	virtual void OnMoveToFailure( const Vector &goal, MoveToFailureType reason )
+	{
+		if (cv_bot_debug.value == 1.0f)
+		{
+			char failreason[128];
+			sprintf(failreason, "%s", "NULL");
+
+			switch (reason)
+			{
+			case FAIL_INVALID_PATH:
+				sprintf(failreason, "%s", "Invalid path");
+				break;
+			case FAIL_STUCK:
+				sprintf(failreason, "%s", "Improv got stuck");
+				break;
+			case FAIL_FELL_OFF:
+				sprintf(failreason, "%s", "Improv fell off");
+				break;
+			default:
+				sprintf(failreason, "%s", "Bugged MoveToFailureType");
+				break;
+			}
+
+			CONSOLE_ECHO_LOGGED("OnMoveToFailure || %s", failreason);
+		}
+
+	}	///< invoked when an improv fails to reach a MoveTo goal
 
 	virtual void OnInjury( float amount ) { }				///< invoked when the improv is injured
 };

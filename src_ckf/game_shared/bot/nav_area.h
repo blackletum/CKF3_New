@@ -675,7 +675,7 @@ public:
 			if (up > 50.0) cost += (up-50.0) * SOFT_Z_PENALTY_SCALE;
 			// prefer flatter ground
 			// wyt: this is leftover from rooster fortress..
-			// probably weird but it doesnt really break anything so
+			// probably weird but it doesnt really break anything so idgaf
 
 			TraceResult result;
 			edict_t* ignore = NULL;

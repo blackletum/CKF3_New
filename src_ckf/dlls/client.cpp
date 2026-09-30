@@ -1501,6 +1501,8 @@ if (FStrEq(pcmd, "fullupdate"))
 
 	if (FStrEq(pcmd, "disguise_last"))
 	{
+		if (!pPlayer->m_pActiveItem)
+			return;
 		if(pPlayer->m_iDisguise == DISGUISE_YES)
 			pPlayer->Disguise_Weapon();
 		else if (pPlayer->m_iDisguiseNewTeam && pPlayer->m_iDisguiseNewClass)

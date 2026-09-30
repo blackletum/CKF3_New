@@ -4,6 +4,8 @@
 #include "pm_materials.h"
 #include "hintmessage.h"
 
+#include "bot\nav_area.h"
+
 #define EF_INVULNERABLE				(1<<8)//256
 #define EF_CRITBOOST				(1<<9)
 #define EF_AFTERBURN				(1<<10)
@@ -223,6 +225,78 @@ enum sbar_data
 	SBAR_END
 };
 
+//-----------------------------------------------------------------------------
+//
+// CAI_MoveMonitor
+//
+// Purpose: Watch an entity, trigger if moved more than a tolerance
+//
+//-----------------------------------------------------------------------------
+
+// JAKULO: THIS IS STOLEN FROM THE SOURCE SDK LOOOOOOOOOOOOOOOOOOOOOL
+
+class CAI_MoveMonitor
+{
+public:
+	CAI_MoveMonitor()
+		: m_vMark(0, 0, 0),
+		m_flMarkTolerance(NO_MARK)
+	{
+	}
+
+	void SetMark(CBaseEntity* pEntity, float tolerance)
+	{
+		if (pEntity)
+		{
+			m_vMark = pEntity->pev->origin;
+			m_flMarkTolerance = tolerance;
+		}
+	}
+
+	void ClearMark()
+	{
+		m_flMarkTolerance = NO_MARK;
+	}
+
+	bool IsMarkSet()
+	{
+		return (m_flMarkTolerance != NO_MARK);
+	}
+
+	bool TargetMoved(CBaseEntity* pEntity)
+	{
+		if (IsMarkSet() && pEntity != NULL)
+		{
+			float distance = (m_vMark - pEntity->pev->origin).Length();
+			if (distance > m_flMarkTolerance)
+				return true;
+		}
+		return false;
+	}
+
+	bool TargetMoved2D(CBaseEntity* pEntity)
+	{
+		if (IsMarkSet() && pEntity != NULL)
+		{
+			float distance = (m_vMark.Make2D() - pEntity->pev->origin.Make2D()).Length();
+			if (distance > m_flMarkTolerance)
+				return true;
+		}
+		return false;
+	}
+
+	Vector GetMarkPos() { return m_vMark; }
+
+private:
+	enum
+	{
+		NO_MARK = -1
+	};
+
+	Vector			   m_vMark;
+	float			   m_flMarkTolerance;
+};
+
 #define CHAT_INTERVAL 1.0
 
 class CBaseBuildable;
@@ -361,6 +435,7 @@ public:
 	virtual BOOL IsAlive(void) { return pev->deadflag == DEAD_NO && pev->health > 0; }
 	virtual BOOL IsPlayer(void) { return TRUE; }
 	virtual BOOL IsNetClient(void) { return TRUE; }
+	virtual BOOL IsBot(void) const { return FALSE; }
 	virtual const char *TeamID(void);
 	virtual BOOL FBecomeProne(void);
 	virtual Vector BodyTarget(const Vector &posSrc) { return Center() + pev->view_ofs * RANDOM_FLOAT(0.5, 1.1); }
@@ -377,6 +452,11 @@ public:
 	//ckf3 hack
 	virtual int FShouldCollide(CBaseEntity *pHit);
 	virtual int GetCriticalHit(void);
+	virtual int GetEnemyTeam(void);
+
+	void UpdateLastKnownArea(void);
+	CNavArea* m_lastNavArea;
+	CAI_MoveMonitor m_NavAreaUpdateMonitor;
 public:
 	void Pain(int hitgroup);
 	void RenewItems(void);

@@ -5,7 +5,7 @@
 #ifndef _NAV_PATH_H_
 #define _NAV_PATH_H_
 
-#pragma warning( disable : 4530 )					// STL uses exceptions, but we are not compiling with them - ignore warning
+#pragma warning( disable : 4530 )					// STL uses exceptions, but we are not compiling with them
 
 #include "nav_area.h"
 #include "bot_util.h"
@@ -192,6 +192,7 @@ public:
 
 	void SetImprov( CImprov *improv ) { m_improv = improv; }
 	void SetPath( CNavPath *path ) { m_path = path; }
+	CImprov* GetImprov() { return m_improv; }
 
 	void Reset( void );
 

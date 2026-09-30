@@ -2,7 +2,7 @@
 // AI Navigation areas
 // Author: Michael S. Booth (mike@turtlerockstudios.com), January 2003
 
-#pragma warning( disable : 4530 )					// STL uses exceptions, but we are not compiling with them - ignore warning
+#pragma warning( disable : 4530 )					// STL uses exceptions, but we are not compiling with them
 #pragma warning( disable : 4786 )					// long STL names get truncated in browse info.
 
 #include <list>
@@ -29,8 +29,8 @@
 #include "player.h"
 #include "gamerules.h"
 #include "bot_util.h"
-#include "hl_bot_manager.h"	// GetNavPlace()/SetNavPlace() - the nav editing code reads/writes its current place
-#include "bot_phrases.h"	// TheBotPhrases - place name <-> ID mapping
+#include "hl_bot_manager.h"	// GetNavPlace()/SetNavPlace()
+#include "bot_phrases.h"	// TheBotPhrases
 
 #include "nav.h"
 #include "nav_node.h"
@@ -38,7 +38,6 @@
 
 #include "pm_shared.h" // for OBS_ROAMING
 
-// this SDK doesn't define the min/max macros (NOMINMAX) - use the std versions
 using std::min;
 using std::max;
 
@@ -4148,37 +4147,16 @@ void EditNavAreas( NavEditCmdType cmd )
 
 				char buffer[128];
 				char attrib[128];
-				char locName[128];
-				// keep this number high, otherwise the game crashes
+				// keep this number high, otherwise the game crashes // 
 
-				if (area->GetPlace())
-				{
-					const char* name = TheBotPhrases->IDToName(area->GetPlace());
-					if (name)
-						strcpy(locName, name);
-					else
-						strcpy(locName, "ERROR");
-				}
-				else
-				{
-					locName[0] = '\000';
-				}
-
-				if (isPlaceMode)
-				{
-					attrib[0] = '\000';
-				}
-				else
-				{
-					sprintf(attrib, "%s%s%s%s",
-						(area->GetAttributes() & NAV_CROUCH) ? "CROUCH " : "",
-						(area->GetAttributes() & NAV_JUMP) ? "JUMP " : "",
-						(area->GetAttributes() & NAV_PRECISE) ? "PRECISE " : "",
-						(area->GetAttributes() & NAV_NO_JUMP) ? "NO_JUMP " : "");
-				}
+				sprintf(attrib, "%s%s%s%s",
+					(area->GetAttributes()& NAV_CROUCH) ? "CROUCH " : "",
+					(area->GetAttributes()& NAV_JUMP) ? "JUMP " : "",
+					(area->GetAttributes()& NAV_PRECISE) ? "PRECISE " : "",
+					(area->GetAttributes()& NAV_NO_JUMP) ? "NO_JUMP " : "");
 
 			
-				sprintf( buffer, "Area %i %s %s\n", area->GetID(), locName, attrib);
+				sprintf( buffer, "Area %i %s\n", area->GetID(), attrib);
 
 				UTIL_SayTextAll(buffer, player);
 

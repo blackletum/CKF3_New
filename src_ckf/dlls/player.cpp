@@ -21,6 +21,10 @@
 #include "buildable.h"
 #include <string>
 
+#include "bot/hl_bot_manager.h" // TheHLBots
+#include "bot/bot_util.h"
+extern cvar_t cv_bot_last_area_update_tolerance;
+
 extern DLL_GLOBAL BOOL g_fGameOver;
 extern DLL_GLOBAL BOOL g_fDrawLines;
 extern DLL_GLOBAL int g_iSkillLevel, gDisplayTitle;
@@ -3671,6 +3675,36 @@ pt_end:
 	m_afButtonLast = pev->button;
 	m_iGaitSequence = pev->gaitsequence;
 	StudioProcessGait();
+	UpdateLastKnownArea();
+}
+
+void CBasePlayer::UpdateLastKnownArea(void)
+{
+	if (TheHLBots->IsNavMeshGenerating())
+	{
+		m_lastNavArea = NULL;
+		return;
+	}
+
+	if (cv_bot_last_area_update_tolerance.value > 0.0f)
+	{
+		if (pev->flags & FL_ONGROUND) // skip this test if we're not standing on the world
+		{
+			if (m_lastNavArea && m_NavAreaUpdateMonitor.IsMarkSet() && !m_NavAreaUpdateMonitor.TargetMoved(this))
+				return;
+
+			m_NavAreaUpdateMonitor.SetMark(this, cv_bot_last_area_update_tolerance.value);
+		}
+	}
+
+	CNavArea* area = TheNavAreaGrid.GetNearestNavArea(&pev->origin);
+
+	// make sure we can actually use this area - if not, consider ourselves off the mesh
+	// if (!IsAreaTraversable(area))
+		// return;
+	// as of right now this hasnt been implemented
+
+	m_lastNavArea = area;
 }
 
 BOOL IsSpawnPointValid(CBaseEntity *pPlayer, CBaseEntity *pSpot)
@@ -7686,6 +7720,11 @@ void CBasePlayer::DmgRecord_Clear(void)
 int CBasePlayer::GetCriticalHit(void)
 {
 	return 0;
+}
+
+int CBasePlayer::GetEnemyTeam(void)
+{
+	return m_iTeam == TEAM_RED ? TEAM_BLUE : TEAM_RED;
 }
 
 bool CBasePlayer::IsObservingPlayer(CBasePlayer *pTarget)

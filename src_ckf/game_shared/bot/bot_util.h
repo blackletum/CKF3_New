@@ -16,6 +16,7 @@ extern cvar_t cv_bot_nav_edit;
 extern cvar_t cv_bot_nav_zdraw;
 extern cvar_t cv_bot_debug;
 extern cvar_t cv_bot_quicksave;
+extern cvar_t cv_bot_last_area_update_tolerance;
 
 #define SIGN( num )		(((num) < 0) ? -1 : 1)
 #define ABS( num )		(SIGN(num) * (num))
@@ -196,19 +197,19 @@ inline bool IsIntersecting2D( const Vector &startA, const Vector &endA,
 }
 
 template < typename Functor >
-bool ForEachPlayer( Functor &func )
+bool ForEachPlayer(Functor& func)
 {
-	for( int i=1; i<=gpGlobals->maxClients; ++i )
+	for (int i = 1; i <= gpGlobals->maxClients; ++i)
 	{
-		CBasePlayer *player = static_cast<CBasePlayer *>( UTIL_PlayerByIndex( i ) );
+		CBasePlayer* player = static_cast<CBasePlayer*>(UTIL_PlayerByIndex(i));
 
-		if (!IsEntityValid( player ))
+		if (!IsEntityValid(player))
 			continue;
 
 		if (!player->IsPlayer())
 			continue;
 
-		if (func( player ) == false)
+		if (func(player) == false)
 			return false;
 	}
 
@@ -216,3 +217,4 @@ bool ForEachPlayer( Functor &func )
 }
 
 #endif // BOT_UTIL_H
+
