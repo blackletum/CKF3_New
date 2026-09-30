@@ -84,7 +84,16 @@ CBot* CBot::CreateBot(const char* name)
 
 	ClientPutInServer(pent);
 
+	/*
+	bool joinblue = false;
+	int onBlue = g_pGameRules->m_iNumCT;
+	int onRed = g_pGameRules->m_iNumTerrorist;
+	bool blueIsWinning = (g_pGameRules->m_iNumCTWins > g_pGameRules->m_iNumTerroristWins);
+
+	no longer needed
+	*/
 	HandleMenu_ChooseTeam(bot, 0);
+
 	HandleMenu_ChooseClass(bot, 0);
 
 	//bot->m_bShouldClearBuild = true;
@@ -142,7 +151,6 @@ void CBot::Think(void)
 	}
 
 	ResetCommand();
-
 	if (!IsAlive())
 	{
 		ExecuteCommand();
@@ -180,14 +188,50 @@ void CBot::Update(void)
 		CClosestTFPlayer closest(this, GetEnemyTeam());
 		ForEachPlayer(closest);
 		
+		//CClosestControlPoint closestControlPoint(this, GetEnemyTeam());
+		//ForEachControlPoint(closestControlPoint);
+
 		if (closest.m_closePlayer)
-		{
 			m_hEnemy = closest.m_closePlayer;
 
-			SetPathToGoal(closest.m_closePlayer);
+		CControlPoint* pBest = NULL;
+		float bestDist = FLT_MAX;
+		for (int i = 0; i < g_pGameRules->m_ControlPoints.Count(); i++)
+		{
+			if (!g_pGameRules->m_ControlPoints.IsValidIndex(i))
+				break; // idk if this matters kjnegjthjbgrkjklwrgwjwfkjlwfjnlwjfejwkefjlfe
 
-			//CONSOLE_ECHO("%s wants to follow %s\n", STRING(pev->netname), STRING(closest.m_closePlayer->pev->netname));
+			CControlPoint* pPoint = NULL;
+			pPoint = (CControlPoint*)CBaseEntity::Instance(g_pGameRules->m_ControlPoints.Element(i));
+
+			if (pPoint->m_bLocked || pPoint->m_bDisabled)
+				continue;
+
+			if ( (m_iTeam == TEAM_RED && !pPoint->m_bCanRedCap) || (m_iTeam == TEAM_BLUE && !pPoint->m_bCanBluCap) )
+				continue;
+
+			if (m_iTeam == pPoint->pev->team)
+				continue;
+
+			float dist = (pPoint->pev->origin - pev->origin).LengthSquared();
+			if (dist < bestDist)
+			{
+				bestDist = dist;
+				pBest = pPoint;
+			}
 		}
+
+		if (pBest)
+		{
+			Vector point = pBest->Center();
+			point.x = RANDOM_FLOAT(pBest->pev->absmax.x, pBest->pev->absmin.x);
+			point.y = RANDOM_FLOAT(pBest->pev->absmax.y, pBest->pev->absmin.y);
+			point.z = pBest->Center().z;
+
+			SetPathToGoal(point);
+		}
+		else if (closest.m_closePlayer)
+			SetPathToGoal(closest.m_closePlayer);
 		
 		m_repathTimer.Start(RANDOM_FLOAT(1.0f, 3.0f));
 	}
@@ -221,6 +265,13 @@ void CBot::Upkeep(void)
 			Bot_LookAt(this, m_hEnemy->Center());
 		}
 	}
+	else if( m_path.IsValid() )
+	{
+		Vector point = pev->origin;
+		m_path.GetPointAlongPath(512.0f, &point);
+
+		Bot_LookAt(this, point);
+	}
 
 	m_pathfollower.Debug(cv_bot_debug.value == 1.0);
 	m_pathfollower.Update(BotCommandInterval);
@@ -248,7 +299,7 @@ void CBot::SetPathToGoal(const Vector& goal)
 
 	if (needPath)
 	{
-		ShortestPathCost cost;
+		ShortestPathCost cost(this);
 		Vector start = pev->origin;
 
 		if (m_path.Compute(&start, &goal, cost))
@@ -261,7 +312,7 @@ void CBot::SetPathToGoal(const Vector& goal)
 			m_path.Invalidate();
 		}
 
-		// don't repath every think even on failure - it is expensive
+		// don't repath every think even on failure
 		m_repathTimer.Start(RANDOM_FLOAT(1.5f, 2.5f));
 	}
 }

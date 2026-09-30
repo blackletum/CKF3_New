@@ -649,6 +649,11 @@ extern CNavArea *GetMarkedArea( void );
 class ShortestPathCost
 {
 public:
+	ShortestPathCost( CBaseEntity* ent )
+	{
+		m_ent = ent;
+	}
+
 	float operator() ( CNavArea *area, CNavArea *fromArea, const CNavLadder *ladder )
 	{
 		if (fromArea == NULL)
@@ -677,9 +682,18 @@ public:
 			// wyt: this is leftover from rooster fortress..
 			// probably weird but it doesnt really break anything so idgaf
 
+			// add a random penalty unique to this character so they choose different routes to the same place
+			float preference = 1.0f;
+
+			// this term causes the same bot to choose different routes over time,
+			// but keep the same route for a period in case of repaths
+			int timeMod = (int)(gpGlobals->time / 10.0f) + 1;
+			preference = 1.0f + 50.0f * (1.0f + cos((float)(m_ent->entindex() * area->GetID() * timeMod)));
+			
+			/*
 			TraceResult result;
 			edict_t* ignore = NULL;
-
+			
 			while (true)
 			{
 				UTIL_TraceLine(useTo, useFrom, dont_ignore_monsters, ignore, &result);
@@ -701,8 +715,11 @@ public:
 
 			if (result.flFraction < 1.0f)
 			{
-				cost += 500.0 * (1.0f - result.flFraction); // trace didnt work! probably a wall, so prefer anything else
+				//cost += 500.0 * (1.0f - result.flFraction);
+				return -1.0f;
+				// trace didnt work! probably a wall
 			}
+			*/
 
 			
 			// if this is a "crouch" area, add penalty
@@ -719,9 +736,11 @@ public:
 				cost += jumpPenalty * dist;
 			}
 
-			return cost;
+			return cost * preference;
 		}
 	}
+
+	CBaseEntity* m_ent;
 };
 
 //--------------------------------------------------------------------------------------------------------------

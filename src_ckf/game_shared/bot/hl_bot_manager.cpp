@@ -243,13 +243,13 @@ void CHLBotManager::ServerCommand( const char *pcmd )
 		return;
 	}
 
-	if (FStrEq( pcmd, "bot_nav_generate" ))
+	if (FStrEq( pcmd, "nav_generate" ))
 	{
 		BeginNavGeneration();
 		return;
 	}
 
-	if (FStrEq( pcmd, "bot_nav_save" ))
+	if (FStrEq( pcmd, "nav_save" ))
 	{
 		if (SaveNavigationMap( GetNavMapFilename() ))
 			CONSOLE_ECHO( "Navigation map saved to '%s'.\n", GetNavMapFilename() );
@@ -258,7 +258,7 @@ void CHLBotManager::ServerCommand( const char *pcmd )
 		return;
 	}
 
-	if (FStrEq( pcmd, "bot_nav_load" ))
+	if (FStrEq( pcmd, "nav_load" ))
 	{
 		NavErrorType result = LoadNavigationMap();
 		m_navLoaded = (result == NAV_OK);
@@ -266,18 +266,18 @@ void CHLBotManager::ServerCommand( const char *pcmd )
 		return;
 	}
 
-	if (FStrEq( pcmd, "bot_nav_check" ))
+	if (FStrEq( pcmd, "nav_check" ))
 	{
 		SanityCheckNavigationMap( STRING( gpGlobals->mapname ) );
 		return;
 	}
 
-	if (FStrEq( pcmd, "bot_nav_place_name" ))
+	if (FStrEq( pcmd, "nav_place_name" ))
 	{
 		// set the current place used by place painting, e.g: bot_nav_place_name Rooftop
 		if (CMD_ARGC() < 2)
 		{
-			CONSOLE_ECHO( "Usage: bot_nav_place_name <name>\n" );
+			CONSOLE_ECHO( "Usage: nav_place_name <name>\n" );
 			return;
 		}
 
@@ -292,7 +292,7 @@ void CHLBotManager::ServerCommand( const char *pcmd )
 		if (FStrEq( pcmd, navEditCommands[i].name ))
 		{
 			if (cv_bot_nav_edit.value == 0.0f)
-				CONSOLE_ECHO( "Set bot_nav_edit to 1 to edit the navigation mesh.\n" );
+				CONSOLE_ECHO( "Set nav_edit to 1 to edit the navigation mesh.\n" );
 			else
 				m_editCmd = navEditCommands[i].cmd;
 			return;
@@ -308,11 +308,11 @@ void CHLBotManager::AddServerCommand( const char *cmd )
 void CHLBotManager::AddServerCommands( void )
 {
 	AddServerCommand( "bot_add" );
-	AddServerCommand( "bot_nav_generate" );
-	AddServerCommand( "bot_nav_save" );
-	AddServerCommand( "bot_nav_load" );
-	AddServerCommand( "bot_nav_check" );
-	AddServerCommand( "bot_nav_place_name" );
+	AddServerCommand( "nav_generate" );
+	AddServerCommand( "nav_save" );
+	AddServerCommand( "nav_load" );
+	AddServerCommand( "nav_check" );
+	AddServerCommand( "nav_place_name" );
 
 	for( int i = 0; navEditCommands[i].name; ++i )
 		AddServerCommand( navEditCommands[i].name );
@@ -343,6 +343,7 @@ void CHLBotManager::StartFrame( void )
 		CBot* bot = static_cast<CBot*>(player);
 		bot->Think();
 
+		/*
 		if(bot->m_iJoiningState != JOINED)
 		{
 			BOOL isdead = bot->IsAlive();
@@ -383,6 +384,7 @@ void CHLBotManager::StartFrame( void )
 
 			CONSOLE_ECHO("%s stats || dead: %i || class %i newclass %i || joinstate %s \n", STRING(bot->pev->netname), isdead, bot->m_iClass, bot->m_iNewClass, joiningstate);
 		}
+		*/
 	}
 
 	if (m_isGenerating)
@@ -415,6 +417,18 @@ void CHLBotManager::BeginNavGeneration( void )
 		CBaseEntity *spot = NULL;
 		while( (spot = UTIL_FindEntityByClassname( spot, seedClassnames[i] )) != NULL )
 			m_walkableSeeds.push_back( spot->pev->origin );
+	}
+
+	static const char* deleteClassnames[] = { "func_door", "func_door_rotating", "func_pushable", NULL};
+	for (int i = 0; deleteClassnames[i]; ++i)
+	{
+		CBaseEntity* spot = NULL;
+		while ((spot = UTIL_FindEntityByClassname(spot, deleteClassnames[i])) != NULL)
+			UTIL_Remove(spot);
+		
+		// some entities will block the traces done during generation
+		// this deletes them
+		// the server reloads the map so we good
 	}
 
 	CBaseEntity* item = NULL;
@@ -469,6 +483,7 @@ void CHLBotManager::UpdateNavGeneration( void )
 
 		m_isGenerating = false;
 		m_navLoaded = true;
+		SERVER_COMMAND("reload\n");
 		return;
 	}
 }

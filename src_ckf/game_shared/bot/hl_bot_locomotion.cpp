@@ -292,7 +292,15 @@ void CTFBotLocomotion::TrackPath(const Vector& pathGoal, float deltaT)
 	if (player->pev->flags & FL_ONGROUND)
 	{
 		if (deltaT > StepHeight)
+		{
+			player->PressDuck();	// to make sure that the jump is an actual crouchjump
 			player->PressJump();
+		}
+	}
+	else
+	{
+		// if airborne, crouch
+		player->PressDuck();
 	}
 
 	player->MoveTowardPos(pathGoal);

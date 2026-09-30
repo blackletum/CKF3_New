@@ -526,7 +526,6 @@ void CNavPathFollower::Update( float deltaT, bool avoidObstacles )
 	if (m_segmentIndex >= m_path->GetSegmentCount())
 		m_segmentIndex = m_path->GetSegmentCount()-1;
 
-
 	bool isApproachingJumpArea = false;
 
 	//

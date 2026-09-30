@@ -199,6 +199,7 @@ CHalfLifeMultiplay::CHalfLifeMultiplay(void)
 	//Round init
 	m_iMaxRounds = (int)CVAR_GET_FLOAT("mp_maxrounds");
 	m_ControlPoints.RemoveAll();
+	m_RespawnRooms.RemoveAll();
 	m_RoundTimers.RemoveAll();
 	m_NoBuildZone.RemoveAll();
 	m_ShadowManager.RemoveAll();

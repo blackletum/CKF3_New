@@ -376,6 +376,7 @@ public:
 	bool m_bFreezePeriod;
 	float m_flFreezeTimer;
 	CUtlVector<edict_t *> m_ControlPoints;
+	CUtlVector<edict_t*>  m_RespawnRooms;
 	CUtlVector<edict_t *> m_RoundTimers;
 	CUtlVector<edict_t *> m_NoBuildZone;
 	CUtlVector<shadow_manager_t> m_ShadowManager;

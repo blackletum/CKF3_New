@@ -7,6 +7,7 @@
 // jakulo: dont expect this
 
 #include "nav_path.h"
+#include "trigger.h"
 
 class CBot : public CBasePlayer
 {
@@ -113,6 +114,10 @@ public:
 
 		if (m_team != -2 && player->m_iTeam != m_team)
 			return true;
+		// player->m_iDisguiseTeam
+		// use this for disguise differenciating 
+		if ( player->m_iCloak == CLOAK_YES || player->m_iDisguise == DISGUISE_YES )
+			return true;
 
 		float rangeSq = (m_where - player->pev->origin).LengthSquared();
 		if (rangeSq < m_closeRangeSq)
@@ -128,5 +133,75 @@ public:
 	CBasePlayer* m_closePlayer;
 	int m_team;
 };
+
+/*
+class CClosestControlPoint
+{
+public:
+	CClosestControlPoint(const Vector& where, int team = -2)
+	{
+		m_where = where;
+		m_closeRangeSq = FLT_MAX;
+		m_closePoint = NULL;
+		m_team = team;
+	}
+
+	CClosestControlPoint(CBaseEntity* entity, int team = -2)
+	{
+		m_where = entity->pev->origin;
+		m_closeRangeSq = FLT_MAX;
+		m_closePoint = NULL;
+		m_team = team;
+	}
+
+	bool operator() (CControlPoint* point)
+	{
+		if (m_team != -2 && point->pev->team != m_team)
+			return true;
+
+		if (m_team == TEAM_RED && !point->m_bCanRedCap)
+			return true;
+
+		if (m_team == TEAM_BLUE && !point->m_bCanBluCap)
+			return true;
+
+		if (point->m_bLocked || point->m_bDisabled)
+			return true;
+
+		float rangeSq = (m_where - point->pev->origin).LengthSquared();
+		if (rangeSq < m_closeRangeSq)
+		{
+			m_closeRangeSq = rangeSq;
+			m_closePoint = point;
+		}
+		return true;
+	}
+
+	Vector m_where;
+	float m_closeRangeSq;
+	CControlPoint* m_closePoint;
+	int m_team;
+};
+
+template < typename Functor >
+bool ForEachControlPoint(Functor& func)
+{
+	// this might not work
+
+	CControlPoint* point = NULL;
+	while ((point = static_cast<CControlPoint*>(UTIL_FindEntityByClassname(point, "func_controlpoint"))) != NULL)
+	{
+		if (!IsEntityValid(point))
+			continue;
+
+		if (!(point->Classify() == CLASS_CONTROLPOINT))
+			continue;
+
+		if (func(point) == false)
+			return false;
+	}
+	return true;
+}
+*/
 
 #endif

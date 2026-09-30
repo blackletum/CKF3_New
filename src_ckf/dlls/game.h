@@ -62,4 +62,6 @@ extern cvar_t kick_percent;
 extern cvar_t fragsleft;
 extern cvar_t timeleft;
 
+extern cvar_t tf_damage_disablespread;
+
 #endif

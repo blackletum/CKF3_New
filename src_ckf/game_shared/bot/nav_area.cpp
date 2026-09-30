@@ -1887,6 +1887,47 @@ void MarkJumpAreas( void )
 	}
 }
 
+static void MarkSpawnRooms(void)
+{
+	if (!g_pGameRules)
+		return;
+
+	const float zSlack = 32.0f;		// areas sit on the floor which can be below the brush's lower z value
+
+	for (int i = 0; i < g_pGameRules->m_RespawnRooms.Count(); ++i)
+	{
+		CBaseEntity* pRoom = CBaseEntity::Instance(g_pGameRules->m_RespawnRooms.Element(i));
+		if (!pRoom)
+			continue;
+
+		if (pRoom->pev->team != TEAM_RED && pRoom->pev->team != TEAM_BLUE)
+			continue;
+		// if theres no team with the spawnroom, theres no attribute to add
+
+		unsigned char flags = 0;
+		if (pRoom->pev->team == TEAM_RED)
+			flags = NAV_SPAWN_ROOM_RED;
+		else	// team blue
+			flags = NAV_SPAWN_ROOM_BLUE;
+
+		const Vector& lo = pRoom->pev->absmin;
+		const Vector& hi = pRoom->pev->absmax;
+
+		for (NavAreaList::iterator iter = TheNavAreaList.begin(); iter != TheNavAreaList.end(); ++iter)
+		{
+			CNavArea* area = *iter;
+			const Vector* c = area->GetCenter();
+
+			if (c->x >= lo.x && c->x <= hi.x &&
+				c->y >= lo.y && c->y <= hi.y &&
+				c->z >= lo.z - zSlack && c->z <= hi.z)
+			{
+				area->SetAttributes(area->GetAttributes() | flags);
+			}
+		}
+	}
+}
+
 
 //--------------------------------------------------------------------------------------------------------------
 /**
@@ -1968,6 +2009,7 @@ void GenerateNavigationAreaMesh( void )
 	MergeGeneratedAreas();
 	SquareUpAreas();
 	MarkJumpAreas();
+	MarkSpawnRooms();
 }
 
 //--------------------------------------------------------------------------------------------------------------

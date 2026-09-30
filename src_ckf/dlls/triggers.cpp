@@ -1657,6 +1657,7 @@ class CResupplyRoom : public CBaseTrigger
 {
 public:
 	void Spawn(void);
+	void PostSpawn(void);
 	void EXPORT ResupplyTouch(CBaseEntity *pOther);
 };
 
@@ -1672,6 +1673,11 @@ void CResupplyRoom::Spawn(void)
 		ALERT(at_console, "Bad team number (%i) in %s\n", pev->team, STRING(pev->classname));
 		pev->team = 0;
 	}
+}
+
+void CResupplyRoom::PostSpawn(void)
+{
+	g_pGameRules->m_RespawnRooms.AddToTail(edict());
 }
 
 void CResupplyRoom::ResupplyTouch(CBaseEntity *pOther)

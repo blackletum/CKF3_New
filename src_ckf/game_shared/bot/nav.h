@@ -50,10 +50,12 @@ enum NavErrorType
 
 enum NavAttributeType
 {
-	NAV_CROUCH	= 0x01,											///< must crouch to use this node/area
-	NAV_JUMP		= 0x02,											///< must jump to traverse this area
-	NAV_PRECISE = 0x04,											///< do not adjust for obstacles, just move along area
-	NAV_NO_JUMP = 0x08,											///< inhibit discontinuity jumping
+	NAV_CROUCH			= (1 << 0),											///< must crouch to use this node/area
+	NAV_JUMP			= (1 << 1),											///< must jump to traverse this area
+	NAV_PRECISE			= (1 << 2),											///< do not adjust for obstacles, just move along area
+	NAV_NO_JUMP			= (1 << 3),											///< inhibit discontinuity jumping
+	NAV_SPAWN_ROOM_RED	= (1 << 4),											///< RED spawn rooms
+	NAV_SPAWN_ROOM_BLUE	= (1 << 5),											///< BLU spawn rooms
 };
 
 enum NavDirType

@@ -10,6 +10,8 @@ cvar_t *g_psv_accelerate, *g_psv_friction, *g_psv_stopspeed;
 
 cvar_t displaysoundlist = { "displaysoundlist", "0" };
 
+cvar_t tf_damage_disablespread = { "tf_damage_disablespread", "1", FCVAR_SERVER };
+
 cvar_t timelimit = { "mp_timelimit", "0", FCVAR_SERVER };
 cvar_t friendlyfire = { "mp_friendlyfire", "0", FCVAR_SERVER };
 

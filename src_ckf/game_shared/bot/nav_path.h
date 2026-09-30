@@ -203,7 +203,6 @@ public:
 	bool IsStuck( void ) const		{ return m_stuckMonitor.IsStuck(); }	///< return true if improv is stuck 
 	void ResetStuck( void )			{ m_stuckMonitor.Reset(); }
 	float GetStuckDuration( void ) const	{ return m_stuckMonitor.GetDuration(); }	///< return how long we've been stuck
-
 	void FeelerReflexAdjustment( Vector *goalPosition, float height = -1.0f );	///< adjust goal position if "feelers" are touched
 
 private:
@@ -214,7 +213,6 @@ private:
 	int m_segmentIndex;												///< the point on the path the improv is moving towards
 	int m_behindIndex;												///< index of the node on the path just behind us
 	Vector m_goal;													///< last computed follow goal
-
 	bool m_isLadderStarted;
 
 	bool m_isDebug;
