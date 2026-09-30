@@ -508,7 +508,7 @@ void CNavPathFollower::Update( float deltaT, bool avoidObstacles )
 	{
 		++m_segmentIndex;
 
-		CONSOLE_ECHO("IMPROV DETECTED CLOSEBY, INCREASE NODE\n");
+		//CONSOLE_ECHO("IMPROV DETECTED CLOSEBY, INCREASE NODE\n");
 
 		if (m_segmentIndex >= m_path->GetSegmentCount())
 		{

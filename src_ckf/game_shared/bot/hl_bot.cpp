@@ -132,13 +132,13 @@ void CBot::Think(void)
 	if (m_iTeam != TEAM_BLU && m_iTeam != TEAM_RED)
 	{
 		HandleMenu_ChooseTeam(this, 0);
-		CONSOLE_ECHO("%s is trying to pick a team.\n", STRING(pev->netname));
+		//CONSOLE_ECHO("%s is trying to pick a team.\n", STRING(pev->netname));
 		// if not on a team, bots automatically pick the team
 	}
 	if (!(CLASS_SPY >= m_iClass && m_iClass >= CLASS_SCOUT))
 	{
 		HandleMenu_ChooseClass(this, 0);
-		CONSOLE_ECHO("%s is trying to pick a class.\n", STRING(pev->netname));
+		//CONSOLE_ECHO("%s is trying to pick a class.\n", STRING(pev->netname));
 	}
 
 	ResetCommand();
@@ -186,7 +186,7 @@ void CBot::Update(void)
 
 			SetPathToGoal(closest.m_closePlayer);
 
-			CONSOLE_ECHO("%s wants to follow %s\n", STRING(pev->netname), STRING(closest.m_closePlayer->pev->netname));
+			//CONSOLE_ECHO("%s wants to follow %s\n", STRING(pev->netname), STRING(closest.m_closePlayer->pev->netname));
 		}
 		
 		m_repathTimer.Start(RANDOM_FLOAT(1.0f, 3.0f));
@@ -399,7 +399,7 @@ void CBot::PressSecondaryAttack(void)
 
 void CBot::MoveTowardPos(const Vector& pos)
 {
-	CONSOLE_ECHO("MoveTowardsPos\n");
+	//CONSOLE_ECHO("MoveTowardsPos\n");
 
 	float dx = pos.x - pev->origin.x;
 	float dy = pos.y - pev->origin.y;
