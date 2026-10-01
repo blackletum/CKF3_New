@@ -681,7 +681,7 @@ public:
 			// prefer flatter ground
 			// wyt: this is leftover from rooster fortress..
 			// probably weird but it doesnt really break anything so idgaf
-
+			
 			// add a random penalty unique to this character so they choose different routes to the same place
 			float preference = 1.0f;
 

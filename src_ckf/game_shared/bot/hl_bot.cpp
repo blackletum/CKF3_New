@@ -12,12 +12,15 @@
 #include "hl_bot_manager.h"
 #include "hl_bot_locomotion.h"
 
+#include "bot/actions/tf_bot_seek_and_destroy.h"
+
 extern cvar_t cv_bot_debug;
 
 static const float BotCommandInterval = 1.0f / 30.0f;	// send movement commands 30 times per second
 static const float BotFullThinkInterval = 1.0f / 10.0f;	// run decision logic 30 times per second
 
 CBot::CBot()
+	: m_actionInterface( new CTFBotSeekAndDestroy )
 {
 	// init for da bots
 	
@@ -34,6 +37,7 @@ CBot::CBot()
 
 	m_pathfollower.SetImprov( new CTFBotLocomotion(this) );
 	m_pathfollower.SetPath(&m_path);
+	m_actionInterface.SetBot(this);
 }
 
 CBot* CBot::CreateBot(const char* name)
@@ -129,6 +133,7 @@ void CBot::Spawn(void)
 	m_hEnemy = NULL;	// no target carries over into a fresh life
 
 	ResetCommand();
+	m_actionInterface.Reset();
 }
 
 void CBot::Think(void)
@@ -181,19 +186,15 @@ void CBot::Update(void)
 			m_hEnemy = NULL;
 	}
 
-	if(m_repathTimer.IsElapsed())
+	if(m_hEnemyRecalculateTimer.IsElapsed())
 	{
-		m_path.Invalidate();
-
 		CClosestTFPlayer closest(this, GetEnemyTeam());
 		ForEachPlayer(closest);
-		
-		//CClosestControlPoint closestControlPoint(this, GetEnemyTeam());
-		//ForEachControlPoint(closestControlPoint);
 
 		if (closest.m_closePlayer)
 			m_hEnemy = closest.m_closePlayer;
 
+		/*
 		CControlPoint* pBest = NULL;
 		float bestDist = FLT_MAX;
 		for (int i = 0; i < g_pGameRules->m_ControlPoints.Count(); i++)
@@ -201,8 +202,7 @@ void CBot::Update(void)
 			if (!g_pGameRules->m_ControlPoints.IsValidIndex(i))
 				break; // idk if this matters kjnegjthjbgrkjklwrgwjwfkjlwfjnlwjfejwkefjlfe
 
-			CControlPoint* pPoint = NULL;
-			pPoint = (CControlPoint*)CBaseEntity::Instance(g_pGameRules->m_ControlPoints.Element(i));
+			CControlPoint* pPoint = (CControlPoint*)CBaseEntity::Instance(g_pGameRules->m_ControlPoints.Element(i));
 
 			if (pPoint->m_bLocked || pPoint->m_bDisabled)
 				continue;
@@ -232,8 +232,9 @@ void CBot::Update(void)
 		}
 		else if (closest.m_closePlayer)
 			SetPathToGoal(closest.m_closePlayer);
+		*/
 		
-		m_repathTimer.Start(RANDOM_FLOAT(1.0f, 3.0f));
+		m_hEnemyRecalculateTimer.Start(RANDOM_FLOAT(1.0f, 3.0f));
 	}
 }
 
@@ -256,16 +257,55 @@ static void Bot_LookAt(CBaseEntity* self, const Vector& point)
 
 void CBot::Upkeep(void)
 {
+	m_actionInterface.Update();
+
+	if (pev->waterlevel >= 3)
+	{
+		// if underwater, get up
+		PressJump();
+	}
+
 	if (m_hEnemy && m_hEnemy->IsPlayer())
 	{
-		bool isVis = m_pathfollower.GetImprov()->IsVisible(m_hEnemy->Center(), false);
+		CBasePlayerWeapon* pWeapon = (CBasePlayerWeapon*)m_pActiveItem;
+		Vector m_aimPosition = m_hEnemy->Center();
+		bool isVis = m_pathfollower.GetImprov()->IsVisible(m_aimPosition, false);
+
+		if (m_iClass == CLASS_SNIPER)
+		{
+			if (m_pathfollower.GetImprov()->IsVisible(m_hEnemy->EyePosition(), false))
+			{
+				m_aimPosition = m_hEnemy->EyePosition();
+				isVis = true;
+			}
+			// this only replaced isVis if the head is visible
+			// IT IS SPECIFICALLY A IF STATEMENT SO IF THE HEAD IS NOT VISIBLE THEN THE CENTER IS USED AS THE ISVIS CHECKER
+		}
+
 		if (isVis)
 		{
-			PressPrimaryAttack();
-			Bot_LookAt(this, m_hEnemy->Center());
+			if (m_iClass == CLASS_SNIPER)
+			{
+				if (pWeapon && m_pActiveItem->m_iId == WEAPON_SNIPERIFLE)
+				{
+					CSniperifle* pSniperRifle = (CSniperifle*)pWeapon;
+
+					if (!(pWeapon->m_iWeaponState & WEAPONSTATE_CHARGING))
+					{
+						PressSecondaryAttack();
+					}
+					else if (pSniperRifle && pSniperRifle->m_fCharge > 10)
+					{
+						PressPrimaryAttack();
+					}
+				}
+			}
+			else
+				PressPrimaryAttack();
+			Bot_LookAt(this, m_aimPosition);
 		}
 	}
-	else if( m_path.IsValid() )
+	else
 	{
 		Vector point = pev->origin;
 		m_path.GetPointAlongPath(512.0f, &point);
@@ -279,9 +319,20 @@ void CBot::Upkeep(void)
 
 void CBot::SetPathToGoal(CBasePlayer *goal)
 {
+	if (!goal)
+		return;
+
 	SetPathToGoal(goal->Center());
 	// this SHOULD cause no problems
 	// gotta learn more about function overloads
+}
+
+void CBot::SetPathToGoal(CBaseEntity* goal)
+{
+	if (!goal)
+		return;
+
+	SetPathToGoal(goal->Center());
 }
 
 void CBot::SetPathToGoal(const Vector& goal)
@@ -293,9 +344,12 @@ void CBot::SetPathToGoal(const Vector& goal)
 
 	if (!needPath && m_repathTimer.IsElapsed())
 		needPath = true;
+	// prevents spam
 
 	if (!needPath && (goal - m_pathGoal).IsLengthGreaterThan(goalMovedTolerance))
 		needPath = true;
+	// if the origin has moved too much, then change this
+	// this allows for path to remain the same if the new goal is close to the old one, to save fps
 
 	if (needPath)
 	{

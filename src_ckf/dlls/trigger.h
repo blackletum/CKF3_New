@@ -171,6 +171,14 @@ public:
 	int m_iLastAnnounceTime;
 };
 
+class CResupplyRoom : public CBaseTrigger
+{
+public:
+	void Spawn(void);
+	void PostSpawn(void);
+	void EXPORT ResupplyTouch(CBaseEntity* pOther);
+};
+
 #define MAP_NOBUILDABLE 1
 #define MAP_CONTROLPOINT 2
 

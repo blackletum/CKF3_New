@@ -1653,14 +1653,6 @@ void CTriggerSpawnControl::Use(CBaseEntity *pActivator, CBaseEntity *pCaller, US
 	}
 }
 
-class CResupplyRoom : public CBaseTrigger
-{
-public:
-	void Spawn(void);
-	void PostSpawn(void);
-	void EXPORT ResupplyTouch(CBaseEntity *pOther);
-};
-
 LINK_ENTITY_TO_CLASS(func_resupplyroom, CResupplyRoom);
 
 void CResupplyRoom::Spawn(void)
