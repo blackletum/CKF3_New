@@ -8,7 +8,11 @@
 
 #include "nav_path.h"
 #include "trigger.h"
+#include "known_entity.h"
 #include "hl_bot_action_interface.h"
+
+#define FOR_EACH_VEC( vecName, iteratorName ) \
+	for ( int iteratorName = 0; iteratorName < vecName.Count(); iteratorName++ )
 
 class CBot : public CBasePlayer
 {
@@ -55,7 +59,12 @@ private:
 	byte ThrottledMsec(void) const;
 	void UpdateStuckMonitor(void);
 
-	int m_iFavoriteClass;
+	CTFAction* DesiredAction(void);
+
+	int ChooseGoodClass(void);
+
+	void UpdateKnownEntities(void);
+	const CKnownEntity* GetPrimaryKnownThreat(bool onlyVisibleThreats = true);
 
 	float m_forwardSpeed;
 	float m_strafeSpeed;
@@ -65,6 +74,10 @@ private:
 	float m_flNextBotThink;
 	float m_flNextFullBotThink;
 	float m_flPreviousCommandTime;
+
+	CUtlVector< CKnownEntity > m_knownEntityVector;		// the set of enemies/friends we are aware of
+	float m_lastVisionUpdateTimestamp;
+	IntervalTimer m_notVisibleTimer[3];		// for tracking interval since last saw a member of the given team
 
 	CNavPath m_path;					// the path itself
 	CNavPathFollower m_pathfollower;	// pathfollower + the improv is in here
@@ -129,4 +142,101 @@ public:
 	CBasePlayer* m_closePlayer;
 	int m_team;
 };
+
+class CCountClassMembers
+{
+public:
+	CCountClassMembers(const CBot* me, int teamID)
+	{
+		m_me = me;
+		m_myTeam = teamID;
+		m_teamSize = 0;
+
+		for (int i = 0; i < 9; ++i)
+			m_count[i] = 0;
+	}
+
+	bool operator() (CBasePlayer* basePlayer)
+	{
+		if (basePlayer->m_iTeam != m_myTeam)
+			return true;
+
+		++m_teamSize;
+
+		if (m_me == basePlayer)
+			return true;
+
+		++m_count[basePlayer->m_iClass];
+
+		return true;
+	}
+
+	const CBot* m_me;
+	int m_myTeam;
+	int m_count[10];
+	int m_teamSize;
+};
+
+class PopulateVisibleVector
+{
+public:
+	PopulateVisibleVector(CUtlVector< CBaseEntity* >* potentiallyVisible)
+	{
+		m_potentiallyVisible = potentiallyVisible;
+	}
+
+	bool operator() (CBaseEntity* actor)
+	{
+		m_potentiallyVisible->AddToTail(actor);
+		return true;
+	}
+
+	CUtlVector< CBaseEntity* >* m_potentiallyVisible;
+};
+
+class CollectVisible
+{
+public:
+	CollectVisible(CBot* me)
+	{
+		m_me = me;
+	}
+
+	bool operator() (CBaseEntity* entity)
+	{
+		if (entity &&
+			entity->IsAlive() &&
+			m_me->FVisible(entity))
+		{
+			m_recognized.AddToTail(entity);
+		}
+
+		return true;
+	}
+
+	bool Contains(CBaseEntity* entity) const
+	{
+		for (int i = 0; i < m_recognized.Count(); ++i)
+		{
+			if (entity->entindex() == m_recognized[i]->entindex())
+			{
+				return true;
+			}
+		}
+		return false;
+	}
+	CBot* m_me;
+	CUtlVector< CBaseEntity* > m_recognized;
+};
+
+inline void CollectPotentiallyVisibleEntities(CUtlVector< CBaseEntity* >* potentiallyVisible)
+{
+	potentiallyVisible->RemoveAll();
+
+	// for now only consider players as potentially visible
+	// i will iterate through buildings eventually
+	PopulateVisibleVector populate(potentiallyVisible);
+	ForEachPlayer(populate);
+}
+
 #endif

@@ -218,6 +218,8 @@ private:
 	bool m_isDebug;
 
 	int FindOurPositionOnPath( Vector *close, bool local ) const;	///< return the closest point to our current position on current path
+
+public:
 	int FindPathPoint( float aheadRange, Vector *point, int *prevIndex );	///< compute a point a fixed distance ahead along our path.
 
 	CStuckMonitor m_stuckMonitor;

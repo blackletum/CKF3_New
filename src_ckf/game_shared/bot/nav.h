@@ -56,6 +56,7 @@ enum NavAttributeType
 	NAV_NO_JUMP			= (1 << 3),											///< inhibit discontinuity jumping
 	NAV_SPAWN_ROOM_RED	= (1 << 4),											///< RED spawn rooms
 	NAV_SPAWN_ROOM_BLUE	= (1 << 5),											///< BLU spawn rooms
+	NAV_SPAWN_ROOM_EXIT = (1 << 6),											///< spawn room exits
 };
 
 enum NavDirType

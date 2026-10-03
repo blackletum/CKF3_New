@@ -70,12 +70,20 @@ public:
 	CUtlVector<CTFAction*> m_Actions;
 	CTFAction* m_bAction;
 
-	void Reset(void);
+	void Reset(CTFAction* first = NULL);
 private:
 	CBot* m_bot;
 	char debug_info[512];
 
 	void DestroyAction(CTFAction* action);
 };
+
+static bool IsInside(const Vector& p, CBaseEntity* e)
+{
+	return p.x > e->pev->absmin.x && p.x < e->pev->absmax.x
+		&& p.y > e->pev->absmin.y && p.y < e->pev->absmax.y
+		&& p.z > e->pev->absmin.z && p.z < e->pev->absmax.z;
+}
+// this was for control points but i might as well just make it a universal thing
 
 #endif

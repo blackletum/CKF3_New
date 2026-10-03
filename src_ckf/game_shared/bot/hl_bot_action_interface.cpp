@@ -69,7 +69,7 @@ void CTFBotActionInterface::Update(void)
 			m_Actions.Remove(top);
 			DestroyAction(action);
 			resumed = true;
-			break;
+			continue;
 		case CHANGE_TO:
 			// remove the old action entirely, action effectively gets REPLACED
 			
@@ -117,37 +117,6 @@ void CTFBotActionInterface::Update(void)
 		action->Update(bot);
 		return;		// only one action runs per tick
 	}
-
-	resumed = false;
-
-	for (int i = m_Actions.Count() - 1; i >= 0; --i)
-	{
-		if (!m_Actions.IsValidIndex(i))
-			continue;
-
-		CTFAction* action = m_Actions.Element(i);
-		if (!action)
-		{
-			m_Actions.Remove(i);
-			resumed = true;
-			continue;
-		}
-
-		sprintf(debug_info, "%s ::", action->GetName());
-
-		if (resumed)
-		{
-			sprintf(debug_info + strlen(debug_info), " %s", "RESUMED");
-			action->OnResume(this->GetBot());
-		}
-		else
-		{
-			CTFAction* new_action = action->GetNewAction();
-		}
-
-		action->Update(this->GetBot());
-		break; // finished with the action in priority. this ensures only one gets ran, to save fps
-	}
 }
 
 void CTFBotActionInterface::DestroyAction(CTFAction* action)
@@ -156,18 +125,28 @@ void CTFBotActionInterface::DestroyAction(CTFAction* action)
 		delete action;
 }
 
-void CTFBotActionInterface::Reset(void)
+void CTFBotActionInterface::Reset(CTFAction* first)
 {
-	// call when the bot respawns so it doesn't resume whatever it was doing when it died
+	CBot* bot = GetBot();
+
 	for (int i = m_Actions.Count() - 1; i >= 0; --i)
 	{
 		CTFAction* action = m_Actions.Element(i);
 		if (!action)
 			continue;
-		action->OnExit(GetBot());
+		action->OnExit(bot);
 		DestroyAction(action);
 	}
 	m_Actions.RemoveAll();
-	if (m_bAction)
-		m_bAction->Continue();
+
+	// idle sits at the bottom so there's always something to fall back to
+	m_bAction->Continue();
+	m_Actions.AddToTail(m_bAction);
+	m_bAction->OnEnter(bot);
+
+	if (first)
+	{
+		m_Actions.AddToTail(first);
+		first->OnEnter(bot);
+	}
 }

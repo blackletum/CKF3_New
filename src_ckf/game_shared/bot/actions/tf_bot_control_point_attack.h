@@ -1,27 +1,19 @@
-#ifndef TFBOTSEEKANDDESTROY
-#define TFBOTSEEKANDDESTROY
+#ifndef TFBOTCONTROLPOINT_ATTACK
+#define TFBOTCONTROLPOINT_ATTACK
 
 #include "bot/hl_bot_action_interface.h"
 
-class CTFBotSeekAndDestroy : public CTFAction
+class CTFBotControlPointAttack : public CTFAction
 {
 public:
-	CTFBotSeekAndDestroy(float timer = -1.0f)
-	{
-		m_giveupTimer.Invalidate(); // just in case
-		m_giveupTimer.Start(timer);
-	};
-
 	virtual void OnEnter(CBot* me);		// when getting changed/suspended into, OR when the initial action
 	virtual void Update(CBot* me);		// CONTINUE status
 	virtual void OnExit(CBot* me);		// CHANGE_TO or DONE status
 	virtual void OnResume(CBot* me);	// action that was suspended into is now finished, so this action is now the active one
-	virtual const char* GetName() const { return "SeekAndDestroy"; };
+	virtual const char* GetName() const { return "ControlPointAttack"; };
 
 private:
-	CResupplyRoom* GetClosestSpawnRoom(CBot* me, int team = -2);
-
-	CountdownTimer m_giveupTimer;
+	CControlPoint* GetClosestControlPoint(CBot* me);
 };
 
 #endif

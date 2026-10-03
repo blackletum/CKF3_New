@@ -7197,8 +7197,8 @@ int GetBuildMetal(int BuildClass)
 	{
 	case BUILDABLE_SENTRY:return 130;
 	case BUILDABLE_DISPENSER:return 100;
-	case BUILDABLE_ENTRANCE:return 125;
-	case BUILDABLE_EXIT:return 125;
+	case BUILDABLE_ENTRANCE:return 50;// 125;
+	case BUILDABLE_EXIT:return 50;// 125;
 	}
 	return 0;
 }

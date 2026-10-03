@@ -1928,6 +1928,36 @@ static void MarkSpawnRooms(void)
 	}
 }
 
+static void MarkSpawnRoomExits(void)
+{
+	for (NavAreaList::iterator iter = TheNavAreaList.begin(); iter != TheNavAreaList.end(); ++iter)
+	{
+		CNavArea* area = *iter;
+		const Vector* c = area->GetCenter();
+
+		if ((area->GetAttributes() & NAV_SPAWN_ROOM_BLUE) || (area->GetAttributes() & NAV_SPAWN_ROOM_RED))
+		{	
+			for (int dir = 0; dir < NUM_DIRECTIONS; ++dir)
+			{
+				const NavConnectList* connect = area->GetAdjacentList((NavDirType)dir);
+				if (connect)
+				{
+					for (NavConnectList::const_iterator it = connect->begin(); it != connect->end(); ++it)
+					{
+						const NavConnect& con = *it;
+						CNavArea* adj = con.area;
+						if (!adj)
+							continue;
+
+						if ( !( adj->GetAttributes() & NAV_SPAWN_ROOM_BLUE || adj->GetAttributes() & NAV_SPAWN_ROOM_RED ) )
+							adj->SetAttributes(adj->GetAttributes() | NAV_SPAWN_ROOM_EXIT);
+					}
+				}
+			}
+		}
+	}
+}
+
 
 //--------------------------------------------------------------------------------------------------------------
 /**
@@ -2010,6 +2040,7 @@ void GenerateNavigationAreaMesh( void )
 	SquareUpAreas();
 	MarkJumpAreas();
 	MarkSpawnRooms();
+	MarkSpawnRoomExits();
 }
 
 //--------------------------------------------------------------------------------------------------------------
@@ -4189,13 +4220,16 @@ void EditNavAreas( NavEditCmdType cmd )
 
 				char buffer[128];
 				char attrib[128];
-				// keep this number high, otherwise the game crashes // 
+				// keep this number high, otherwise the game crashes
 
-				sprintf(attrib, "%s%s%s%s",
+				sprintf(attrib, "%s%s%s%s%s%s%s",
 					(area->GetAttributes()& NAV_CROUCH) ? "CROUCH " : "",
 					(area->GetAttributes()& NAV_JUMP) ? "JUMP " : "",
 					(area->GetAttributes()& NAV_PRECISE) ? "PRECISE " : "",
-					(area->GetAttributes()& NAV_NO_JUMP) ? "NO_JUMP " : "");
+					(area->GetAttributes()& NAV_NO_JUMP) ? "NO_JUMP " : "",
+					(area->GetAttributes() & NAV_SPAWN_ROOM_RED) ? "RED_SPAWN_ROOM " : "",
+					(area->GetAttributes() & NAV_SPAWN_ROOM_BLUE) ? "BLU_SPAWN_ROOM " : "",
+					(area->GetAttributes() & NAV_SPAWN_ROOM_EXIT) ? "SPAWN_ROOM_EXIT " : "");
 
 			
 				sprintf( buffer, "Area %i %s\n", area->GetID(), attrib);
