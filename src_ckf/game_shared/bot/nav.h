@@ -57,6 +57,7 @@ enum NavAttributeType
 	NAV_SPAWN_ROOM_RED	= (1 << 4),											///< RED spawn rooms
 	NAV_SPAWN_ROOM_BLUE	= (1 << 5),											///< BLU spawn rooms
 	NAV_SPAWN_ROOM_EXIT = (1 << 6),											///< spawn room exits
+	NAV_NO_BUILD_ZONE	= (1 << 7),											///< cannot build here!!!
 };
 
 enum NavDirType

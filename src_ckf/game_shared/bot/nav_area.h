@@ -217,6 +217,8 @@ public:
 	void SetAttributes( unsigned char bits )		{ m_attributeFlags = bits; }
 	unsigned char GetAttributes( void ) const		{ return m_attributeFlags; }
 
+	void ComputeIncursionDistances(void);
+
 	void SetPlace( Place place )			{ m_place = place; }	///< set place descriptor
 	Place GetPlace( void ) const			{ return m_place; }		///< get place descriptor
 
@@ -351,10 +353,13 @@ private:
 	float m_neZ;
 	float m_swZ;
 
-	enum { MAX_AREA_TEAMS = 2 };
+	enum { MAX_AREA_TEAMS = 3 };
 
 	//- for hunting -------------------------------------------------------------------------------------
 	float m_clearedTimestamp[ MAX_AREA_TEAMS ];				///< time this area was last "cleared" of enemies
+
+	//- spawn room distances ----------------------------------------------------------------------------
+	float m_distanceFromSpawn[ MAX_AREA_TEAMS ];				///< time this area was last "cleared" of enemies
 
 	//- "danger" ----------------------------------------------------------------------------------------
 	float m_danger[ MAX_AREA_TEAMS ];						///< danger of this area, allowing bots to avoid areas where they died in the past - zero is no danger

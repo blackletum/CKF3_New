@@ -1887,6 +1887,41 @@ void MarkJumpAreas( void )
 	}
 }
 
+static void MarkNoBuildZones(void)
+{
+	if (!g_pGameRules)
+		return;
+
+	const float zSlack = 32.0f;		// areas sit on the floor which can be below the brush's lower z value
+
+	for (int i = 0; i < g_pGameRules->m_NoBuildZone.Count(); ++i)
+	{
+		CBaseEntity* pRoom = CBaseEntity::Instance(g_pGameRules->m_NoBuildZone.Element(i));
+		if (!pRoom)
+			continue;
+
+	//	if (pRoom->pev->team != TEAM_RED && pRoom->pev->team != TEAM_BLUE)
+		//	continue;
+		// technically the no build zone has a team but this attribute should probably be universal
+
+		const Vector& lo = pRoom->pev->absmin;
+		const Vector& hi = pRoom->pev->absmax;
+
+		for (NavAreaList::iterator iter = TheNavAreaList.begin(); iter != TheNavAreaList.end(); ++iter)
+		{
+			CNavArea* area = *iter;
+			const Vector* c = area->GetCenter();
+
+			if (c->x >= lo.x && c->x <= hi.x &&
+				c->y >= lo.y && c->y <= hi.y &&
+				c->z >= lo.z - zSlack && c->z <= hi.z)
+			{
+				area->SetAttributes(area->GetAttributes() | NAV_NO_BUILD_ZONE);
+			}
+		}
+	}
+}
+
 static void MarkSpawnRooms(void)
 {
 	if (!g_pGameRules)
@@ -1956,6 +1991,18 @@ static void MarkSpawnRoomExits(void)
 			}
 		}
 	}
+}
+
+void CNavArea::ComputeIncursionDistances(void)
+{
+	m_distanceFromSpawn[TEAM_RED] = 0.0f;
+	m_distanceFromSpawn[TEAM_BLU] = 0.0f;
+	// reset my incursion
+
+	if (!g_pGameRules)
+		return;
+
+	// NOT IMPLEMENTED YET... IGNORE THIS FOR NOW....
 }
 
 
@@ -2039,6 +2086,7 @@ void GenerateNavigationAreaMesh( void )
 	MergeGeneratedAreas();
 	SquareUpAreas();
 	MarkJumpAreas();
+	MarkNoBuildZones();
 	MarkSpawnRooms();
 	MarkSpawnRoomExits();
 }
