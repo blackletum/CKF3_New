@@ -98,6 +98,8 @@ BOOL IsBackFace(Vector &anglesAttacker, Vector &anglesVictim)
 	if(flAngles < -180.0) flAngles += 360.0;
 	if(flAngles <= 90.0 && flAngles >= -90.0) return TRUE;
 	return FALSE;
+	// THIS IS INACCURATE
+	// TF2'S CHECKS ARE SLIGHTLY DIFFERENT, AND THIS LOGIC ALLOWS FOR CERTAIN OLD TF2 EXPLOITS TO WORK
 }
 
 void CButterfly::Swing(void)

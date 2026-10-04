@@ -196,6 +196,8 @@ CRocket *CRocket::CreatePjRocket(Vector vecOrigin, Vector vecAngles, CBaseEntity
 	float flDistance = (tr.vecEndPos - vecOrigin).Length();
 
 	pRocket->SetThink(&CRocket::RocketLaunch);
+	
+	/*
 	if(flDistance > 880)
 	{
 		pRocket->pev->velocity = gpGlobals->v_forward * 50;
@@ -208,9 +210,14 @@ CRocket *CRocket::CreatePjRocket(Vector vecOrigin, Vector vecAngles, CBaseEntity
 	}
 	else
 	{
-		pRocket->pev->velocity = gpGlobals->v_forward * 1100;
-		pRocket->pev->nextthink = gpGlobals->time + 0.05;
+		
 	}
+
+	for some reason this is here LOLOL
+	*/
+
+	pRocket->pev->velocity = gpGlobals->v_forward * 1100;
+	pRocket->pev->nextthink = gpGlobals->time + 0.05;
 
 	return pRocket;
 }

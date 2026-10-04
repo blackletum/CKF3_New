@@ -33,6 +33,8 @@ extern int gmsgWeaponAnimEx;
 
 MULTIDAMAGE gMultiDamage;
 
+#define WEAPON_DEPLOY_SPEED 0.5
+
 int MaxAmmoCarry(int iszName)
 {
 	for (int i = 0; i < MAX_WEAPONS; i++)
@@ -747,13 +749,13 @@ BOOL CBasePlayerWeapon::DefaultDeploy(char *szViewModel, char *szWeaponModel, in
 	strcpy(m_pPlayer->m_szAnimExtention, szAnimExt);
 	SendWeaponAnim(iAnim, UseDecrement() != FALSE);
 
-	m_pPlayer->m_flNextAttack = UTIL_WeaponTimeBase() + 0.75;
+	m_pPlayer->m_flNextAttack = UTIL_WeaponTimeBase() + WEAPON_DEPLOY_SPEED;
 	m_pPlayer->m_iFOV = m_pPlayer->m_iDefaultFOV;//Reset Fov
 	m_pPlayer->SetAnimation(PLAYER_IDLE);
 	m_pPlayer->ResetMaxSpeed();
 
 	m_flTimeWeaponIdle = UTIL_WeaponTimeBase() + 1.5;
-	m_flDecreaseShotsFired = UTIL_WeaponTimeBase() + 0.75;
+	m_flDecreaseShotsFired = UTIL_WeaponTimeBase() + WEAPON_DEPLOY_SPEED;
 	m_bMeleeAttack = FALSE;
 	return TRUE;
 }
@@ -770,7 +772,7 @@ BOOL CBasePlayerWeapon::GroupDeploy(char *szViewModel, char *szWeaponModel, int 
 		SendWeaponAnim(iViewAnim, UseDecrement() != FALSE);
 	else
 		SendWeaponAnimEx(iViewAnim, iViewBody, iViewSkin, UseDecrement() != FALSE);
-	m_pPlayer->m_flNextAttack = UTIL_WeaponTimeBase() + 0.75;
+	m_pPlayer->m_flNextAttack = UTIL_WeaponTimeBase() + WEAPON_DEPLOY_SPEED;
 	m_pPlayer->m_iFOV = m_pPlayer->m_iDefaultFOV;
 	m_pPlayer->SetAnimation(PLAYER_IDLE);
 	m_pPlayer->ResetMaxSpeed();
