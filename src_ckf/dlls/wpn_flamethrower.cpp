@@ -275,7 +275,10 @@ void CFlame::FlameThink(void)
 		if (pev->owner)
 			pevOwner = VARS(pev->owner);
 
-		CKFRadiusDamage(pev->origin, NULL, pev, pevOwner, max(m_fDmg-0.4*(gpGlobals->time-m_fFireTime)/0.4,m_fDmg*0.6) , m_fDmgRadius, 0, DMG_NEVERGIB|DMG_NOSELFDMG|DMG_FLAME, 0, 0, m_iCrit);
+		// formally max(m_fDmg-0.4*(gpGlobals->time-m_fFireTime)/0.4,m_fDmg*0.6)
+		// this didnt really do anything to the flame dmg
+		// now accurate to tf2
+		CKFRadiusDamage(pev->origin, NULL, pev, pevOwner, max(m_fDmg * (1.0f - (gpGlobals->time - m_fFireTime)), m_fDmg * 0.5f), m_fDmgRadius, 0, DMG_NEVERGIB|DMG_NOSELFDMG|DMG_FLAME, 0, 0, m_iCrit);
 		m_fDmgTime = gpGlobals->time + 0.1;
 	}
 	if( pev->velocity.Length() > 240 )
