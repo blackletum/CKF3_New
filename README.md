@@ -1,35 +1,18 @@
-# Chicken Fortress 3
-
-# edited by weyouthey and jakulo 
+# Chicken Fortress 3, edited by weyouthey and jakulo 
 
 NOTE FROM WYT: Do note that this still has the same big bugs with building anything else but client.dll and mp.dll. Ignore the others as they cannot really be built without doing a bunch of stupid shit that I can't be bothered to finish. Considering it mainly handles rendering, it isn't actually THAT important right now, so dont expect any changes there brah
 
-Chicken Fortress 3 is a Half-Life mod that ported the Team Fortress 2 to GoldSRC engine. Currently in alpha version.
+Chicken Fortress 3 is a Half-Life mod that ported the Team Fortress 2 to GoldSRC engine.
 
-Please check [ModDB Page](https://www.moddb.com/mods/chicken-fortress-3) for more info!
+## New changes compared to the original:
+##### Bots!
+Nav-mesh system in general.
+Weapon fixes / readjustments to be more accurate to live Team Fortress 2.
 
-## Installation
-
-You could download major updates here:
-<http://www.moddb.com/mods/chicken-fortress-3/news/ckf3-alpha3-update>
-
-### Steam
-
-1. Make sure "Half-Life" in steam game library and was played once.
-2. Put files in "path\to\steamapps\common\Half-Life".
-3. Restart steam.
-4. You will find "Chicken Fortress 3" in steam game library, Have fun :).
-
-### Non-steam
-
-1. Put files in "path\to\Half-Life".
-2. Run "ckf3.exe".
-3. There is no guarantee this mod will work. Particularly older versions of the engine will probably not work.
-
-If you have suggestions or ideas. You can post comments or send private messages to us:
-<http://www.moddb.com/mods/chicken-fortress-3>
+Please check [ModDB Page](https://www.moddb.com/mods/chicken-fortress-3) for more info on the original!
 
 ## Setup
+(NOTE: this was from original sdk. idk if the new one will work as well considering my new files)
 
 1. Clone this project.
 2. Run ".\prepare.bat".
@@ -42,7 +25,7 @@ If you have suggestions or ideas. You can post comments or send private messages
 
 ## Contribution
 
-Most of contributors of this project have no time to update it. So if you are interested in this project. Please contact us!
+only 2 ppl with the newer version: jakulo and me, weyouthey.
 
 ## Credits
 
