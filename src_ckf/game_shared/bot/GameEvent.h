@@ -16,6 +16,10 @@
 // end of the list to remain maximally compatible with existing clients.
 //
 
+// NOTE FROM WEYOUTHEY: THIS IS NOT USED ANYWHERE, SO YOU CAN FUCK WITH IT LOL. NOTHING CALLS ONGAMEEVENT YET, SO DONT WORRY ABOUT IT
+// this WILL become a thing eventually though, as events are super useful for stuff ( bots, like the note below describes )
+// it might also help with navmesh tings but whateverrr
+
 // Define some event types used in various places (CZ bot code, career mode, and tutor, initially)
 enum GameEventType
 {
@@ -143,8 +147,9 @@ enum GameEventType
 	NUM_GAME_EVENTS
 };
 
-#ifdef DEFINE_EVENT_NAMES
+//#ifdef DEFINE_EVENT_NAMES
 // NOTE: These must be kept in sync with the GameEventType enum
+/*
 const char *GameEventName[ NUM_GAME_EVENTS+1 ] =
 {
 	"EVENT_INVALID",
@@ -272,11 +277,12 @@ const char *GameEventName[ NUM_GAME_EVENTS+1 ] =
 
 	NULL		// must be NULL-terminated
 };
-#else
-extern const char *GameEventName[ NUM_GAME_EVENTS ];
-#endif
+*/
+//#else
+// extern const char *GameEventName[ NUM_GAME_EVENTS ];
+//#endif
 
 /// convert name to GameEventType
-extern GameEventType NameToGameEvent( const char *name );
+// extern GameEventType NameToGameEvent( const char *name );
 
 #endif // GAME_EVENT_H

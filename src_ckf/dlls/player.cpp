@@ -621,6 +621,8 @@ int TrainSpeed(int iSpeed, int iMax)
 
 void CBasePlayer::DeathSound(void)
 {
+	// todo: change with tf2 sounds
+
 	switch (RANDOM_LONG(1, 4))
 	{
 		case 1: EMIT_SOUND(ENT(pev), CHAN_VOICE, "player/die1.wav", VOL_NORM, ATTN_NORM); break;

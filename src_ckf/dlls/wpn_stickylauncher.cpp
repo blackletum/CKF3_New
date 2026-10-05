@@ -195,11 +195,11 @@ void CStickyLauncher::SecondaryAttack(void)
 
 	if(iDetonate)
 	{
-		m_flNextSecondaryAttack = UTIL_WeaponTimeBase() + 0.4;
+		m_flNextSecondaryAttack = UTIL_WeaponTimeBase() + 0.1;
 		EMIT_SOUND(ENT(pev), CHAN_STATIC, "CKF_III/stickylauncher_det.wav", 1.0, 1.0);
 		m_iStickyNum -= iDetonate;
 	}
-	m_flNextSecondaryAttack = UTIL_WeaponTimeBase() + 0.4f;
+	m_flNextSecondaryAttack = UTIL_WeaponTimeBase() + 0.1f;
 }
 
 void CStickyLauncher::StickyLauncherFire(void)

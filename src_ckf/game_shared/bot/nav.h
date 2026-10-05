@@ -12,7 +12,7 @@
 
 const float GenerationStepSize = 25.0f;		// (30) was 20, but bots can't fit always fit
 const float StepHeight = 18.0f;						///< if delta Z is greater than this, we have to jump to get up
-const float JumpHeight = 41.8f;						///< if delta Z is less than this, we can jump up on it
+const float JumpHeight = 48.8f;						///< if delta Z is less than this, we can jump up on it. Originally was 41.8f, but we can jump higher then that!!!
 const float JumpCrouchHeight = 58.0f;			///< (48) if delta Z is less than or equal to this, we can jumpcrouch up on it
 
 // Strictly speaking, you CAN get up a slope of 1.643 (about 59 degrees), but you move very, very slowly
@@ -23,7 +23,7 @@ const float MaxSlope = 1.4f;							///< rise/run - if greater than this, we can'
 const float MaxUnitZSlope = 0.7f;
 
 const float BotRadius = 10.0f;						///< circular extent that contains bot
-const float DeathDrop = 200.0f;						///< (300) distance at which we will die if we fall - should be about 600, and pay attention to fall damage during pathfind
+const float DeathDrop = 300.0f;						///< (300) distance at which we will die if we fall - should be about 600, and pay attention to fall damage during pathfind
 
 const float HalfHumanWidth = 16.0f;
 const float HalfHumanHeight = 36.0f;
