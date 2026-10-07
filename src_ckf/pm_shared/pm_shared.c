@@ -1915,7 +1915,7 @@ void PM_NoClip(void)
 	VectorClear(pmove->velocity);
 }
 
-#define BUNNYJUMP_MAX_SPEED_FACTOR 1.2
+#define BUNNYJUMP_MAX_SPEED_FACTOR 3.0 //1.2
 
 void PM_PreventMegaBunnyJumping(void)
 {
@@ -2051,8 +2051,8 @@ void PM_Jump(void)
 		pmove->oldbuttons |= IN_JUMP;
 		return;
 	}
-
-	if (~pmove->oldbuttons & IN_JUMP && (!pmove->bInDuck || ~pmove->flags & FL_DUCKING))
+	//~pmove->oldbuttons & IN_JUMP &&
+	if ( (!pmove->bInDuck || ~pmove->flags & FL_DUCKING))
 	{
 		pmove->onground = -1;
 

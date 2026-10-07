@@ -4724,6 +4724,18 @@ void EditNavAreas( NavEditCmdType cmd )
 		isCreatingNavArea = false;
 }
 
+Vector CNavArea::GetRandomPoint(void) const
+{
+	const Extent *extent = GetExtent();
+
+	Vector spot;
+	spot.x = RANDOM_FLOAT(extent->lo.x, extent->hi.x);
+	spot.y = RANDOM_FLOAT(extent->lo.y, extent->hi.y);
+	spot.z = GetZ(spot.x, spot.y);
+
+	return spot;
+}
+
 //--------------------------------------------------------------------------------------------------------------
 /**
  * Return the ground height below this point in "height".
@@ -5269,6 +5281,65 @@ CNavArea *CNavAreaGrid::GetNearestNavArea( const Vector *pos, bool anyZ ) const
 					continue;
 			}
 					
+			closeDistSq = distSq;
+			close = area;
+		}
+	}
+
+	return close;
+}
+
+//--------------------------------------------------------------------------------------------------------------
+// same as normal GetNearestNavArea but only for specific attributes
+CNavArea* CNavAreaGrid::GetNearestNavAreaAttributes(const Vector* pos, bool anyZ, NavAttributeType attributes) const
+{
+	if (m_grid == NULL)
+		return NULL;
+
+	CNavArea* close = NULL;
+	float closeDistSq = 99999999.9f;
+
+	// quick check
+	close = GetNavArea(pos);
+	if (close)
+		return close;
+
+	// ensure source position is well behaved
+	Vector source;
+	source.x = pos->x;
+	source.y = pos->y;
+	if (GetGroundHeight(pos, &source.z) == false)
+		return NULL;
+
+	source.z += HalfHumanHeight;
+
+	/// @todo Step incrementally using grid for speed
+
+	// find closest nav area
+	for (NavAreaList::iterator iter = TheNavAreaList.begin(); iter != TheNavAreaList.end(); ++iter)
+	{
+		CNavArea* area = *iter;
+		
+		if ( !(area->GetAttributes() & attributes) )
+			continue;
+
+		Vector areaPos;
+		area->GetClosestPointOnArea(&source, &areaPos);
+
+		float distSq = (areaPos - source).LengthSquared();
+
+		// keep the closest area
+		if (distSq < closeDistSq)
+		{
+			// check LOS to area
+			if (!anyZ)
+			{
+				TraceResult result;
+				UTIL_TraceLine(source, areaPos + Vector(0, 0, HalfHumanHeight), ignore_monsters, ignore_glass, NULL, &result);
+				if (result.flFraction != 1.0f)
+					continue;
+			}
+
 			closeDistSq = distSq;
 			close = area;
 		}

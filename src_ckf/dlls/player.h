@@ -467,6 +467,9 @@ public:
 	BOOL IsOnLadder(void);
 	void UpdatePlayerSound(void);
 	void DeathSound(void);
+	bool AttemptToPlayVoiceline(const char* voiceline);
+	bool AttemptToPlayVoiceline(CBasePlayer* pPlayer, const char* voiceline);
+	bool AttemptToPlayVoiceline(int iTeam, const char* voiceline);
 	void SetAnimation(PLAYER_ANIM playerAnim);
 	void SetWeaponAnimType(const char *szExtention);
 	void CheatImpulseCommands(int iImpulse);
@@ -556,6 +559,7 @@ public:
 	void Cloak_Begin(void);
 	void Cloak_Stop(void);
 	void Cloak_Think(void);
+	bool IsPlayerCloaked();
 	BOOL PlayerCanAttack(void);	
 	void SendCriticalHit(BOOL bShowEffects, BOOL bShowSound);
 	void SendMiniCritHit(BOOL bShowEffects, BOOL bShowSound);
@@ -589,6 +593,7 @@ public:
 	void Disguise_Weapon(void);
 	void Disguise_Think(void);
 	void Disguise_Stop(void);
+	bool IsPlayerDisguised(void);
 	void SetDisguiseAnimation(PLAYER_ANIM playerAnim);
 	void Build_Start(int iBuildClass);
 	void Build_Deploy(void);

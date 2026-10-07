@@ -241,6 +241,8 @@ public:
 	CNavArea *GetAdjacentArea( NavDirType dir, int i ) const;	/// return the i'th adjacent area in the given direction
 	CNavArea *GetRandomAdjacentArea( NavDirType dir ) const;
 
+	Vector GetRandomPoint(void) const;
+
 	const NavConnectList *GetAdjacentList( NavDirType dir ) const	{ return &m_connect[dir]; }
 	bool IsConnected( const CNavArea *area, NavDirType dir ) const;	///< return true if given area is connected in given direction
 	float ComputeHeightChange( const CNavArea *area );			///< compute change in height from this area to given area
@@ -504,8 +506,11 @@ public:
 	CNavArea *GetNavArea( const Vector *pos, float beneathLimt = 120.0f ) const;	///< given a position, return the nav area that IsOverlapping and is *immediately* beneath it
 	CNavArea *GetNavAreaByID( unsigned int id ) const;
 	CNavArea *GetNearestNavArea( const Vector *pos, bool anyZ = false ) const;
+	CNavArea *GetNearestNavAreaAttributes(const Vector* pos, bool anyZ = false, NavAttributeType attributes = NAV_NO_JUMP) const;
 
 	Place GetPlace( const Vector *pos ) const;				///< return radio chatter place for given coordinate
+
+	bool IsNavmeshValid() { return m_grid != NULL; };
 
 private:
 	const float m_cellSize;

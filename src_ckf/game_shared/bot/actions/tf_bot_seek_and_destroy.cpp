@@ -12,6 +12,8 @@
 #include "bot/hl_bot.h"
 #include "bot/actions/tf_bot_seek_and_destroy.h"
 
+inline int FNullEnt(CBaseEntity* ent) { return (!ent) || FNullEnt(ent->edict()); }
+
 void CTFBotSeekAndDestroy::OnEnter(CBot* me)
 {
 }
@@ -22,8 +24,57 @@ void CTFBotSeekAndDestroy::Update(CBot* me)
 
 	if(me->HasEnemy() && enemy)
 		me->SetPathToGoal(enemy->Center());
-	else
-		me->SetPathToGoal(GetClosestSpawnRoom(me, me->GetEnemyTeam()));
+	else if (!me->HasPath())
+	{
+		CResupplyRoom* spawn = GetClosestSpawnRoom(me, me->GetEnemyTeam());
+		if (spawn)
+		{
+			CNavArea* area = TheNavAreaGrid.GetNearestNavAreaAttributes(&spawn->Center(), false, NAV_SPAWN_ROOM_EXIT);
+			if (area)
+			{
+				Vector close = area->GetRandomPoint();
+				me->SetPathToGoal(close);
+			}
+		}
+		else
+		{
+			// if, for some reason, theres no spawn rooms, then just go to their spawn points
+			CBaseEntity* pSpot;
+
+			if (me->m_iTeam == TEAM_RED)
+			{
+				// info_player_start is for blu spawners
+			
+				pSpot = UTIL_FindEntityByClassname(NULL, "info_player_start");
+
+				if (!FNullEnt(pSpot))
+				{
+					CNavArea* area = TheNavAreaGrid.GetNearestNavArea(&pSpot->Center(), false);
+					if (area)
+					{
+						Vector close = area->GetRandomPoint();
+						me->SetPathToGoal(close);
+					}
+				}
+			}
+			else
+			{
+				// info_player_deathmatch is for red spawners
+
+				pSpot = UTIL_FindEntityByClassname(NULL, "info_player_deathmatch");
+
+				if (!FNullEnt(pSpot))
+				{
+					CNavArea* area = TheNavAreaGrid.GetNearestNavArea(&pSpot->Center(), false);
+					if (area)
+					{
+						Vector close = area->GetRandomPoint();
+						me->SetPathToGoal(close);
+					}
+				}
+			}
+		}
+	}
 
 	Continue();
 }
@@ -52,7 +103,7 @@ CResupplyRoom* CTFBotSeekAndDestroy::GetClosestSpawnRoom(CBot* me, int team)
 			continue;
 		if (team != -2 && pRoom->pev->team != team)
 			continue;
-		
+
 		float dist = (pRoom->Center() - me->pev->origin).LengthSquared();
 		if (dist < bestdistance)
 		{

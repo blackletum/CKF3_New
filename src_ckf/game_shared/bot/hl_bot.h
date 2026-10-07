@@ -49,6 +49,8 @@ public:
 	}
 
 	virtual BOOL IsBot(void) const { return TRUE; }
+
+	bool HasPath(void) { return m_path.IsValid(); }
 private:
 	// decision logic
 	void Update(void);
@@ -208,6 +210,18 @@ public:
 			entity->IsAlive() &&
 			m_me->FVisible(entity))
 		{
+			if (entity->IsPlayer())
+			{
+				CBasePlayer* player = (CBasePlayer*)entity;
+				if (player->IsPlayerCloaked() || player->IsPlayerDisguised())
+				{
+					return true;
+					// skips players that are disguised or cloaked
+					// TODO: disguise logic also counts it if the spy is disguised as their teammate, which would look weird
+					// eg: blue bot ignores red spy disguised as red player due to them being disguised regardless
+				}
+			}
+
 			m_recognized.AddToTail(entity);
 		}
 

@@ -535,6 +535,7 @@ void CBasePlayer::Radio(const char *msg_id, const char *msg_verbose)
 
 void CBasePlayer::Pain(int hitgroup)
 {
+	/*
 	if (hitgroup == HITGROUP_HEAD)
 	{
 		if (m_iKevlar == 2)
@@ -565,23 +566,41 @@ void CBasePlayer::Pain(int hitgroup)
 			}
 		}
 	}
+	*/
 	if(m_iDisguise != DISGUISE_YES)
 	{
+		switch (RANDOM_LONG(1, 12))
+		{
+		case 1: AttemptToPlayVoiceline("painsharp01"); break;
+		case 2: AttemptToPlayVoiceline("painsharp02"); break;
+		case 3: AttemptToPlayVoiceline("painsharp03"); break;
+		}
+		/*
 		switch (RANDOM_LONG(0, 2))
 		{
 			case 0: EMIT_SOUND(ENT(pev), CHAN_VOICE, "player/bhit_flesh-1.wav", VOL_NORM, ATTN_NORM); break;
 			case 1: EMIT_SOUND(ENT(pev), CHAN_VOICE, "player/bhit_flesh-2.wav", VOL_NORM, ATTN_NORM); break;
 			case 2: EMIT_SOUND(ENT(pev), CHAN_VOICE, "player/bhit_flesh-3.wav", VOL_NORM, ATTN_NORM); break;
 		}
+		*/
 	}
 	else
 	{
+		switch (RANDOM_LONG(1, 12))
+		{
+		case 1: AttemptToPlayVoiceline(this, "painsharp01"); break;
+		case 2: AttemptToPlayVoiceline(this, "painsharp02"); break;
+		case 3: AttemptToPlayVoiceline(this, "painsharp03"); break;
+		}
+
+		/*
 		switch (RANDOM_LONG(0, 2))
 		{
 			case 0: UTIL_PlayWAV(this, "player/bhit_flesh-1.wav");break;
 			case 1: UTIL_PlayWAV(this, "player/bhit_flesh-2.wav");break;
 			case 2: UTIL_PlayWAV(this, "player/bhit_flesh-3.wav");break;
 		}
+		*/
 	}
 }
 
@@ -619,10 +638,111 @@ int TrainSpeed(int iSpeed, int iMax)
 	return iRet;
 }
 
+char* tf_class_names[] =
+{
+	NULL,
+	"scout",
+	"heavy",
+	"soldier",
+	"pyro",
+	"sniper",
+	"medic",
+	"engineer",
+	"demoman",
+	"spy",
+	NULL
+};
+
+static char* GetClassStringName(int iClass)
+{
+	if (iClass < 1 || iClass > 9) return NULL;
+	return tf_class_names[iClass];
+}
+
+bool CBasePlayer::AttemptToPlayVoiceline(const char* voiceline)
+{
+	char* model;
+	model = GetClassStringName(m_iClass);
+
+	if (model != NULL)
+	{
+		char szSound[128];
+		sprintf(szSound, "ckf_decap/player/vox/%s_%s.wav", model, voiceline);
+
+		EMIT_SOUND(ENT(pev), CHAN_VOICE, szSound, 1, ATTN_NORM);
+		return true;
+	}
+
+	return false;
+}
+
+bool CBasePlayer::AttemptToPlayVoiceline(CBasePlayer* pPlayer, const char* voiceline)
+{
+	char* model;
+	model = GetClassStringName(m_iClass);
+
+	if (model != NULL)
+	{
+		char szSound[128];
+		sprintf(szSound, "ckf_decap/player/vox/%s_%s.wav", model, voiceline);
+
+		UTIL_PlayWAV(pPlayer, szSound);
+		return true;
+	}
+
+	return false;
+}
+
+bool CBasePlayer::AttemptToPlayVoiceline(int iTeam, const char* voiceline)
+{
+	char* model;
+	model = GetClassStringName(m_iClass);
+
+	if (model != NULL)
+	{
+		char szSound[128];
+		sprintf(szSound, "ckf_decap/player/vox/%s_%s.wav", model, voiceline);
+
+		UTIL_PlayTeamWAV(iTeam, szSound);
+		return true;
+	}
+
+	return false;
+}
+
+
 void CBasePlayer::DeathSound(void)
 {
 	// todo: change with tf2 sounds
 
+	// TODO: if player died via critical hits, then play the death sound
+
+	if (m_bCritKilled)
+	{
+		switch (RANDOM_LONG(1, 3))
+		{
+		case 1: AttemptToPlayVoiceline("paincrticialdeath01"); break;
+		case 2: AttemptToPlayVoiceline("paincrticialdeath02"); break;
+		case 3: AttemptToPlayVoiceline("paincrticialdeath03"); break;
+		}
+
+	}
+	else
+	{
+		switch (RANDOM_LONG(1, 4))
+		{
+		case 1: AttemptToPlayVoiceline("painsharp01"); break;
+		case 2: AttemptToPlayVoiceline("painsharp02"); break;
+		case 3: AttemptToPlayVoiceline("painsharp03"); break;
+		}
+	}
+	// NOTE: tf2 has a sound script thing that allows for the classes to have more or less than 3 death sounds
+	// we dont have that here, so it just uses 3 random ones
+	// eventually we will make a system like valves
+	// eventually....
+
+
+	/*
 	switch (RANDOM_LONG(1, 4))
 	{
 		case 1: EMIT_SOUND(ENT(pev), CHAN_VOICE, "player/die1.wav", VOL_NORM, ATTN_NORM); break;
@@ -630,6 +750,7 @@ void CBasePlayer::DeathSound(void)
 		case 3: EMIT_SOUND(ENT(pev), CHAN_VOICE, "player/die3.wav", VOL_NORM, ATTN_NORM); break;
 		case 4: EMIT_SOUND(ENT(pev), CHAN_VOICE, "player/death6.wav", VOL_NORM, ATTN_NORM); break;
 	}
+	*/
 }
 
 int CBasePlayer::TakeHealth(float flHealth, int bitsDamageType)
@@ -3576,7 +3697,7 @@ void CBasePlayer::PostThink(void)
 		{
 			if (m_flFallVelocity > PLAYER_MAX_SAFE_FALL_SPEED)
 			{
-				float flFallDamage = g_pGameRules->FlPlayerFallDamage(this);
+				float flFallDamage = (g_pGameRules->FlPlayerFallDamage(this) / 100.0f) * pev->max_health; // should be accurate to tf2 now, b4 it wasnt
 
 				if (flFallDamage > pev->health)
 					EMIT_SOUND(ENT(pev), CHAN_ITEM, "common/bodysplat.wav", VOL_NORM, ATTN_NORM);
@@ -7191,6 +7312,16 @@ void CBasePlayer::Disguise_Stop(void)
 	m_iDisguiseClass = 0;
 	m_iDisguiseTeam = 0;
 	ResetMaxSpeed();
+}
+
+bool CBasePlayer::IsPlayerDisguised(void)
+{
+	return (m_iDisguise == DISGUISE_YES);
+}
+
+bool CBasePlayer::IsPlayerCloaked(void)
+{
+	return (m_iCloak == CLOAK_YES);
 }
 
 int GetBuildMetal(int BuildClass)

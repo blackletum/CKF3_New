@@ -48,6 +48,7 @@ void CTFBotControlPointAttack::Update(CBot* me)
 	else
 	{
 		Suspend_For(new CTFBotSeekAndDestroy, "No control points to attack!");
+		CONSOLE_ECHO("No control points to attack!");
 		return;
 	}
 
@@ -65,11 +66,13 @@ void CTFBotControlPointAttack::OnResume(CBot* me)
 CControlPoint* CTFBotControlPointAttack::GetClosestControlPoint(CBot* me)
 {
 	CControlPoint* pBest = NULL;
-	float bestDist = FLT_MAX;
-	for (int i = 0; i < g_pGameRules->m_ControlPoints.Count(); i++)
+	float bestDist = -1.0f;
+
+	ALERT(at_console, "CP count: %d\n", g_pGameRules->m_ControlPoints.Count());
+	for (int i = 0; i < g_pGameRules->m_ControlPoints.Count(); ++i)
 	{
-		if (!g_pGameRules->m_ControlPoints.IsValidIndex(i))
-			break; // idk if this matters kjnegjthjbgrkjklwrgwjwfkjlwfjnlwjfejwkefjlfe
+		//if (!g_pGameRules->m_ControlPoints.IsValidIndex(i))
+			//break;
 
 		CControlPoint* pPoint = (CControlPoint*)CBaseEntity::Instance(g_pGameRules->m_ControlPoints.Element(i));
 
@@ -83,11 +86,23 @@ CControlPoint* CTFBotControlPointAttack::GetClosestControlPoint(CBot* me)
 			continue;
 		// we already own this point
 
-		if ((me->m_iTeam == TEAM_RED && !pPoint->m_bCanRedCap) || (me->m_iTeam == TEAM_BLUE && !pPoint->m_bCanBluCap))
+		bool unassigned = false;
+		if (pPoint->pev->team == TEAM_UNASSIGNED)
+			unassigned = true;
+
+		if (pPoint->pev->team == TEAM_SPECTATOR)
 			continue;
 
+		if (!unassigned) // unassigned points can be weird so this helps
+		{
+			if (me->m_iTeam == TEAM_RED && !pPoint->m_bCanRedCap)
+				continue;
+			if (me->m_iTeam == TEAM_BLU && !pPoint->m_bCanBluCap)
+				continue;
+		}
+
 		float dist = (pPoint->pev->origin - me->pev->origin).LengthSquared();
-		if (dist < bestDist)
+		if (dist < bestDist || bestDist == -1.0f)
 		{
 			bestDist = dist;
 			pBest = pPoint;

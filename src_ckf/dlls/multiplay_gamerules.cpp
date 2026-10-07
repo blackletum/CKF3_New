@@ -1916,8 +1916,8 @@ void CHalfLifeMultiplay::ClientDisconnected(edict_t *pClient)
 
 float CHalfLifeMultiplay::FlPlayerFallDamage(CBasePlayer *pPlayer)
 {
-	pPlayer->m_flFallVelocity -= PLAYER_MAX_SAFE_FALL_SPEED;
-	return pPlayer->m_flFallVelocity * DAMAGE_FOR_FALL_SPEED * 1.25;
+	// pPlayer->m_flFallVelocity -= PLAYER_MAX_SAFE_FALL_SPEED;
+	return pPlayer->m_flFallVelocity / 300 * 5;
 }
 
 BOOL CHalfLifeMultiplay::FPlayerCanTakeDamage(CBasePlayer *pPlayer, CBaseEntity *pAttacker)

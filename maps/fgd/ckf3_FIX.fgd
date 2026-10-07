@@ -1,0 +1,257 @@
+// ------------------------------------------------------------------
+// CKF3_ENG.FGD FILE, FIXED BY HUNCAMPER
+// MANY ISSUES HAS BEEN FIXED, AND THE FIXES HAVE BEEN TESTED.
+// !MAY NOT OFFER THE SAME AS THE ORIGINAL SCRIPT!
+// ORIGINAL DESCRIPTION AND NOTES CAN BE FOUND IN THE ORIGINAL FILE!
+// ------------------------------------------------------------------
+
+// Base Classes
+
+@BaseClass = Appearflags
+[
+	spawnflags(Flags) =
+	[
+		2048 : "Not in deathmatch" : 0
+	]
+]
+
+@BaseClass = Angles
+[
+	angles(string) : "Pitch Yaw Roll (Y Z X)" : "0 0 0"
+]
+
+@BaseClass = Targetname 
+[ 
+	targetname(target_source) : "Name"
+]
+
+@BaseClass = Target 
+[ 
+	target(target_destination) : "Target" 
+]
+
+@BaseClass = Global 
+[ 
+	globalname(string) : "Global entity name" 
+]
+
+@BaseClass = RenderFxChoices
+[
+	renderfx(choices) :"Render FX" : 0 =
+	[
+		0: "Normal"
+		1: "Slow pulse"
+		2: "Fast pulse"
+		3: "Slow wide pulse"
+		4: "Fast wide pulse"
+		9: "Slow strobe"
+		10: "Fast strobe"
+		11: "Faster strobe"
+		12: "Slow flicker"
+		13: "Fast flicker"
+		5: "Slow fade away"
+		6: "Fast fade away"
+		7: "Slow become solid"
+		8: "Fast become solid"
+		14: "Constant glow"
+		15: "Distort"
+		16: "Hologram (distort + fade)"
+	]
+]
+
+@BaseClass base(RenderFxChoices) = RenderFields 
+[
+	rendermode(choices) : "Render mode" : 0 =
+	[
+		0: "Normal"
+		1: "Color"
+		2: "Texture - some light"
+		3: "Glow"
+		4: "Solid"
+		5: "Additive"
+	]
+	renderamt(integer) : "FX amount (1 - 255)"
+	rendercolor(color255) : "FX color (R G B)" : "0 0 0"
+]
+
+@BaseClass = Light 
+[
+	_light(color255) : "Brightness" : "255 255 128 200"
+      style(Choices) : "Appearance" : 0 =
+	[
+		0 : "Normal"
+		-3: "Grouped"
+		10: "Fluorescent flicker"
+		2 : "Slow, strong pulse"
+		11: "Slow pulse, noblack"
+		5 : "Gentle pulse"
+		1 : "Flicker A"
+		6 : "Flicker B"
+		3 : "Candle A"
+		7 : "Candle B"
+		8 : "Candle C"
+		4 : "Fast strobe"
+		9 : "Slow strobe"
+	    12: "Underwater"
+	]
+	pattern(string) : "Custom appearance"
+	_color(string) : "Color scale (0-1)":"1.000000 1.000000 1.000000"
+	_falloff(Choices) : "Falloff (ZHLT only)" : 0 =
+	[
+		0 : "Default"
+		1 : "Inverse Linear"
+		2 : "Inverse Square"
+	]
+	spawnflags(Flags) =
+	[ 
+		1 : "Initially dark" : 0
+	]
+	dot_product_weight(integer):"Dot product weight":0
+	spherical_ambient(integer):"Spherical ambient":0
+	angle_hotspot(integer):"Angle hotspot":0
+	falloff_curvature(integer):"Falloff curvature":0
+	angle_penumbra(integer):"Angle pnumbra":0
+	falloff_start_dist(integer):"Falloff start distance":0
+	falloff_end_dist(integer):"Falloff end distance":0
+	
+]
+
+// Solid Classes
+
+@SolidClass base(Targetname, Appearflags) = func_resupplyroom : "Resupply room" 
+[
+	team(choices) : "Team" : 0 =
+	[
+		0 : "Both"
+		1 : "Red"
+		2 : "Blue"
+	]
+]
+
+@SolidClass base(Targetname, Appearflags) = func_resupplycase : "Resupply case" 
+[
+	team(choices) : "Team" : 0 =
+	[
+		0 : "Both"
+		1 : "Red"
+		2 : "Blue"
+	]
+	subentity(string) : "Model entity to link to" : ""
+]
+
+@SolidClass base(Targetname, Global) = func_nobuildzone : "No Buildable Zone" 
+[
+	team(choices) : "Team" : 0 =
+	[
+		0 : "Both"
+		1 : "Red"
+		2 : "Blue"
+	]
+	spawnflags(flags) =
+	[
+		1 : "Off when round start" : 0
+	]
+]
+
+@SolidClass base(Targetname, Appearflags) = func_controlpoint : "Control Point" 
+[
+	team(choices) : "Team" : 0 =
+	[
+		0 : "Both"
+		1 : "Red"
+		2 : "Blue"
+	]
+	capname(string) : "Control point name" : ""
+	caprate(string) : "capture rate(/s)" : "0"
+	trigonredcap(string) : "Triggered when red captured" : ""
+	trigonblucap(string) : "Triggered when blue captured" : ""
+	trigoncap(string) : "Triggered when captured" : ""
+	subentity(string) : "Model entity to link to" : ""
+	hudpos(integer) : "HUD icon position(0~5)" : 2
+	timeadded(string) : "RoundTime added when captured" : ""
+	startlock(choices) : "Locked when round start" : 0 =
+	[
+		0 : "no"
+		1 : "yes"
+	]
+]
+
+// Point Classes
+
+@PointClass base(Targetname, Angles, RenderFields, Appearflags) Studio("models/CKF_III/w_health.mdl") = item_healthbox : "Health Box" 
+[
+	givehealth(string) : "*Give health(%)" : "100"
+	type(choices) : "type" : "tiny" =
+	[
+		"0" : "tiny"
+		"1" : "middle"
+		"2" : "large"
+	]
+]
+
+@PointClass base(Targetname, Angles, RenderFields, Appearflags) Studio("models/CKF_III/w_ammo.mdl") = item_ammobox : "Ammo Box" 
+[
+ 	giveammo(string) : "*Give ammo(%)" : "0"
+	type(Choices) : "type" : "" = 
+	[
+		"0" : "tiny"
+		"1" : "mid"
+		"2" : "large"
+	]
+]
+
+@PointClass base(Targetname, Target, Appearflags) iconsprite("sprites/CS/TriggerChangetarget.spr") = trigger_cplocker : "Control Point Locker"
+[
+	lockstate(choices) : "Action" : 0 = 
+	[
+		0 : "Switch"
+		1 : "Lock"
+		2 : "Unlock"
+	]
+]
+
+@PointClass base(Targetname, Target, Appearflags) iconsprite("sprites/CS/TriggerChangetarget.spr") = trigger_roundterminator : "Round Terminator"
+[
+	winstatus(choices) : "Winner" : 0 = 
+	[
+		0 : "Stalemate"
+		1 : "Red"
+		2 : "Blue"
+	]
+	endtime(integer) : "Custom humiliation time(sec.)" : 0
+]
+
+@PointClass iconsprite("sprites/CS/lightbulb.spr") base(Targetname, Target, Angles, Light, Appearflags) = shadow_manager : "Shadow Manager"
+[
+	pitch(integer) : "pitch (-90=down 90=up)" : -90
+	radius(integer) : "distance" : "100"
+	fardist(integer) : "fade distance" : "50"
+	scale(integer) : "depth texture scale" : "16"
+	texsize(integer) : "depth texture size" : "512"
+	affectmodel(string) : "which model to apply to" : ""
+]
+
+@PointClass base(Targetname, Appearflags) iconsprite("sprites/CS/MapParams.spr") = info_map_settings : "CKF3 GameRules Settings"
+[
+	setupcondition(choices) : "Round status when round start" : 0 =
+	[
+		0 : "Normal(Default)"
+		1 : "Setup Stage"
+		2 : "End Stage"
+		3 : "Overtime Stage"
+		4 : "Wait for Players"
+	]
+	endaction(choices)  : "Action when time is out" : 0 =
+	[
+		0 : "No Action(Default)"
+		1 : "Stalemate"
+		2 : "Red Win"
+		3 : "Blue Win"
+		4 : "Sudden Death(Not done yet)"
+	]
+	waittime(integer) : "Wait for players time(sec.)" : 30
+	freezetime(integer) : "Freeze time(sec.)" : 3
+	setuptime(integer) : "Setup time(sec.)" : 60
+	roundtime(integer) : "Round time(sec.)" : 300
+	endtime(integer) : "Humiliation time(sec.)" : 15
+]

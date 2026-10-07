@@ -49,6 +49,8 @@ CTFAction* CBot::DesiredAction(void)
 {
 	if (g_pGameRules->CPExist())
 	{
+	// CONSOLE_ECHO("DesiredAction is control points\n");
+
 	//	if (m_iTeam == TEAM_BLUE)
 			return (new CTFBotControlPointAttack);
 	//	else
@@ -337,6 +339,7 @@ CBot* CBot::CreateBot(const char* name)
 
 	no longer needed
 	*/
+
 	HandleMenu_ChooseTeam(bot, 0);
 	HandleMenu_ChooseClass(bot, bot->ChooseGoodClass());
 
@@ -392,6 +395,14 @@ void CBot::Think(void)
 	}
 
 	ResetCommand();
+	if (!TheNavAreaGrid.IsNavmeshValid()) // this disables bots if there is no navmesh to work with, to prevent certain errors
+	{
+		ExecuteCommand();
+		m_path.Invalidate();
+		// CONSOLE_ECHO("NO NAVMESH!");
+		return;
+	}
+
 	if (!IsAlive())
 	{
 		ExecuteCommand();
@@ -559,8 +570,6 @@ void CBot::SetPathToGoal(CBasePlayer *goal)
 		return;
 
 	SetPathToGoal(goal->Center());
-	// this SHOULD cause no problems
-	// gotta learn more about function overloads
 }
 
 void CBot::SetPathToGoal(CBaseEntity* goal)
