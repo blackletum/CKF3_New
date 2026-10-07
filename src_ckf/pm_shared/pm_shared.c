@@ -1915,7 +1915,7 @@ void PM_NoClip(void)
 	VectorClear(pmove->velocity);
 }
 
-#define BUNNYJUMP_MAX_SPEED_FACTOR 3.0 //1.2
+#define BUNNYJUMP_MAX_SPEED_FACTOR 1.2
 
 void PM_PreventMegaBunnyJumping(void)
 {
