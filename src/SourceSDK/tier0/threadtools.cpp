@@ -34,6 +34,8 @@ typedef void *LPVOID;
 #include "xbox/xbox_win32stubs.h"
 #endif
 
+#include <memory>
+
 // Must be last header...
 #include "tier0/memdbgon.h"
 
@@ -1682,7 +1684,7 @@ unsigned __stdcall CThread::ThreadProc(LPVOID pv)
 #ifdef _LINUX
   ThreadInit_t *pInit = (ThreadInit_t *)pv;
 #else
-  std::auto_ptr<ThreadInit_t> pInit((ThreadInit_t *)pv);
+	std::unique_ptr<ThreadInit_t> pInit((ThreadInit_t*)pv);
 #endif
   
 #ifdef _X360

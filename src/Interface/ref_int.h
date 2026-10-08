@@ -1,7 +1,7 @@
 #pragma once
 
 #include <gl/gl.h>
-#include <gl/glext.h>
+#include "glext.h"
 
 #include <com_model.h>
 #include <studio.h>

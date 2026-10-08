@@ -2,7 +2,7 @@
 #include <windows.h>
 #include <winsani_out.h>
 #include <gl/gl.h>
-#include <gl/glext.h>
+#include "gl2/glext.h"
 
 #ifdef __cplusplus
 extern "C"

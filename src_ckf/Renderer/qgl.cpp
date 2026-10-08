@@ -1,7 +1,7 @@
 #include <metahook.h>
 #include <gl/gl.h>
-#include <gl/glext.h>
 #include "gl_local.h"
+#include "gl2/glext.h"
 
 #ifdef _DEBUG
 #pragma comment(lib, "opengl32.lib")

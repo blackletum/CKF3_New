@@ -208,7 +208,8 @@ public:
 	{
 		if (entity &&
 			entity->IsAlive() &&
-			m_me->FVisible(entity))
+			m_me->FVisible(entity)
+			&& m_me->FInViewCone(entity))
 		{
 			if (entity->IsPlayer())
 			{
