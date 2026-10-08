@@ -214,12 +214,14 @@ public:
 			if (entity->IsPlayer())
 			{
 				CBasePlayer* player = (CBasePlayer*)entity;
-				if (player->IsPlayerCloaked() || player->IsPlayerDisguised())
+				if (player->IsPlayerCloaked())
 				{
 					return true;
-					// skips players that are disguised or cloaked
-					// TODO: disguise logic also counts it if the spy is disguised as their teammate, which would look weird
-					// eg: blue bot ignores red spy disguised as red player due to them being disguised regardless
+				}
+				if (player->IsPlayerDisguised() && player->m_iDisguiseTeam == m_me->m_iTeam)
+				{
+					// has to specifically be disguised as my team to be fooled
+					return true;
 				}
 			}
 

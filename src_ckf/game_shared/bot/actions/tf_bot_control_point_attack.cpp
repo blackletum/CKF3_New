@@ -48,7 +48,7 @@ void CTFBotControlPointAttack::Update(CBot* me)
 	else
 	{
 		Suspend_For(new CTFBotSeekAndDestroy, "No control points to attack!");
-		CONSOLE_ECHO("No control points to attack!");
+		// CONSOLE_ECHO("No control points to attack!");
 		return;
 	}
 
@@ -68,7 +68,7 @@ CControlPoint* CTFBotControlPointAttack::GetClosestControlPoint(CBot* me)
 	CControlPoint* pBest = NULL;
 	float bestDist = -1.0f;
 
-	ALERT(at_console, "CP count: %d\n", g_pGameRules->m_ControlPoints.Count());
+	// ALERT(at_console, "CP count: %d\n", g_pGameRules->m_ControlPoints.Count());
 	for (int i = 0; i < g_pGameRules->m_ControlPoints.Count(); ++i)
 	{
 		//if (!g_pGameRules->m_ControlPoints.IsValidIndex(i))

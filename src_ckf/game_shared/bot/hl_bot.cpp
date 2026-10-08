@@ -482,44 +482,32 @@ void CBot::Upkeep(void)
 	}
 
 	Vector m_aimPosition = pev->origin;
-	if (GetPrimaryKnownThreat() && GetPrimaryKnownThreat()->GetEntity()->IsPlayer())
+
+	bool enemyfound = GetPrimaryKnownThreat() && GetPrimaryKnownThreat()->GetEntity()->IsPlayer();
+	if (enemyfound)
 	{
 		CBasePlayerWeapon* pWeapon = (CBasePlayerWeapon*)m_pActiveItem;
-		m_aimPosition = GetPrimaryKnownThreat()->GetLastKnownPosition();
-		bool isVis = m_pathfollower.GetImprov()->IsVisible(m_aimPosition);
-
 		if (m_iClass == CLASS_SNIPER)
 		{
 			if (m_pathfollower.GetImprov()->IsVisible(m_hEnemy->EyePosition()))
-			{
 				m_aimPosition = m_hEnemy->EyePosition();
-				isVis = true;
-			}
-			// this only replaced isVis if the head is visible
-			// IT IS SPECIFICALLY A IF STATEMENT SO IF THE HEAD IS NOT VISIBLE THEN THE CENTER IS USED AS THE ISVIS CHECKER
-		}
 
-		if (isVis)
-		{
-			if (m_iClass == CLASS_SNIPER)
+			if (pWeapon && m_pActiveItem->m_iId == WEAPON_SNIPERIFLE)
 			{
-				if (pWeapon && m_pActiveItem->m_iId == WEAPON_SNIPERIFLE)
-				{
-					CSniperifle* pSniperRifle = (CSniperifle*)pWeapon;
+				CSniperifle* pSniperRifle = (CSniperifle*)pWeapon;
 
-					if (!(pWeapon->m_iWeaponState & WEAPONSTATE_CHARGING))
-					{
-						PressSecondaryAttack();
-					}
-					else if (pSniperRifle && pSniperRifle->m_fCharge > 10)
-					{
-						PressPrimaryAttack();
-					}
+				if (!(pWeapon->m_iWeaponState & WEAPONSTATE_CHARGING))
+				{
+					PressSecondaryAttack();
+				}
+				else if (pSniperRifle && pSniperRifle->m_fCharge > 10)
+				{
+					PressPrimaryAttack();
 				}
 			}
-			else
-				PressPrimaryAttack();
 		}
+		else
+			PressPrimaryAttack();
 	}
 	else
 	{

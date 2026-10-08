@@ -41,22 +41,6 @@ extern int gmsgHLTV;
 #define WEAPON_RESPAWN_TIME 10
 #define AMMO_RESPAWN_TIME 10
 
-void CONSOLE_ECHO_THREE(const char* pszMsg, ...)
-{
-	// for some reason using CONSOLE_ECHO causes a linker error despite being proper on my computer
-	// i need to learn more about this... this seems too important to not know how to fix myself
-	// its not really that unique so i just cloned it here LOLOLOL
-	// plz fix this jakulo ur smarter then i am.................
-	va_list argptr;
-	static char szStr[1024];
-
-	va_start(argptr, pszMsg);
-	vsnprintf(szStr, sizeof(szStr), pszMsg, argptr);
-	va_end(argptr);
-
-	(*g_engfuncs.pfnServerPrint)(szStr);
-}
-
 class CCStrikeGameMgrHelper : public IVoiceGameMgrHelper
 {
 public:
@@ -1056,8 +1040,6 @@ void CHalfLifeMultiplay::RestartRound(void)
 			pPlayer->ResetMaxSpeed();
 		}
 	}
-
-	CONSOLE_ECHO_THREE("Round Restart\n");
 }
 
 void CHalfLifeMultiplay::SetRoundStatus(int iStatus)
