@@ -37,6 +37,8 @@ cvar_t *gl_wireframe;
 cvar_t *cl_righthand;
 cvar_t *r_decals;
 
+cvar_t *ckf3d_hitsound;
+
 void Cvar_HudInit(void)
 {
 	r_drawentities = gEngfuncs.pfnGetCvarPointer("r_drawentities");
@@ -73,6 +75,9 @@ void Cvar_Init(void)
 	g_particle_sort = gEngfuncs.pfnRegisterVariable("ckf_particle_sort", "1", FCVAR_CLIENTDLL);
 	g_deathmsg_clean = gEngfuncs.pfnRegisterVariable("ckf_deathmsg_clean", "10.0", FCVAR_ARCHIVE | FCVAR_CLIENTDLL);
 	g_deathmsg_max = gEngfuncs.pfnRegisterVariable("ckf_deathmsg_max", "5", FCVAR_ARCHIVE | FCVAR_CLIENTDLL);
+
+	// ckf3 decap
+	ckf3d_hitsound = gEngfuncs.pfnRegisterVariable("ckf3d_hitsound", "1", FCVAR_ARCHIVE | FCVAR_CLIENTDLL);
 
 	chase_active = gEngfuncs.pfnGetCvarPointer("chase_active");
 }

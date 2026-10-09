@@ -1,17 +1,4 @@
-﻿C:\Program Files\Microsoft Visual Studio\2022\Community\MSBuild\Microsoft\VC\v170\Microsoft.CppBuild.targets(1133,5): warning MSB4211: The property "GetTargetPathDependsOn" is being set to a value for the first time, but it was already consumed at "C:\Program Files\Microsoft Visual Studio\2022\Community\MSBuild\Current\Bin\amd64\Microsoft.Common.CurrentVersion.targets (2243,5)".
-cl : command line  warning D9035: option 'Gm' has been deprecated and will be removed in a future release
-cl : command line  warning D9030: '/Gm' is incompatible with multiprocessing; ignoring /MP switch
-  metahook.cpp
-  memdll.cpp
-  LoadBlob.cpp
-  modules.cpp
-  image.cpp
-  disasm.cpp
-  detours.cpp
-  Generating Code...
-detours.obj : warning LNK4075: ignoring '/EDITANDCONTINUE' due to '/SAFESEH' specification
-     Creating library Debug\MetaHook.lib and object Debug\MetaHook.exp
-  MetaHook.vcxproj -> C:\Users\wen\source\repos\CKF3Alpha_New\src\MetaHook\Debug\MetaHook.dll
+﻿  MetaHook.vcxproj -> C:\Users\wen\source\repos\CKF3Alpha_New\src\MetaHook\Debug\MetaHook.dll
           1 file(s) copied.
   The system cannot find the path specified.
           0 file(s) copied.

@@ -8,6 +8,8 @@
 #include "weapon.h"
 #include "hud_localize.h"
 
+extern cvar_t* ckf3d_hitsound;
+
 pfnUserMsgHook pfnMsgFunc_Health;
 pfnUserMsgHook pfnMsgFunc_ResetHUD;
 pfnUserMsgHook pfnMsgFunc_TeamInfo;
@@ -700,7 +702,16 @@ int MF_DrawFX_HitDamage(void)
 
 	R_HitDamageText(damage, vecSrc, crit);
 
-	gEngfuncs.pfnPlaySoundByName("CKF_III/hitsound.wav", 1);
+	switch ((int)ckf3d_hitsound->value)
+	{
+	case 1:
+		gEngfuncs.pfnPlaySoundByName("ckf_decap/hitsound/hitsound.wav", 1); break;
+	case 2:
+		gEngfuncs.pfnPlaySoundByName("ckf_decap/hitsound/hitsound_beepo.wav", 1); break;
+	case 3:
+	default:
+		gEngfuncs.pfnPlaySoundByName("ckf_decap/hitsound/hitsound_space.wav", 1); break;
+	}
 
 	return 1;
 }
