@@ -1,6 +1,6 @@
 # Chicken Fortress 3, edited by weyouthey and jakulo 
 
-NOTE FROM WYT: Do note that this still has the same big bugs with building anything else but client.dll and mp.dll. Ignore the others as they cannot really be built without doing a bunch of stupid shit that I can't be bothered to finish. Considering it mainly handles rendering, it isn't actually THAT important right now, so dont expect any changes there brah
+This fixes the bug pertaining to building dlls that aren't client.dll and mp.dll!!! Now, all DLLs can be compiled safely.
 
 Chicken Fortress 3 is a Half-Life mod that ported the Team Fortress 2 to GoldSRC engine.
 
