@@ -1,8 +1,6 @@
-# Chicken Fortress 3, edited by weyouthey and jakulo 
+# Chicken Fortress 3: Decapitated
 
-This fixes the bug pertaining to building dlls that aren't client.dll and mp.dll!!! Now, all DLLs can be compiled safely.
-
-Chicken Fortress 3 is a Half-Life mod that ported the Team Fortress 2 to GoldSRC engine.
+An updated version of the original Chicken Fortress 3. Managed by weyouthey and ( occasionally ) jakulo
 
 ## New changes compared to the original:
 ##### Bots!
