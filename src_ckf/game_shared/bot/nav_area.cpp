@@ -43,6 +43,8 @@ using std::max;
 
 NavAreaList TheNavAreaList;
 CNavAreaGrid TheNavAreaGrid;
+float TheNavMapMaxZ = 0.0f;
+float TheNavMapMinZ = 0.0f;
 
 extern void HintMessageToAllPlayers( const char *message );
 
@@ -1024,6 +1026,35 @@ void DestroyNavigationMap( void )
 
 	// reset the grid
 	TheNavAreaGrid.Reset();
+
+	TheNavMapMaxZ = 0.0f;
+	TheNavMapMinZ = 0.0f;
+	// so it doesnt survive map changes
+	// this might not even need to be here
+}
+
+//--------------------------------------------------------------------------------------------------------------
+// finds the highest point on the nav area list
+
+void ComputeNavMapHeightRange(void)
+{
+	bool first = true;
+
+	for (NavAreaList::iterator iter = TheNavAreaList.begin(); iter != TheNavAreaList.end(); ++iter)
+	{
+		float z = (*iter)->GetCenter()->z;
+
+		if (first)
+		{
+			TheNavMapMaxZ = TheNavMapMinZ = z;
+			first = false;
+		}
+		else
+		{
+			if (z > TheNavMapMaxZ) TheNavMapMaxZ = z;
+			if (z < TheNavMapMinZ) TheNavMapMinZ = z;
+		}
+	}
 }
 
 //--------------------------------------------------------------------------------------------------------------
@@ -1664,12 +1695,11 @@ void BuildLadders( void )
 		ladder->m_bottom.y = ladder->m_top.y;
 		ladder->m_bottom.z = entity->pev->absmin.z;
 
-		// determine facing - assumes "normal" runged ladder
 		float xSize = entity->pev->absmax.x - entity->pev->absmin.x;
 		float ySize = entity->pev->absmax.y - entity->pev->absmin.y;
 		if (xSize > ySize)
 		{
-			// ladder is facing north or south - determine which way
+			// ladder is facing north or south, determine which way
 			// "pull in" traceline from bottom and top in case ladder abuts floor and/or ceiling
 			Vector from = ladder->m_bottom + Vector( 0.0f, GenerationStepSize, GenerationStepSize );
 			Vector to = ladder->m_top + Vector( 0.0f, GenerationStepSize, -GenerationStepSize );
@@ -1683,7 +1713,6 @@ void BuildLadders( void )
 		}
 		else
 		{
-			// ladder is facing east or west - determine which way
 			Vector from = ladder->m_bottom + Vector( GenerationStepSize, 0.0f, GenerationStepSize );
 			Vector to = ladder->m_top + Vector( GenerationStepSize, 0.0f, -GenerationStepSize );
 
@@ -2089,6 +2118,7 @@ void GenerateNavigationAreaMesh( void )
 	MarkNoBuildZones();
 	MarkSpawnRooms();
 	MarkSpawnRoomExits();
+	ComputeNavMapHeightRange();
 }
 
 //--------------------------------------------------------------------------------------------------------------

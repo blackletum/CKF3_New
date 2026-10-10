@@ -702,15 +702,59 @@ int MF_DrawFX_HitDamage(void)
 
 	R_HitDamageText(damage, vecSrc, crit);
 
-	switch ((int)ckf3d_hitsound->value)
+	// TODO: killsounds
+
+	int value = (int)ckf3d_hitsound->value;
+	if (value)
 	{
-	case 1:
-		gEngfuncs.pfnPlaySoundByName("ckf_decap/hitsound/hitsound.wav", 1); break;
-	case 2:
-		gEngfuncs.pfnPlaySoundByName("ckf_decap/hitsound/hitsound_beepo.wav", 1); break;
-	case 3:
-	default:
-		gEngfuncs.pfnPlaySoundByName("ckf_decap/hitsound/hitsound_space.wav", 1); break;
+		switch (value)
+		{
+		case 2:
+			gEngfuncs.pfnPlaySoundByName("ckf_decap/hitsound/hitsound_beepo.wav", 1); break;
+		case 3:
+			gEngfuncs.pfnPlaySoundByName("ckf_decap/hitsound/hitsound_space.wav", 1); break;
+		case 4:
+			gEngfuncs.pfnPlaySoundByName("ckf_decap/hitsound/hitsound_squasher.wav", 1); break;
+		case 5:
+		{
+			char* hitsound = "";
+			sprintf(hitsound, "ckf_decap/hitsound/hitsound_electro%i.wav", RANDOM_LONG(1, 3));
+			gEngfuncs.pfnPlaySoundByName(hitsound, 1);
+			break;
+		}
+		case 6:
+		{
+			char* hitsound = "";
+			int rnd = RANDOM_LONG(1, 9);
+			sprintf(hitsound, "ckf_decap/hitsound/hitsound_menu_note%i%s.wav", rnd, (RANDOM_LONG(0, 1) == 0 && rnd == 7) ? "b" : "");
+			gEngfuncs.pfnPlaySoundByName(hitsound, 1);
+			break;
+		}
+		case 7:
+		{
+			char* hitsound = "";
+			sprintf(hitsound, "ckf_decap/hitsound/hitsound_percussion%i.wav", RANDOM_LONG(1, 5));
+			gEngfuncs.pfnPlaySoundByName(hitsound, 1);
+			break;
+		}
+		case 8:
+		{
+			char* hitsound = "";
+			sprintf(hitsound, "ckf_decap/hitsound/hitsound_retro%i.wav", RANDOM_LONG(1, 5));
+			gEngfuncs.pfnPlaySoundByName(hitsound, 1);
+			break;
+		}
+		case 9:
+		{
+			char* hitsound = "";
+			sprintf(hitsound, "ckf_decap/hitsound/hitsound_vortex%i.wav", RANDOM_LONG(1, 5));
+			gEngfuncs.pfnPlaySoundByName(hitsound, 1);
+			break;
+		}
+		default:
+		case 1:
+			gEngfuncs.pfnPlaySoundByName("ckf_decap/hitsound/hitsound.wav", 1); break;
+		}
 	}
 
 	return 1;

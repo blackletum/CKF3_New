@@ -1137,6 +1137,7 @@ public:
 
 public:
 	void Swing(void);
+	BOOL IsBackFace(Vector& anglesAttacker, Vector& anglesVictim);
 };
 
 class CSyringeGun : public CBasePlayerWeapon

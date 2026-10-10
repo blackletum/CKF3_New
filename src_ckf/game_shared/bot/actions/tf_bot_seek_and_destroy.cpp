@@ -12,7 +12,7 @@
 #include "bot/hl_bot.h"
 #include "bot/actions/tf_bot_seek_and_destroy.h"
 
-inline int FNullEnt(CBaseEntity* ent) { return (!ent) || FNullEnt(ent->edict()); }
+inline int FNullEnt(CBaseEntity* ent) { return ( (!ent) || FNullEnt(ent->edict()) ); }
 
 void CTFBotSeekAndDestroy::OnEnter(CBot* me)
 {
@@ -29,7 +29,7 @@ void CTFBotSeekAndDestroy::Update(CBot* me)
 		CResupplyRoom* spawn = GetClosestSpawnRoom(me, me->GetEnemyTeam());
 		if (spawn)
 		{
-			CNavArea* area = TheNavAreaGrid.GetNearestNavAreaAttributes(&spawn->Center(), false, NAV_SPAWN_ROOM_EXIT);
+			CNavArea* area = TheNavAreaGrid.GetNearestNavAreaAttributes(&spawn->Center(), false, me->m_iTeam == TEAM_RED ? NAV_SPAWN_ROOM_BLUE : NAV_SPAWN_ROOM_RED);
 			if (area)
 			{
 				Vector close = area->GetRandomPoint();

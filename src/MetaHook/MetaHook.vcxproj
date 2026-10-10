@@ -33,9 +33,11 @@
   </ImportGroup>
   <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="PropertySheets">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+    <Import Project="..\..\develop\user.props" />
   </ImportGroup>
   <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="PropertySheets">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+    <Import Project="..\..\develop\user.props" />
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup>
@@ -98,8 +100,7 @@ copy "$(OutDir)$(ProjectName).dll" "F:\Steam\steamapps\common\Half-Life\ckf3\met
       <Profile>true</Profile>
     </Link>
     <PostBuildEvent>
-      <Command>copy "$(OutDir)$(ProjectName).dll" "..\..\Test\ckf3\metahook.dll"
-copy "$(OutDir)$(ProjectName).dll" "F:\Steam\steamapps\common\Half-Life\ckf3\metahook.dll"</Command>
+      <Command>if "$(ChickenFortressInstallPath)"=="" (echo ChickenFortressInstallPath is not set &amp; exit 1) else (if not exist "$(ChickenFortressInstallPath)" mkdir "$(ChickenFortressInstallPath)" &amp; copy /Y "$(TargetPath)" "$(ChickenFortressInstallPath)\metahook.dll")</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>

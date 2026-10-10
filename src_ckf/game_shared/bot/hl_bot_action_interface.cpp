@@ -12,10 +12,12 @@
 #include "hl_bot_action_interface.h"
 
 CTFBotActionInterface::CTFBotActionInterface(CTFAction* m_baseAction)
+	: m_scenarioMoniterInterface()
 {
 	m_bAction = m_baseAction;
 	m_bot = NULL;
 	debug_info[0] = '\0';
+	m_scenarioMoniterInterface.SetBot(NULL);
 }
 
 void CTFBotActionInterface::Update(void)
@@ -114,7 +116,13 @@ void CTFBotActionInterface::Update(void)
 			break;
 		}
 
-		action->Update(bot);
+		int check = m_scenarioMoniterInterface.Check();
+
+		if (!action->ShouldHurry(bot) && check)
+			m_scenarioMoniterInterface.Update(check);
+		else
+			action->Update(bot);
+		
 		return;		// only one action runs per tick
 	}
 }
@@ -149,4 +157,34 @@ void CTFBotActionInterface::Reset(CTFAction* first)
 		m_Actions.AddToTail(first);
 		first->OnEnter(bot);
 	}
+}
+
+void CTFBotScenarioMoniterInterface::Update(int attrib)
+{
+	if (attrib & RESULT_HEALTH && m_hpAction)
+		m_hpAction->Update(m_bot);
+	else if (attrib & RESULT_RETREAT && m_retreatAction)
+		m_retreatAction->Update(m_bot);
+}
+
+int CTFBotScenarioMoniterInterface::Check()	// TODO: add option to ignore certain checks
+{
+	// dual purpose function
+	// you can use the results to determine other stuff
+	// it is also possible to input them directly into the Update function below, so it'll b easier
+
+	if (!m_bot)
+		return 0;
+
+	int attributes = 0;
+
+	const float lowhealthmulti = 0.6f;
+	if (m_bot->pev->health < (m_bot->pev->max_health * lowhealthmulti))
+		attributes = (attributes | RESULT_RETREAT);
+
+	const float superlowhealthmulti = 0.2f;
+	if (m_bot->pev->health < (m_bot->pev->max_health * superlowhealthmulti))
+		attributes = (attributes | RESULT_HEALTH);
+
+	return attributes;
 }

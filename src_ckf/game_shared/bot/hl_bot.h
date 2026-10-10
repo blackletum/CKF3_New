@@ -36,9 +36,18 @@ public:
 	void PressSecondaryAttack(void);
 	void MoveTowardPos(const Vector& pos);
 
-	void SetPathToGoal(const Vector& goal); // recompute goal
+	// recompute goal
+	void SetPathToGoal(const Vector& goal);
 	void SetPathToGoal(CBasePlayer* goal);
 	void SetPathToGoal(CBaseEntity* goal);
+
+	void StopPath()
+	{
+		if (!HasPath())
+			return;
+
+		m_path.Invalidate();
+	}
 
 	bool HasEnemy() { return m_hEnemy && m_hEnemy->IsPlayer(); }
 	CBaseEntity* GetEnemy()
@@ -89,7 +98,7 @@ private:
 	Vector m_stuckSpot;					// where we were when the stuck check last ran
 	IntervalTimer m_stuckTimer;			// how long we have been near m_stuckSpot
 
-	CTFBotActionInterface m_actionInterface;	// Korozbot action interface
+	CTFBotActionInterface m_actionInterface;					// Korozbot action interface
 
 	EHANDLE m_hEnemy;					// the target
 	CountdownTimer m_hEnemyRecalculateTimer;		// limits how often we change our target

@@ -27,6 +27,7 @@ public:
 	virtual void OnExit(CBot* me) = 0;		// CHANGE_TO or DONE status
 	virtual void OnResume(CBot* me) = 0;	// action that was suspended into is now finished, so this action is now the active one
 	virtual const char* GetName() const = 0;
+	virtual bool ShouldHurry(CBot* me) = 0;
 
 	// do not change or inherit these
 	ActionResult Status() { return m_Status; }
@@ -50,11 +51,36 @@ private:
 	CTFAction* new_action;
 };
 
-class CTFBotScenarioMoniterInterface: public CTFAction
+enum ScenarioMoniterCheckResult
+{
+	RESULT_HEALTH				= (1 << 0),
+	RESULT_RETREAT				= (1 << 1),
+	RESULT_AMMO					= (1 << 2),
+};
+
+class CTFBotScenarioMoniterInterface
 {
 	// handles universal things that would normally stop a player
 	// eg get health or get ammo
-	// not implemented yet
+public:
+	CTFBotScenarioMoniterInterface()
+	{
+		m_hpAction = NULL;
+		m_retreatAction = NULL;
+		m_bot = NULL;
+	}
+
+	void SetBot(CBot* me) { m_bot = me; }
+	void SetHealthAction(CTFAction* action) { m_hpAction = action; }
+	void SetRetreatAction(CTFAction* action) { m_retreatAction = action; }
+
+	int Check();
+	void Update(int attrib = 0);
+private:
+	CBot* m_bot;
+	CTFAction* m_hpAction;
+	CTFAction* m_retreatAction;
+	// CTFAction* m_ammoAction;
 };
 
 class CTFBotActionInterface
@@ -63,18 +89,18 @@ public:
 	CTFBotActionInterface(CTFAction* m_baseAction);
 
 	CBot* GetBot() const { return m_bot; }
-	void SetBot(CBot* me) { m_bot = me; }
+	void SetBot(CBot* me) { m_bot = me; m_scenarioMoniterInterface.SetBot(me); }
 
 	virtual void Update();
 	
 	CUtlVector<CTFAction*> m_Actions;
 	CTFAction* m_bAction;
-
+	CTFBotScenarioMoniterInterface m_scenarioMoniterInterface;	// Scenario moniter interface
 	void Reset(CTFAction* first = NULL);
+
 private:
 	CBot* m_bot;
 	char debug_info[512];
-
 	void DestroyAction(CTFAction* action);
 };
 

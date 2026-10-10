@@ -467,7 +467,7 @@ void CHLBotManager::UpdateNavGeneration( void )
 		if (SampleStep())
 			continue;
 
-		// sampling is finished - build nav areas from the nodes and save
+		// sampling is finished, so build nav areas from the nodes and save
 		CONSOLE_ECHO( "Sampling complete (%d nodes). Building nav areas...\n", CNavNode::GetListLength() );
 
 		GenerateNavigationAreaMesh();
@@ -475,6 +475,35 @@ void CHLBotManager::UpdateNavGeneration( void )
 
 		BuildLadders();
 		CONSOLE_ECHO( "Built %d nav ladders.\n", (int)TheNavLadderList.size() );
+
+		// do hiding spots first before everything else cuz sniper spots and spot encounters rely on them
+		for (NavAreaList::iterator it = TheNavAreaList.begin(); it != TheNavAreaList.end(); ++it)
+			(*it)->ComputeHidingSpots();
+
+		int spotCount = 0;
+		for (NavAreaList::iterator it = TheNavAreaList.begin(); it != TheNavAreaList.end(); ++it)
+			spotCount += (int)(*it)->GetHidingSpotList()->size();
+		CONSOLE_ECHO("Found %d hiding spots.\n", spotCount);
+
+		for (NavAreaList::iterator it = TheNavAreaList.begin(); it != TheNavAreaList.end(); ++it)
+			(*it)->ComputeSniperSpots();
+		CONSOLE_ECHO("Classified sniper spots.\n");
+
+		for (NavAreaList::iterator it = TheNavAreaList.begin(); it != TheNavAreaList.end(); ++it)
+			(*it)->ComputeApproachAreas();
+		CONSOLE_ECHO("Computed approach areas.\n");
+
+		/*
+		int approachCount = 0;
+		for (NavAreaList::iterator it = TheNavAreaList.begin(); it != TheNavAreaList.end(); ++it)
+			approachCount += (int)(*it)->GetApproachInfoCount();
+		CONSOLE_ECHO("Found %d approach spots.\n", approachCount);
+		*/
+
+		for (NavAreaList::iterator it = TheNavAreaList.begin(); it != TheNavAreaList.end(); ++it)
+			(*it)->ComputeSpotEncounters();
+		CONSOLE_ECHO("Computed spot encounters.\n");
+
 
 		if (SaveNavigationMap( GetNavMapFilename() ))
 			CONSOLE_ECHO( "Navigation map saved to '%s'.\n", GetNavMapFilename() );

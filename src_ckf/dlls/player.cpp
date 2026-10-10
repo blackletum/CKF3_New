@@ -373,19 +373,39 @@ int GetClassMaxHealth(int iClass)
 
 float GetClassMaxSpeed(int iClass)
 {
-	float speed = 300;
+	float speed = 300; // base speed
 
+	// class multipliers
 	switch(iClass)
 	{
-	case CLASS_SCOUT: speed * 1.33;
-	case CLASS_HEAVY: speed * 0.77;
-	case CLASS_SOLDIER: speed * 0.8;
-	case CLASS_PYRO: speed * 1.0;
-	case CLASS_SNIPER: speed * 1.0;
-	case CLASS_MEDIC: speed * 1.07;
-	case CLASS_ENGINEER: speed * 1.0;
-	case CLASS_DEMOMAN: speed * 0.93;
-	case CLASS_SPY: speed * 1.07;
+	case CLASS_SCOUT:
+	{
+		speed *= 1.33;
+		break;
+	}
+	case CLASS_HEAVY:
+	{
+		speed *= 0.77;
+		break;
+	}
+	case CLASS_SOLDIER:
+	{
+		speed *= 0.8;
+		break;
+	}
+	case CLASS_MEDIC:
+	case CLASS_SPY:
+	{
+		speed *= 1.07;
+		break;
+	}
+	case CLASS_DEMOMAN:
+	{
+		speed *= 0.93;
+		break;
+	}
+	default: // all other classes
+		break;
 	}
 	return speed;
 }

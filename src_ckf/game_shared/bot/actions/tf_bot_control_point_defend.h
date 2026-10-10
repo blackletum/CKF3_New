@@ -11,7 +11,10 @@ public:
 	virtual void OnExit(CBot* me);		// CHANGE_TO or DONE status
 	virtual void OnResume(CBot* me);	// action that was suspended into is now finished, so this action is now the active one
 	virtual const char* GetName() const { return "ControlPointDefend"; };
-
+	virtual bool ShouldHurry(CBot* me)
+	{
+		return false;
+	}
 private:
 	CControlPoint* GetClosestControlPoint(CBot* me);
 	CountdownTimer m_seekTimer;

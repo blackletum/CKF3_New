@@ -92,7 +92,7 @@ void CButterfly::SecondaryAttack(void)
 		m_pPlayer->Cloak_Stop();
 }
 
-BOOL IsBackFace(Vector &anglesAttacker, Vector &anglesVictim)
+BOOL CButterfly::IsBackFace(Vector& anglesAttacker, Vector& anglesVictim)
 {
 	float flAngles = anglesAttacker.y - anglesVictim.y;
 	if(flAngles < -180.0) flAngles += 360.0;

@@ -7,15 +7,21 @@
 
 #include <list>
 #include "nav.h"
+#include "cbase.h"
 #include "steam_util.h"
 
 class CNavArea;
+class CBaseEntity;
 
 void DestroyHidingSpots( void );
 void StripNavigationAreas( void );
 bool SaveNavigationMap( const char *filename );
 NavErrorType LoadNavigationMap( void );
 void DestroyNavigationMap( void );
+void  ComputeNavMapHeightRange(void);
+extern float TheNavMapMaxZ;
+extern float TheNavMapMinZ;
+
 
 #define SOFT_Z_PENALTY_SCALE    12.0
 
@@ -25,8 +31,10 @@ void DestroyNavigationMap( void );
  */
 enum RouteType
 {
-	FASTEST_ROUTE,
-	SAFEST_ROUTE,
+	FASTEST_ROUTE,	// default
+	HIGHEST_ROUTE,	// prefers high points
+	LOWEST_ROUTE,	// prefers lower points
+	// SAFEST_ROUTE,
 };
 
 
@@ -659,9 +667,10 @@ extern CNavArea *GetMarkedArea( void );
 class ShortestPathCost
 {
 public:
-	ShortestPathCost( CBaseEntity* ent )
+	ShortestPathCost( CBaseEntity* ent, RouteType routetype = FASTEST_ROUTE )
 	{
 		m_ent = ent;
+		m_route = routetype;
 	}
 
 	float operator() ( CNavArea *area, CNavArea *fromArea, const CNavLadder *ladder )
@@ -673,6 +682,15 @@ public:
 		}
 		else
 		{
+			// add a random penalty unique to this character so they choose different routes to the same place
+			float preference = 1.0f;
+
+			// grabbed from the Source SDK
+			// this term causes the same bot to choose different routes over time,
+			// but keep the same route for a period in case of repaths
+			int timeMod = (int)(gpGlobals->time / 10.0f) + 1;
+			preference = 1.0f + 50.0f * (1.0f + cos((float)(m_ent->entindex() * area->GetID() * timeMod)));
+
 			// compute distance travelled along path so far
 			float dist;
 
@@ -684,21 +702,50 @@ public:
 			else
 				dist = (useTo - useFrom).Length();
 
+			float up = useTo.z - useFrom.z;
+
+			if (m_route == HIGHEST_ROUTE) // prefers high routes
+			{
+				const float HEIGHT_SCALE = 0.0f;
+				float edge = dist + (TheNavMapMaxZ - useTo.z) * HEIGHT_SCALE;
+				// float edge = dist + ((up < 0.0f) ? -up : 0.0f) * HEIGHT_SCALE;
+				// this edge makes it so that bots will specifically avoid going down
+				// this one wont go for higher ones, but avoid lower ones
+
+				// this makes sure that the jump penalties stay
+				if (area->GetAttributes() & NAV_CROUCH)
+					edge += 20.0f * dist;
+				if (area->GetAttributes() & NAV_JUMP)
+					edge += 5.0f * dist;
+
+				return (fromArea->GetCostSoFar() + edge) * preference;
+			}
+			else if (m_route == LOWEST_ROUTE)	// prefers low routes
+			{
+				// honestly this will probably never be used
+				// good to have though!!! just in case
+
+				const float LOW_HEIGHT_SCALE = 0.75f;
+				float edge = dist + (useTo.z - TheNavMapMinZ) * LOW_HEIGHT_SCALE;
+
+				if (area->GetAttributes() & NAV_CROUCH)
+					edge += 10.0f * dist;
+				if (area->GetAttributes() & NAV_JUMP)
+					edge += 40.0f * dist;
+
+				return fromArea->GetCostSoFar() + edge;
+			}
+			// i could probably get away with combining these two types considering they only change a few things
+			// barely matters though
+			// if it works it works LOLOL
+
+
 			float cost = dist + fromArea->GetCostSoFar();
 
-			float up = useTo.z - useFrom.z;
 			if (up > 50.0) cost += (up-50.0) * SOFT_Z_PENALTY_SCALE;
 			// prefer flatter ground
 			// wyt: this is leftover from rooster fortress..
 			// probably weird but it doesnt really break anything so idgaf
-			
-			// add a random penalty unique to this character so they choose different routes to the same place
-			float preference = 1.0f;
-
-			// this term causes the same bot to choose different routes over time,
-			// but keep the same route for a period in case of repaths
-			int timeMod = (int)(gpGlobals->time / 10.0f) + 1;
-			preference = 1.0f + 50.0f * (1.0f + cos((float)(m_ent->entindex() * area->GetID() * timeMod)));
 			
 			/*
 			TraceResult result;
@@ -730,7 +777,6 @@ public:
 				// trace didnt work! probably a wall
 			}
 			*/
-
 			
 			// if this is a "crouch" area, add penalty
 			if (area->GetAttributes() & NAV_CROUCH)
@@ -751,6 +797,7 @@ public:
 	}
 
 	CBaseEntity* m_ent;
+	RouteType m_route;
 };
 
 //--------------------------------------------------------------------------------------------------------------

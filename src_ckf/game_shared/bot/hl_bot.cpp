@@ -21,6 +21,8 @@
 #include "bot/actions/tf_bot_seek_and_destroy.h"
 #include "bot/actions/tf_bot_control_point_attack.h"
 #include "bot/actions/tf_bot_control_point_defend.h"
+#include "bot/actions/tf_bot_get_health.h"
+#include "bot/actions/tf_bot_retreat.h"
 
 extern cvar_t cv_bot_debug;
 
@@ -28,7 +30,7 @@ static const float BotCommandInterval = 1.0f / 30.0f;	// send movement commands 
 static const float BotFullThinkInterval = 1.0f / 10.0f;	// run decision logic 30 times per second
 
 CBot::CBot()
-	: m_actionInterface( new CTFBotIdle )
+	: m_actionInterface(new CTFBotIdle)
 {
 	// init for da bots
 	
@@ -43,6 +45,9 @@ CBot::CBot()
 	m_pathfollower.SetImprov( new CTFBotLocomotion(this) );
 	m_pathfollower.SetPath(&m_path);
 	m_actionInterface.SetBot(this);
+	m_actionInterface.m_scenarioMoniterInterface.SetBot(this); // just in case
+	m_actionInterface.m_scenarioMoniterInterface.SetHealthAction( new CTFBotGetHealth );
+	m_actionInterface.m_scenarioMoniterInterface.SetRetreatAction( new CTFBotRetreat );
 }
 
 CTFAction* CBot::DesiredAction(void)
@@ -50,6 +55,7 @@ CTFAction* CBot::DesiredAction(void)
 	if (g_pGameRules->CPExist())
 	{
 	// CONSOLE_ECHO("DesiredAction is control points\n");
+	// 
 
 	//	if (m_iTeam == TEAM_BLUE)
 			return (new CTFBotControlPointAttack);
@@ -60,7 +66,7 @@ CTFAction* CBot::DesiredAction(void)
 	// i will do this with koth eventually but koth itself is buggy as fuuuuuuck rn
 	}
 
-	return (new CTFBotSeekAndDestroy);
+	return new CTFBotSeekAndDestroy;
 }
 
 int CBot::ChooseGoodClass(void)
@@ -483,31 +489,108 @@ void CBot::Upkeep(void)
 
 	Vector m_aimPosition = pev->origin;
 
-	bool enemyfound = GetPrimaryKnownThreat() && GetPrimaryKnownThreat()->GetEntity()->IsPlayer();
+	bool enemyfound = GetPrimaryKnownThreat() && m_hEnemy->IsPlayer();
+	// this should run the GetPrimaryKnownThreat() before checking the m_hEnemy, so this should be fine
 	if (enemyfound)
 	{
+		m_aimPosition = GetPrimaryKnownThreat()->GetLastKnownPosition();
+
 		CBasePlayerWeapon* pWeapon = (CBasePlayerWeapon*)m_pActiveItem;
-		if (m_iClass == CLASS_SNIPER)
+
+		if (pWeapon)
 		{
-			if (m_pathfollower.GetImprov()->IsVisible(m_hEnemy->EyePosition()))
-				m_aimPosition = m_hEnemy->EyePosition();
-
-			if (pWeapon && m_pActiveItem->m_iId == WEAPON_SNIPERIFLE)
+			switch (m_pActiveItem->m_iId)
 			{
-				CSniperifle* pSniperRifle = (CSniperifle*)pWeapon;
+				case WEAPON_SNIPERIFLE:
+				{
+					Vector head = m_hEnemy->EyePosition();
+					if (m_pathfollower.GetImprov()->IsVisible(head))
+						m_aimPosition = head;
 
-				if (!(pWeapon->m_iWeaponState & WEAPONSTATE_CHARGING))
-				{
-					PressSecondaryAttack();
+					CSniperifle* pSniperRifle = (CSniperifle*)pWeapon;
+
+					if (m_rgAmmo[pSniperRifle->m_iPrimaryAmmoType] > 0)
+					{
+						if (!(pWeapon->m_iWeaponState & WEAPONSTATE_CHARGING))
+						{
+							PressSecondaryAttack();
+						}
+						else if (pSniperRifle && pSniperRifle->m_fCharge > 10)
+						{
+							PressPrimaryAttack();
+						}
+					}
+					break;
 				}
-				else if (pSniperRifle && pSniperRifle->m_fCharge > 10)
+				case WEAPON_MINIGUN:
 				{
-					PressPrimaryAttack();
+					CMinigun* pMinigun = (CMinigun*)pWeapon;
+
+					if (m_rgAmmo[pMinigun->m_iPrimaryAmmoType] > 0)
+					{
+						if (m_pathfollower.GetImprov()->IsVisible(m_aimPosition))
+							PressPrimaryAttack();
+						else
+							PressSecondaryAttack();
+					}
+					break;
+				}
+				case WEAPON_BAT:
+				case WEAPON_SHOVEL:
+				case WEAPON_FIREAXE:
+				case WEAPON_BOTTLE:
+				case WEAPON_FIST:
+				case WEAPON_WRENCH:
+				case WEAPON_BONESAW:
+				case WEAPON_KUKRI:
+				{
+					if ((pev->origin - m_aimPosition).IsLengthLessThan(48.0f))
+					{
+						PressPrimaryAttack();
+					}
+					// if close enough, then attack
+					// TODO: swing prediction maybe?
+
+					break;
+				}
+				case WEAPON_BUTTERFLY:
+				{
+					CButterfly* pKnife = (CButterfly*)pWeapon;
+					if (pKnife && pKnife->IsBackFace(pev->angles, m_hEnemy->pev->angles))
+					{
+						PressPrimaryAttack();
+					}
+					// only swings if the spy can backstab
+
+					break;
+				}
+				case WEAPON_STICKYLAUNCHER:
+				{
+					CStickyLauncher* pStickybombLauncher = (CStickyLauncher*)pWeapon;
+					if (pStickybombLauncher)
+					{
+						if (!(pWeapon->m_iWeaponState & WEAPONSTATE_CHARGING))
+							PressPrimaryAttack();
+						else
+							PressSecondaryAttack();
+					}
+				}
+				case WEAPON_FLAMETHROWER:
+				{
+					CFlamethrower* pFlamethrower = (CFlamethrower*)pWeapon;
+					if (m_rgAmmo[pFlamethrower->m_iPrimaryAmmoType] > 0)
+						PressPrimaryAttack();
+				}
+				default:
+				{
+					if (pWeapon->m_iClip > 0)
+					{
+						PressPrimaryAttack();
+					}
+					break;
 				}
 			}
 		}
-		else
-			PressPrimaryAttack();
 	}
 	else
 	{
