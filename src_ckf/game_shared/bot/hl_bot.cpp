@@ -24,6 +24,10 @@
 #include "bot/actions/tf_bot_get_health.h"
 #include "bot/actions/tf_bot_retreat.h"
 
+#include "bot_names.h"
+
+#define BOT_NAME_COUNT (sizeof(g_BotNames) / sizeof(g_BotNames[0])) // just in case the name list changes
+
 extern cvar_t cv_bot_debug;
 
 static const float BotCommandInterval = 1.0f / 30.0f;
@@ -308,12 +312,14 @@ CBot* CBot::CreateBot(const char* name)
 		botName[sizeof(botName) - 1] = '\0';
 	}
 	else
-	{
-		int serial = 1;
+	{	
 		do
 		{
-			sprintf(botName, "Bot%02d", serial++);
-		} while (UTIL_IsNameTaken(botName) && serial < 100);
+			//sprintf(botName, "Bot%02d", serial++);
+			sprintf(botName, "%s", g_BotNames[RANDOM_LONG(0, BOT_NAME_COUNT - 1)]);
+			// this SHOULD have a indent thingy so that the random is not needed
+			// however, the chance of a random bot getting the same name as another one has is literally 1/7833, so its whatever
+		} while (UTIL_IsNameTaken(botName));
 	}
 
 	edict_t* pent = CREATE_FAKE_CLIENT(botName);
@@ -339,19 +345,6 @@ CBot* CBot::CreateBot(const char* name)
 	CBot* bot = GetClassPtr((CBot*)VARS(pent));
 
 	ClientPutInServer(pent);
-
-	/*
-	bool joinblue = false;
-	int onBlue = g_pGameRules->m_iNumCT;
-	int onRed = g_pGameRules->m_iNumTerrorist;
-	bool blueIsWinning = (g_pGameRules->m_iNumCTWins > g_pGameRules->m_iNumTerroristWins);
-
-	no longer needed
-	*/
-	bot->m_wantedClass = bot->ChooseGoodClass();
-
-	HandleMenu_ChooseTeam(bot, 0);
-	HandleMenu_ChooseClass(bot, bot->m_wantedClass);
 
 	return bot;
 }
@@ -395,13 +388,32 @@ void CBot::Think(void)
 	if (m_iTeam != TEAM_BLU && m_iTeam != TEAM_RED)
 	{
 		HandleMenu_ChooseTeam(this, 0);
+		ResetCommand();
+		ExecuteCommand();
+		return;
 		//CONSOLE_ECHO("%s is trying to pick a team.\n", STRING(pev->netname));
 		// if not on a team, bots automatically pick the team
 	}
 	if (!(CLASS_SPY >= m_iClass && m_iClass >= CLASS_SCOUT))
 	{
 		HandleMenu_ChooseClass(this, 0);
+		ResetCommand();
+		ExecuteCommand();
+		return;
 		//CONSOLE_ECHO("%s is trying to pick a class.\n", STRING(pev->netname));
+	}
+	else if(m_hReevaluateClassTimer.IsElapsed())
+	{
+		m_hReevaluateClassTimer.Start(RANDOM_FLOAT(1.0f,5.0f));
+		int new_class = ChooseGoodClass();
+		NavAttributeType spawn = m_iTeam == TEAM_BLUE ? NAV_SPAWN_ROOM_BLUE : NAV_SPAWN_ROOM_RED;
+		if (m_iClass != new_class && ( m_lastNavArea->GetAttributes() & spawn ) )
+		{
+			HandleMenu_ChooseClass(this, ChooseGoodClass());
+			ResetCommand();
+			ExecuteCommand();
+			return;
+		}
 	}
 
 	ResetCommand();

@@ -82,7 +82,7 @@ private:
 	float m_verticalSpeed;
 	unsigned short m_buttonFlags;
 
-	int m_wantedClass;
+	// int m_wantedClass;
 
 	float m_flNextBotThink;
 	float m_flNextFullBotThink;
@@ -104,6 +104,7 @@ private:
 
 	EHANDLE m_hEnemy;					// the target
 	CountdownTimer m_hEnemyRecalculateTimer;		// limits how often we change our target
+	CountdownTimer m_hReevaluateClassTimer;
 };
 
 // this is ripped straight from the source sdk LOLOL
