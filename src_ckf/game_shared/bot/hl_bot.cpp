@@ -26,8 +26,8 @@
 
 extern cvar_t cv_bot_debug;
 
-static const float BotCommandInterval = 1.0f / 30.0f;	// send movement commands 30 times per second
-static const float BotFullThinkInterval = 1.0f / 10.0f;	// run decision logic 30 times per second
+static const float BotCommandInterval = 1.0f / 30.0f;
+static const float BotFullThinkInterval = 1.0f / 10.0f;
 
 CBot::CBot()
 	: m_actionInterface(new CTFBotIdle)
@@ -54,13 +54,18 @@ CTFAction* CBot::DesiredAction(void)
 {
 	if (g_pGameRules->CPExist())
 	{
-	// CONSOLE_ECHO("DesiredAction is control points\n");
-	// 
+	// CONSOLE_ECHO("DesiredAction is control point related\n");
+	
+	//	if(g_pGameRules->m_ControlPoints.Count() == 1)
+	//	{
+			// assume that it is koth related
+	//		return new CTFBotControlPointAttackKoth;
+	//	}
 
-	//	if (m_iTeam == TEAM_BLUE)
-			return (new CTFBotControlPointAttack);
-	//	else
-		//	return (new CTFBotControlPointDefend);
+		if (m_iClass != CLASS_ENGINEER)
+			return new CTFBotControlPointAttack;
+		else
+			return new CTFBotControlPointDefend;
 	// no reason for the defend point thing to exist...
 	// yet...
 	// i will do this with koth eventually but koth itself is buggy as fuuuuuuck rn
@@ -71,8 +76,6 @@ CTFAction* CBot::DesiredAction(void)
 
 int CBot::ChooseGoodClass(void)
 {
-	int newclass = 0;
-
 	static int offenseRoster[] =
 	{
 		CLASS_ENGINEER,
@@ -345,9 +348,10 @@ CBot* CBot::CreateBot(const char* name)
 
 	no longer needed
 	*/
+	bot->m_wantedClass = bot->ChooseGoodClass();
 
 	HandleMenu_ChooseTeam(bot, 0);
-	HandleMenu_ChooseClass(bot, bot->ChooseGoodClass());
+	HandleMenu_ChooseClass(bot, bot->m_wantedClass);
 
 	return bot;
 }
@@ -458,6 +462,8 @@ void CBot::Update(void)
 
 		m_hEnemyRecalculateTimer.Start(RANDOM_FLOAT(0.2f, 0.6f));
 	}
+
+	m_actionInterface.Update();
 }
 
 static void Bot_LookAt(CBaseEntity* self, const Vector& point)
@@ -479,8 +485,6 @@ static void Bot_LookAt(CBaseEntity* self, const Vector& point)
 
 void CBot::Upkeep(void)
 {
-	m_actionInterface.Update();
-
 	if (pev->waterlevel >= 3)
 	{
 		// if underwater, get up
@@ -490,7 +494,8 @@ void CBot::Upkeep(void)
 	Vector m_aimPosition = pev->origin;
 
 	bool enemyfound = GetPrimaryKnownThreat() && m_hEnemy->IsPlayer();
-	// this should run the GetPrimaryKnownThreat() before checking the m_hEnemy, so this should be fine
+	// this should run the GetPrimaryKnownThreat() before checking the m_hEnemy, so this should be fine to keep here
+
 	if (enemyfound)
 	{
 		m_aimPosition = GetPrimaryKnownThreat()->GetLastKnownPosition();
@@ -528,8 +533,13 @@ void CBot::Upkeep(void)
 
 					if (m_rgAmmo[pMinigun->m_iPrimaryAmmoType] > 0)
 					{
-						if (m_pathfollower.GetImprov()->IsVisible(m_aimPosition))
+						if (m_pathfollower.GetImprov()->IsVisible(m_hEnemy->Center()))
 							PressPrimaryAttack();
+						// jakulo: this specifically does NOT use GetLastKnownPosition so that bots dont shoot at targets that they do not see anymore
+						// eg: bot is aware of someone but they just lost sight of them, meaning that the last known position is right before they lost track
+						// since they can still SEE the last known, they keep shooting at that point even if nobody is there
+						// the Center() check makes it so that bots keep aiming, but they dont actually shoot at it
+						// hastag REALISM!!!!!!!!!!!!!!!!!!!!!!!!!
 						else
 							PressSecondaryAttack();
 					}
@@ -574,11 +584,12 @@ void CBot::Upkeep(void)
 						else
 							PressSecondaryAttack();
 					}
+					// TODO: this only lets the demo sticky spam. eventually, this should have charging based off the player distance
 				}
 				case WEAPON_FLAMETHROWER:
 				{
 					CFlamethrower* pFlamethrower = (CFlamethrower*)pWeapon;
-					if (m_rgAmmo[pFlamethrower->m_iPrimaryAmmoType] > 0)
+					if (m_rgAmmo[pFlamethrower->m_iPrimaryAmmoType] > 0 && (pev->origin - m_aimPosition).IsLengthLessThan(1024.0f))
 						PressPrimaryAttack();
 				}
 				default:
@@ -592,11 +603,18 @@ void CBot::Upkeep(void)
 			}
 		}
 	}
+	/*
+	else if(HasPath())
+	{
+		m_pathfollower.FindPathPoint(512.0f, &m_aimPosition, NULL);
+
+		// TODO: use GetSpotEncounter
+	}
+	// for some reason this breaks the pathfinding
+	// TODO: fix this shit dawg
+	*/
 	else
 	{
-	//	Vector point = pev->origin;
-	//	m_pathfollower.FindPathPoint(512.0f, &point, NULL); // use this mayb
-
 		const float minMoveSpeed = 1.0f;
 		// below this we count as standing still
 		// super small so that it keeps the vel stuff until we are REALLY still
@@ -683,7 +701,7 @@ void CBot::SetPathToGoal(const Vector& goal)
 		}
 
 		// don't repath every think even on failure
-		m_repathTimer.Start(RANDOM_FLOAT(1.5f, 2.5f));
+		m_repathTimer.Start(RANDOM_FLOAT(3.0f, 4.5f));
 	}
 }
 

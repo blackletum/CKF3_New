@@ -18,12 +18,8 @@ void StripNavigationAreas( void );
 bool SaveNavigationMap( const char *filename );
 NavErrorType LoadNavigationMap( void );
 void DestroyNavigationMap( void );
-void  ComputeNavMapHeightRange(void);
-extern float TheNavMapMaxZ;
-extern float TheNavMapMinZ;
 
 
-#define SOFT_Z_PENALTY_SCALE    12.0
 
 //-------------------------------------------------------------------------------------------------------------------
 /**
@@ -32,8 +28,7 @@ extern float TheNavMapMinZ;
 enum RouteType
 {
 	FASTEST_ROUTE,	// default
-	HIGHEST_ROUTE,	// prefers high points
-	LOWEST_ROUTE,	// prefers lower points
+	HIDDEN_ROUTE,	// hides from known entities
 	// SAFEST_ROUTE,
 };
 
@@ -661,16 +656,21 @@ extern CNavArea *GetMarkedArea( void );
 */
 
 
+#define SOFT_Z_PENALTY_SCALE			12.0
+#define DIFFERENT_DIRECTION_PENALTY		100.0 // this is big on purpose!!!! leave it be!!!
+
 /**
  * Functor used with NavAreaBuildPath()
  */
 class ShortestPathCost
 {
 public:
-	ShortestPathCost( CBaseEntity* ent, RouteType routetype = FASTEST_ROUTE )
+	ShortestPathCost(CBaseEntity* ent, RouteType routetype = FASTEST_ROUTE, NavDirType dir = NUM_DIRECTIONS)
 	{
 		m_ent = ent;
 		m_route = routetype;
+		m_dir = dir;
+		// TODO: m_direction maybe, random NavDir that the path prefers per bot? so that paths are unique and different rather than just being identical
 	}
 
 	float operator() ( CNavArea *area, CNavArea *fromArea, const CNavLadder *ladder )
@@ -704,49 +704,21 @@ public:
 
 			float up = useTo.z - useFrom.z;
 
-			if (m_route == HIGHEST_ROUTE) // prefers high routes
-			{
-				const float HEIGHT_SCALE = 0.0f;
-				float edge = dist + (TheNavMapMaxZ - useTo.z) * HEIGHT_SCALE;
-				// float edge = dist + ((up < 0.0f) ? -up : 0.0f) * HEIGHT_SCALE;
-				// this edge makes it so that bots will specifically avoid going down
-				// this one wont go for higher ones, but avoid lower ones
-
-				// this makes sure that the jump penalties stay
-				if (area->GetAttributes() & NAV_CROUCH)
-					edge += 20.0f * dist;
-				if (area->GetAttributes() & NAV_JUMP)
-					edge += 5.0f * dist;
-
-				return (fromArea->GetCostSoFar() + edge) * preference;
-			}
-			else if (m_route == LOWEST_ROUTE)	// prefers low routes
-			{
-				// honestly this will probably never be used
-				// good to have though!!! just in case
-
-				const float LOW_HEIGHT_SCALE = 0.75f;
-				float edge = dist + (useTo.z - TheNavMapMinZ) * LOW_HEIGHT_SCALE;
-
-				if (area->GetAttributes() & NAV_CROUCH)
-					edge += 10.0f * dist;
-				if (area->GetAttributes() & NAV_JUMP)
-					edge += 40.0f * dist;
-
-				return fromArea->GetCostSoFar() + edge;
-			}
-			// i could probably get away with combining these two types considering they only change a few things
-			// barely matters though
-			// if it works it works LOLOL
-
-
 			float cost = dist + fromArea->GetCostSoFar();
 
 			if (up > 50.0) cost += (up-50.0) * SOFT_Z_PENALTY_SCALE;
 			// prefer flatter ground
 			// wyt: this is leftover from rooster fortress..
-			// probably weird but it doesnt really break anything so idgaf
+			// probably weird but it doesnt really break anything and does what it says it does so idgaf
 			
+
+			NavDirType dir = fromArea->ComputeDirection(&useTo);
+			if (m_dir == NUM_DIRECTIONS)
+				m_dir = (NavDirType)RANDOM_LONG(0, ((int)NUM_DIRECTIONS - 1));
+
+			if (dir != NUM_DIRECTIONS && m_dir != dir)
+				cost += DIFFERENT_DIRECTION_PENALTY;
+
 			/*
 			TraceResult result;
 			edict_t* ignore = NULL;
@@ -798,6 +770,7 @@ public:
 
 	CBaseEntity* m_ent;
 	RouteType m_route;
+	NavDirType m_dir;
 };
 
 //--------------------------------------------------------------------------------------------------------------

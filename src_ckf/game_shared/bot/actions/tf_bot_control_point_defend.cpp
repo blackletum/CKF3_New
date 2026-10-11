@@ -74,6 +74,14 @@ void CTFBotControlPointDefend::Update(CBot* me)
 			}
 			else
 			{
+				if (me->m_iClass == CLASS_HEAVY)
+				{
+					CBasePlayerWeapon* pWeapon = (CBasePlayerWeapon*)me->m_pActiveItem;
+					
+					if(pWeapon->m_iId == WEAPON_MINIGUN)
+						me->PressSecondaryAttack();
+				}
+
 				if (!m_seekTimer.HasStarted())
 				{
 					m_seekTimer.Start(RANDOM_FLOAT(1.0f, 10.0f));
@@ -88,7 +96,7 @@ void CTFBotControlPointDefend::Update(CBot* me)
 	}
 	else
 	{
-		Suspend_For(new CTFBotSeekAndDestroy(), "No control points to attack!");
+		Suspend_For(new CTFBotSeekAndDestroy(), "No control points to defend!");
 		return;
 	}
 
@@ -108,12 +116,13 @@ void CTFBotControlPointDefend::OnResume(CBot* me)
 CControlPoint* CTFBotControlPointDefend::GetClosestControlPoint(CBot* me)
 {
 	CControlPoint* pBest = NULL;
-	float bestDist = FLT_MAX;
-	bool sameteam = false;
-	for (int i = 0; i < g_pGameRules->m_ControlPoints.Count(); i++)
+	float bestDist = -1.0f;
+
+	// ALERT(at_console, "CP count: %d\n", g_pGameRules->m_ControlPoints.Count());
+	for (int i = 0; i < g_pGameRules->m_ControlPoints.Count(); ++i)
 	{
-		if (!g_pGameRules->m_ControlPoints.IsValidIndex(i))
-			break; // idk if this matters kjnegjthjbgrkjklwrgwjwfkjlwfjnlwjfejwkefjlfe
+		//if (!g_pGameRules->m_ControlPoints.IsValidIndex(i))
+			//break;
 
 		CControlPoint* pPoint = (CControlPoint*)CBaseEntity::Instance(g_pGameRules->m_ControlPoints.Element(i));
 
@@ -123,18 +132,21 @@ CControlPoint* CTFBotControlPointDefend::GetClosestControlPoint(CBot* me)
 		if (pPoint->m_bLocked || pPoint->m_bDisabled)
 			continue;
 
-		if (sameteam && (pPoint->pev->team != me->m_iTeam) ) // if we have found a defendable cap point that's owned by us, then filter all others that do not ( blue/neutral )
+		if (pPoint->pev->team != me->m_iTeam && pPoint->pev->team != TEAM_UNASSIGNED)
 			continue;
+		// we do not own this point, so we cant defend it
 
-		if ((me->m_iTeam == TEAM_RED && !pPoint->m_bCanBluCap) || (me->m_iTeam == TEAM_BLUE && !pPoint->m_bCanRedCap))
+		if (me->m_iTeam == TEAM_RED && !pPoint->m_bCanBluCap)
 			continue;
+		if (me->m_iTeam == TEAM_BLU && !pPoint->m_bCanRedCap)
+			continue;
+		// if the enemy cannot capture this point, then we dont need to defend it
 
 		float dist = (pPoint->pev->origin - me->pev->origin).LengthSquared();
-		if (dist < bestDist)
+		if (dist < bestDist || bestDist == -1.0f)
 		{
 			bestDist = dist;
 			pBest = pPoint;
-			sameteam = (pPoint->pev->team == me->m_iTeam);
 		}
 	}
 

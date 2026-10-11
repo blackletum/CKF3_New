@@ -411,7 +411,7 @@ void CHLBotManager::BeginNavGeneration( void )
 	m_walkableSeeds.clear();
 	m_seedIndex = 0;
 
-	static const char *seedClassnames[] = { "info_player_deathmatch", "info_player_start", "item_healthkit", "item_battery", NULL};
+	static const char *seedClassnames[] = { "info_player_deathmatch", "info_player_start", NULL};
 	for( int i = 0; seedClassnames[i]; ++i )
 	{
 		CBaseEntity *spot = NULL;
@@ -424,10 +424,14 @@ void CHLBotManager::BeginNavGeneration( void )
 	{
 		CBaseEntity* spot = NULL;
 		while ((spot = UTIL_FindEntityByClassname(spot, deleteClassnames[i])) != NULL)
+		{
 			UTIL_Remove(spot);
+			m_walkableSeeds.push_back(spot->pev->origin);
+		}
 		
 		// some entities will block the traces done during generation
 		// this deletes them
+		// also adds it as a seed, considering that it may be a spawn door
 		// the server reloads the map so we good
 	}
 

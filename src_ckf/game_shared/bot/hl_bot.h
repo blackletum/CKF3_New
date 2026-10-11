@@ -82,6 +82,8 @@ private:
 	float m_verticalSpeed;
 	unsigned short m_buttonFlags;
 
+	int m_wantedClass;
+
 	float m_flNextBotThink;
 	float m_flNextFullBotThink;
 	float m_flPreviousCommandTime;
@@ -134,8 +136,7 @@ public:
 
 		if (m_team != -2 && player->m_iTeam != m_team)
 			return true;
-		// player->m_iDisguiseTeam
-		// use this for disguise differenciating 
+
 		if ( player->m_iCloak == CLOAK_YES || player->m_iDisguise == DISGUISE_YES )
 			return true;
 

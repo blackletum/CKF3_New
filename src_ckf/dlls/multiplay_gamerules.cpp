@@ -1899,7 +1899,8 @@ void CHalfLifeMultiplay::ClientDisconnected(edict_t *pClient)
 float CHalfLifeMultiplay::FlPlayerFallDamage(CBasePlayer *pPlayer)
 {
 	// pPlayer->m_flFallVelocity -= PLAYER_MAX_SAFE_FALL_SPEED;
-	return pPlayer->m_flFallVelocity / 300 * 5;
+	float vel = pPlayer->m_flFallVelocity;
+	return ( (vel < 3500.0f) ? vel : 3500.0f ) / 300 * 5;
 }
 
 BOOL CHalfLifeMultiplay::FPlayerCanTakeDamage(CBasePlayer *pPlayer, CBaseEntity *pAttacker)
@@ -2258,6 +2259,7 @@ void CHalfLifeMultiplay::PlayerKilled(CBasePlayer *pVictim, entvars_t *pevKiller
 
 		CalcPoints(plKiller, pevInflictor, pVictim);
 		FireTargets("game_playerkill", pKiller, pKiller, USE_TOGGLE, 0);
+		plKiller->KillReward(); // for on kill effects on weapons
 	}
 
 	pVictim->SendScoreInfo();

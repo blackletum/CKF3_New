@@ -24,7 +24,7 @@ void CTFBotGetHealth::Update(CBot* me)
 	CBaseEntity* pSpot = UTIL_FindEntityByClassname(NULL, "item_healthbox");
 	if (!FNullEnt(pSpot))
 	{
-		me->SetPathToGoal(pSpot->Center());
+		me->SetPathToGoal(pSpot->pev->origin);
 	}
 
 	Continue();

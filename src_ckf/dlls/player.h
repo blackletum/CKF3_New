@@ -454,6 +454,8 @@ public:
 	virtual int GetCriticalHit(void);
 	virtual int GetEnemyTeam(void);
 
+	void KillReward(void);
+
 	void UpdateLastKnownArea(void);
 	CNavArea* m_lastNavArea;
 	CAI_MoveMonitor m_NavAreaUpdateMonitor;

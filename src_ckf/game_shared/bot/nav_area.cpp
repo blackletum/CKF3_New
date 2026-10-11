@@ -43,8 +43,6 @@ using std::max;
 
 NavAreaList TheNavAreaList;
 CNavAreaGrid TheNavAreaGrid;
-float TheNavMapMaxZ = 0.0f;
-float TheNavMapMinZ = 0.0f;
 
 extern void HintMessageToAllPlayers( const char *message );
 
@@ -1026,35 +1024,6 @@ void DestroyNavigationMap( void )
 
 	// reset the grid
 	TheNavAreaGrid.Reset();
-
-	TheNavMapMaxZ = 0.0f;
-	TheNavMapMinZ = 0.0f;
-	// so it doesnt survive map changes
-	// this might not even need to be here
-}
-
-//--------------------------------------------------------------------------------------------------------------
-// finds the highest point on the nav area list
-
-void ComputeNavMapHeightRange(void)
-{
-	bool first = true;
-
-	for (NavAreaList::iterator iter = TheNavAreaList.begin(); iter != TheNavAreaList.end(); ++iter)
-	{
-		float z = (*iter)->GetCenter()->z;
-
-		if (first)
-		{
-			TheNavMapMaxZ = TheNavMapMinZ = z;
-			first = false;
-		}
-		else
-		{
-			if (z > TheNavMapMaxZ) TheNavMapMaxZ = z;
-			if (z < TheNavMapMinZ) TheNavMapMinZ = z;
-		}
-	}
 }
 
 //--------------------------------------------------------------------------------------------------------------
@@ -1997,7 +1966,6 @@ static void MarkSpawnRoomExits(void)
 	for (NavAreaList::iterator iter = TheNavAreaList.begin(); iter != TheNavAreaList.end(); ++iter)
 	{
 		CNavArea* area = *iter;
-		const Vector* c = area->GetCenter();
 
 		if ((area->GetAttributes() & NAV_SPAWN_ROOM_BLUE) || (area->GetAttributes() & NAV_SPAWN_ROOM_RED))
 		{	
@@ -2118,7 +2086,9 @@ void GenerateNavigationAreaMesh( void )
 	MarkNoBuildZones();
 	MarkSpawnRooms();
 	MarkSpawnRoomExits();
-	ComputeNavMapHeightRange();
+	// TODO: MarkHealthPoints(), so bots can go to healthpacks without needing to keep finding them
+	// would be better fps-wise to cache them
+	// same with ammo
 }
 
 //--------------------------------------------------------------------------------------------------------------

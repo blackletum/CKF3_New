@@ -7,3 +7,4 @@
 #include "client.h"
 #include "hl_bot.h"
 
+// this file is useless!!!! delete this fucking shit now!!!!!!!!!!!!!!

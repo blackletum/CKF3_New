@@ -1399,19 +1399,15 @@ void CBasePlayer::Killed(entvars_t *pevAttacker, int iGib)
 
 	g_pGameRules->PlayerKilled(this, pevAttacker, g_pevLastInflictor);
 
-	//清理粘弹
 	ClearSticky();
 	Condition_Clear();
 
-	//解除隐身
 	m_iCloak = CLOAK_NO;
 	pev->renderamt = 255;
 	pev->rendermode = kRenderNormal;
 
-	//解除伪装
 	Disguise_Stop();
 
-	//开始重生
 	Respawn_Start();
 
 	//Clear carrying building
@@ -1566,6 +1562,20 @@ void CBasePlayer::Killed(entvars_t *pevAttacker, int iGib)
 		HintMessage("#Spec_Duck", TRUE, TRUE);
 		m_flDisplayHistory |= DHF_SPEC_DUCK;
 	}*/
+}
+
+void CBasePlayer::KillReward(void)
+{
+	return;
+
+	// for weapons that do stuff on kill
+
+	CBasePlayerWeapon* pWeapon = (CBasePlayerWeapon*)m_pActiveItem;
+
+	if (pWeapon)
+	{
+		// TODO: call and check for weapons here using the economy id
+	}
 }
 
 int CBasePlayer::IsBombGuy(void)

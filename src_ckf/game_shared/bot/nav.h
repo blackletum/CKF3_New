@@ -17,13 +17,13 @@ const float JumpCrouchHeight = 58.0f;			///< (48) if delta Z is less than or equ
 
 // Strictly speaking, you CAN get up a slope of 1.643 (about 59 degrees), but you move very, very slowly
 // This slope will represent the slope you can navigate without much slowdown
-const float MaxSlope = 1.4f;							///< rise/run - if greater than this, we can't move up it (de_survivor canyon ramps)
+const float MaxSlope = 1.5f;							///< rise/run - if greater than this, we can't move up it (de_survivor canyon ramps)
 
 // instead of MaxSlope, we are using the following max Z component of a unit normal
 const float MaxUnitZSlope = 0.7f;
 
 const float BotRadius = 10.0f;						///< circular extent that contains bot
-const float DeathDrop = 300.0f;						///< (300) distance at which we will die if we fall - should be about 600, and pay attention to fall damage during pathfind
+const float DeathDrop = 3500.0f;					///< distance at which we will die if we fall, and pay attention to fall damage during pathfind
 
 const float HalfHumanWidth = 16.0f;
 const float HalfHumanHeight = 36.0f;

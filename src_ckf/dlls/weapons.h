@@ -362,18 +362,6 @@ public:
 	int PrimaryAmmoIndex(void);
 	int SecondaryAmmoIndex(void);
 	//bool HasAnyAmmo( void );
-
-public:
-	// ckf3:decapitated stuff
-	// for weapon unlocks. tf2 has a whole weapon script system, but we do not. dont wanna bother with that shit anyway!!!!!!!!!!
-	// this has the downside of making all weapons hardcoded
-	enum WeaponAttributes
-	{
-		CRIT_ON_KILL = (1 << 0),	// gives crits on kill
-	};
-
-	int m_attributes;
-	bool HasAttribute(WeaponAttributes attrib) { return (m_attributes & attrib); };
 public:
 	int m_iPlayEmptySound;
 	int m_fFireOnEmpty;

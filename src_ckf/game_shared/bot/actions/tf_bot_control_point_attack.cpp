@@ -10,6 +10,7 @@
 #include "bot/hl_bot.h"
 #include "bot/actions/tf_bot_control_point_attack.h"
 #include "bot/actions/tf_bot_seek_and_destroy.h"
+#include "bot/actions/tf_bot_retreat.h"
 
 void CTFBotControlPointAttack::OnEnter(CBot* me)
 {
@@ -21,7 +22,7 @@ void CTFBotControlPointAttack::Update(CBot* me)
 	{
 		if (g_pGameRules->m_iRoundWinStatus != me->m_iTeam)
 		{
-			Suspend_For(new CTFBotSeekAndDestroy, "We lost!");
+			Suspend_For(new CTFBotRetreat, "We lost!");
 		}
 		else
 		{
@@ -86,20 +87,14 @@ CControlPoint* CTFBotControlPointAttack::GetClosestControlPoint(CBot* me)
 			continue;
 		// we already own this point
 
-		bool unassigned = false;
-		if (pPoint->pev->team == TEAM_UNASSIGNED)
-			unassigned = true;
-
 		if (pPoint->pev->team == TEAM_SPECTATOR)
 			continue;
+		// this shouldnt work
 
-		if (!unassigned) // unassigned points can be weird so this helps
-		{
-			if (me->m_iTeam == TEAM_RED && !pPoint->m_bCanRedCap)
-				continue;
-			if (me->m_iTeam == TEAM_BLU && !pPoint->m_bCanBluCap)
-				continue;
-		}
+		if (me->m_iTeam == TEAM_RED && !pPoint->m_bCanRedCap)
+			continue;
+		if (me->m_iTeam == TEAM_BLU && !pPoint->m_bCanBluCap)
+			continue;
 
 		float dist = (pPoint->pev->origin - me->pev->origin).LengthSquared();
 		if (dist < bestDist || bestDist == -1.0f)
