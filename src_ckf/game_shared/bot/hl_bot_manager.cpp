@@ -337,6 +337,11 @@ void CHLBotManager::StartFrame( void )
 			continue;
 		}
 
+		// TODO: maybe stagger the bot thinking per tick like tf2 does
+		// since we are in goldsrc FPS is good enough
+		// however when playing on a 24~ bot server on jakulo's shitty laptop, it started to get noticably worse ( 30~ fps on average, dipping below )
+		// this would be better for maintaining the fps anyway especially considering particles are starting to fuck us over
+
 		// jakulo: This Should Be Fine...
 		// Try not to make the bots use any other class other than CBot
 		// otherwise.... Shit Might Get Weird....

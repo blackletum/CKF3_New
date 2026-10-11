@@ -670,7 +670,8 @@ public:
 		m_ent = ent;
 		m_route = routetype;
 		m_dir = dir;
-		// TODO: m_direction maybe, random NavDir that the path prefers per bot? so that paths are unique and different rather than just being identical
+		if (m_dir == NUM_DIRECTIONS)
+			m_dir = (NavDirType)RANDOM_LONG(0, ((int)NUM_DIRECTIONS - 1));
 	}
 
 	float operator() ( CNavArea *area, CNavArea *fromArea, const CNavLadder *ladder )
@@ -715,6 +716,7 @@ public:
 			NavDirType dir = fromArea->ComputeDirection(&useTo);
 			if (m_dir == NUM_DIRECTIONS)
 				m_dir = (NavDirType)RANDOM_LONG(0, ((int)NUM_DIRECTIONS - 1));
+			// just in case
 
 			if (dir != NUM_DIRECTIONS && m_dir != dir)
 				cost += DIFFERENT_DIRECTION_PENALTY;
