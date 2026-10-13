@@ -21,10 +21,25 @@ void CTFBotGetHealth::Update(CBot* me)
 	if (!me)
 		return;
 
-	CBaseEntity* pSpot = UTIL_FindEntityByClassname(NULL, "item_healthbox");
-	if (!FNullEnt(pSpot))
+	CBaseEntity* pSpot = NULL;
+	while (pSpot = UTIL_FindEntityByClassname(pSpot, "item_healthbox"))
 	{
-		me->SetPathToGoal(pSpot->pev->origin);
+		if (!FNullEnt(pSpot))
+		{
+			me->SetPathToGoal(pSpot->pev->origin);
+			break;
+		}
+	}
+	if (FNullEnt(pSpot))
+	{
+		while (pSpot = UTIL_FindEntityByClassname(pSpot, "func_resupplycase"))
+		{
+			if (!FNullEnt(pSpot))
+			{
+				me->SetPathToGoal(pSpot->pev->origin);
+				break;
+			}
+		}
 	}
 
 	Continue();

@@ -14,12 +14,19 @@
 #define FOR_EACH_VEC( vecName, iteratorName ) \
 	for ( int iteratorName = 0; iteratorName < vecName.Count(); iteratorName++ )
 
+enum KickStatus
+{
+	NOT_KICKED = 0,
+	GOING_TO_BE_KICKED = 1,
+	KICKED = 2,
+};
+
 class CBot : public CBasePlayer
 {
 public:
 	CBot(void);
 
-	static CBot* CreateBot(const char* name);
+	static CBot* CreateBot(const char* name, bool quotaManaged = false);
 
 	virtual void Spawn(void);
 
@@ -40,7 +47,7 @@ public:
 	void SetPathToGoal(const Vector& goal);
 	void SetPathToGoal(CBasePlayer* goal);
 	void SetPathToGoal(CBaseEntity* goal);
-
+	bool HasPath(void) { return m_path.IsValid(); }
 	void StopPath()
 	{
 		if (!HasPath())
@@ -59,7 +66,10 @@ public:
 
 	virtual BOOL IsBot(void) const { return TRUE; }
 
-	bool HasPath(void) { return m_path.IsValid(); }
+	bool m_bQuotaManaged;
+	KickStatus m_kickStatus; // this could probably be done another way, but this was the only way i could get bots kicked without instantly crashing the game
+
+	CUtlVector< CKnownEntity > m_knownEntityVector;		// the set of enemies/friends we are aware of
 private:
 	// decision logic
 	void Update(void);
@@ -82,13 +92,10 @@ private:
 	float m_verticalSpeed;
 	unsigned short m_buttonFlags;
 
-	// int m_wantedClass;
-
 	float m_flNextBotThink;
 	float m_flNextFullBotThink;
 	float m_flPreviousCommandTime;
 
-	CUtlVector< CKnownEntity > m_knownEntityVector;		// the set of enemies/friends we are aware of
 	float m_lastVisionUpdateTimestamp;
 	IntervalTimer m_notVisibleTimer[3];		// for tracking interval since last saw a member of the given team
 

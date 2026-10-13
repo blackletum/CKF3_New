@@ -23,6 +23,7 @@ cvar_t cv_bot_nav_edit		= { "nav_edit", "0", FCVAR_SERVER };
 cvar_t cv_bot_nav_zdraw		= { "nav_zdraw", "4", FCVAR_SERVER };
 cvar_t cv_bot_debug			= { "bot_debug", "0", FCVAR_SERVER };
 cvar_t cv_bot_quicksave		= { "bot_quicksave", "0", FCVAR_SERVER };
+cvar_t cv_bot_quota			= { "bot_quota", "0", FCVAR_SERVER };
 
 cvar_t cv_bot_last_area_update_tolerance = { "bot_last_area_update_tolerance", "4.0", FCVAR_SERVER };
 
@@ -37,6 +38,7 @@ void Bot_RegisterCvars( void )
 	CVAR_REGISTER( &cv_bot_debug );
 	CVAR_REGISTER( &cv_bot_quicksave );
 	CVAR_REGISTER( &cv_bot_last_area_update_tolerance );
+	CVAR_REGISTER( &cv_bot_quota );
 }
 
 static unsigned int s_navPlace = UNDEFINED_PLACE;
@@ -300,6 +302,33 @@ void CHLBotManager::ServerCommand( const char *pcmd )
 	}
 }
 
+float g_nextBotAddQuota = 0.0f;
+#define BOT_QUOTA_DELAY 0.5f
+void Quota_Think( int count, CBot* kicked = NULL )
+{
+	if (g_nextBotAddQuota > gpGlobals->time + (BOT_QUOTA_DELAY * 2.0f))
+	{
+		g_nextBotAddQuota = gpGlobals->time + BOT_QUOTA_DELAY;
+		return;
+		// this should only happen when the value is brought from another map
+	}
+
+	if (g_nextBotAddQuota > gpGlobals->time)
+		return;
+
+	int quotaCount = (int)cv_bot_quota.value;
+	if (quotaCount > count)
+		CBot::CreateBot(NULL, true);
+	else if (quotaCount < count)
+	{
+		if (kicked && kicked->m_bQuotaManaged)
+		{
+			kicked->m_kickStatus = GOING_TO_BE_KICKED;
+		}
+	}
+	g_nextBotAddQuota = gpGlobals->time + BOT_QUOTA_DELAY;
+}
+
 void CHLBotManager::AddServerCommand( const char *cmd )
 {
 	(*g_engfuncs.pfnAddServerCommand)( (char *)cmd, Bot_ServerCommand );
@@ -321,21 +350,19 @@ void CHLBotManager::AddServerCommands( void )
 void CHLBotManager::StartFrame( void )
 {
 	// think all bots
-	// KNOWN BUG: for some odd reason, the bot does not spawn well if it spawns after the round has started...
+
+	int quotaAmount = 0;
+	CBot* lastbot = NULL;
 	for (int i = 1; i <= gpGlobals->maxClients; ++i)
 	{
 		CBasePlayer* player = static_cast<CBasePlayer*>(UTIL_PlayerByIndex(i));
 
 		if (player == NULL || FNullEnt(player->pev))
-		{
 			continue;
-		}
 
 		if (!player->IsBot())	//(!(player->pev->flags & FL_FAKECLIENT))
-		{
-			// only bots can play
+		// only bots can play
 			continue;
-		}
 
 		// TODO: maybe stagger the bot thinking per tick like tf2 does
 		// since we are in goldsrc FPS is good enough
@@ -346,51 +373,31 @@ void CHLBotManager::StartFrame( void )
 		// Try not to make the bots use any other class other than CBot
 		// otherwise.... Shit Might Get Weird....
 		CBot* bot = static_cast<CBot*>(player);
-		bot->Think();
-
-		/*
-		if(bot->m_iJoiningState != JOINED)
+		if (bot)
 		{
-			BOOL isdead = bot->IsAlive();
-
-			char joiningstate[128];
-			sprintf(joiningstate, "%s", "NULL");
-
-			switch (bot->m_iJoiningState)
+			switch (bot->m_kickStatus)
 			{
-			case JOINED:
-				sprintf(joiningstate, "%s", "JOINED");
-				break;
+				case GOING_TO_BE_KICKED:
+				{
+					bot->m_kickStatus = KICKED;
+					// UTIL_ClientPrintAll(HUD_PRINTNOTIFY, "#Game_disconnected", STRING(bot->pev->netname)); this doesnt work for some reason
+					SERVER_COMMAND(UTIL_VarArgs("kick \"%s\"\n", STRING(bot->pev->netname)));
+					break;
+				}
+				case NOT_KICKED:
+				{
+					if (bot->m_bQuotaManaged)
+						quotaAmount++;
 
-			case SHOWLTEXT:
-				sprintf(joiningstate, "%s", "SHOWLTEXT");
-				break;
-
-			case READINGLTEXT:
-				sprintf(joiningstate, "%s", "READINGLTEXT");
-				break;
-
-			case SHOWTEAMSELECT:
-				sprintf(joiningstate, "%s", "SHOWTEAMSELECT");
-				break;
-
-			case PICKINGTEAM:
-				sprintf(joiningstate, "%s", "PICKINGTEAM");
-				break;
-
-			case GETINTOGAME:
-				sprintf(joiningstate, "%s", "GETINTOGAME");
-				break;
-
-			default:
-				sprintf(joiningstate, "%s", "BUGGED JOINSTATE!!!");
-				break;
+					bot->Think();
+					lastbot = bot;
+					break;
+				}
 			}
-
-			CONSOLE_ECHO("%s stats || dead: %i || class %i newclass %i || joinstate %s \n", STRING(bot->pev->netname), isdead, bot->m_iClass, bot->m_iNewClass, joiningstate);
 		}
-		*/
 	}
+
+	Quota_Think(quotaAmount, lastbot);
 
 	if (m_isGenerating)
 		UpdateNavGeneration();
@@ -424,14 +431,14 @@ void CHLBotManager::BeginNavGeneration( void )
 			m_walkableSeeds.push_back( spot->pev->origin );
 	}
 
-	static const char* deleteClassnames[] = { "func_door", "func_door_rotating", "func_pushable", NULL};
+	static const char* deleteClassnames[] = { "func_door", "func_door_rotating", "func_pushable", "func_resupplycase", NULL};
 	for (int i = 0; deleteClassnames[i]; ++i)
 	{
 		CBaseEntity* spot = NULL;
 		while ((spot = UTIL_FindEntityByClassname(spot, deleteClassnames[i])) != NULL)
 		{
-			UTIL_Remove(spot);
 			m_walkableSeeds.push_back(spot->pev->origin);
+			UTIL_Remove(spot);
 		}
 		
 		// some entities will block the traces done during generation

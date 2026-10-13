@@ -22,6 +22,7 @@
 #include "bot/actions/tf_bot_control_point_attack.h"
 #include "bot/actions/tf_bot_control_point_defend.h"
 #include "bot/actions/tf_bot_get_health.h"
+#include "bot/actions/tf_bot_get_ammo.h"
 #include "bot/actions/tf_bot_retreat.h"
 
 #include "bot_names.h"
@@ -52,6 +53,7 @@ CBot::CBot()
 	m_actionInterface.m_scenarioMoniterInterface.SetBot(this); // just in case
 	m_actionInterface.m_scenarioMoniterInterface.SetHealthAction( new CTFBotGetHealth );
 	m_actionInterface.m_scenarioMoniterInterface.SetRetreatAction( new CTFBotRetreat );
+	m_actionInterface.m_scenarioMoniterInterface.SetAmmoAction( new CTFBotGetAmmo );
 }
 
 CTFAction* CBot::DesiredAction(void)
@@ -284,7 +286,8 @@ const CKnownEntity* CBot::GetPrimaryKnownThreat(bool onlyVisibleThreats)
 		{
 			if (!onlyVisibleThreats || newThreat.IsVisibleRecently())
 			{
-				threat = &newThreat;
+				if( (newThreat.GetLastKnownPosition() - pev->origin).IsLengthLessThan( (threat->GetLastKnownPosition() - pev->origin).Length() ) )
+					threat = &newThreat;
 				// SelectMoreDangerousThreat has not been implemented yet...
 			}
 		}
@@ -296,7 +299,7 @@ const CKnownEntity* CBot::GetPrimaryKnownThreat(bool onlyVisibleThreats)
 	return threat;
 }
 
-CBot* CBot::CreateBot(const char* name)
+CBot* CBot::CreateBot(const char* name, bool quotaManaged)
 {
 	if (UTIL_ClientsInGame() >= gpGlobals->maxClients)
 	{
@@ -346,6 +349,9 @@ CBot* CBot::CreateBot(const char* name)
 
 	ClientPutInServer(pent);
 
+	bot->m_bQuotaManaged = quotaManaged;
+	bot->m_kickStatus = NOT_KICKED;
+
 	return bot;
 }
 
@@ -380,6 +386,9 @@ void CBot::Spawn(void)
 
 void CBot::Think(void)
 {
+	if (m_kickStatus != NOT_KICKED)
+		return;
+
 	if (gpGlobals->time < m_flNextBotThink)
 		return;
 

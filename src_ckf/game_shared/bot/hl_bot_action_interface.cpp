@@ -165,6 +165,8 @@ void CTFBotScenarioMoniterInterface::Update(int attrib)
 		m_hpAction->Update(m_bot);
 	else if (attrib & RESULT_RETREAT && m_retreatAction)
 		m_retreatAction->Update(m_bot);
+	else if (attrib & RESULT_AMMO && m_ammoAction)
+		m_ammoAction->Update(m_bot);
 }
 
 int CTFBotScenarioMoniterInterface::Check()	// TODO: add option to ignore certain checks
@@ -180,11 +182,20 @@ int CTFBotScenarioMoniterInterface::Check()	// TODO: add option to ignore certai
 
 	const float lowhealthmulti = 0.6f;
 	if (m_bot->pev->health < (m_bot->pev->max_health * lowhealthmulti))
+		attributes = (attributes | RESULT_HEALTH);
+
+	const float superlowhealthmulti = 0.3f;
+	if (m_bot->pev->health < (m_bot->pev->max_health * superlowhealthmulti))
 		attributes = (attributes | RESULT_RETREAT);
 
-	const float superlowhealthmulti = 0.2f;
-	if (m_bot->pev->health < (m_bot->pev->max_health * superlowhealthmulti))
-		attributes = (attributes | RESULT_HEALTH);
+	CBasePlayerWeapon* pWeapon = (CBasePlayerWeapon*)m_bot->m_pActiveItem;
+	
+	bool engieGetMetal = false;
+	if (m_bot->m_iClass == CLASS_ENGINEER && m_bot->m_iMetal < 200)
+		engieGetMetal = true;
+
+	if ( (pWeapon && m_bot->m_rgAmmo[pWeapon->m_iPrimaryAmmoType] <= 0) || engieGetMetal )
+		attributes = (attributes | RESULT_AMMO);
 
 	return attributes;
 }

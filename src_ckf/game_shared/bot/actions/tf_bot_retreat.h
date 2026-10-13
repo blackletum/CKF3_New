@@ -15,6 +15,10 @@ public:
 	{
 		return false;
 	}
+
+	CNavArea* m_cover;
+	CountdownTimer m_recomputeCoverArea;
+	CountdownTimer m_recomputeRetreatSpot;
 };
 
 #endif

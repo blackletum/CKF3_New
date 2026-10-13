@@ -67,12 +67,14 @@ public:
 	{
 		m_hpAction = NULL;
 		m_retreatAction = NULL;
+		m_ammoAction = NULL;
 		m_bot = NULL;
 	}
 
 	void SetBot(CBot* me) { m_bot = me; }
 	void SetHealthAction(CTFAction* action) { m_hpAction = action; }
 	void SetRetreatAction(CTFAction* action) { m_retreatAction = action; }
+	void SetAmmoAction(CTFAction* action) { m_ammoAction = action; }
 
 	int Check();
 	void Update(int attrib = 0);
@@ -80,7 +82,7 @@ private:
 	CBot* m_bot;
 	CTFAction* m_hpAction;
 	CTFAction* m_retreatAction;
-	// CTFAction* m_ammoAction;
+	CTFAction* m_ammoAction;
 };
 
 class CTFBotActionInterface
