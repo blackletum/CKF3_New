@@ -194,6 +194,7 @@ extern cvar_t *v_lightgamma;
 extern cvar_t *v_brightness;
 extern cvar_t *v_gamma;
 extern cvar_t *cl_righthand;
+extern cvar_t *cl_viewmodel_fov;
 
 void R_FillAddress(void);
 void R_InstallHook(void);

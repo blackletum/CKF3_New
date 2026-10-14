@@ -188,19 +188,19 @@ void CMinigun::ItemPostFrame(void)
 		{
 			case STATE_MINIGUN_NONE:
 			{
-				if(!(iButton & IN_DUCK) && !(iOldButton & IN_DUCK) && !m_pPlayer->pev->bInDuck)
-				{
-					m_iSpin = STATE_MINIGUN_WINDUP;
-					m_fSpin = UTIL_WeaponTimeBase() + 0.87;
-					SendWeaponAnim(MINIGUN_WIND_UP, UseDecrement() != FALSE);
-					//EMIT_SOUND(ENT(m_pPlayer->pev) , CHAN_WEAPON, "CKF_III/minigun_wind_up.wav", 1.0, 0.80); 
-					PLAYBACK_EVENT_FULL(FEV_NOTHOST, m_pPlayer->edict(), m_usFireScript, 0, (float *)&g_vecZero, (float *)&g_vecZero, 0, 0, STATE_MINIGUN_WINDUP, 0, 0, 0);
+				// for some odd reason the minigun in stock ckf3 did not allow this to happen when crouched
+				// this is stupid. you can now do it while ducked
+				
+				m_iSpin = STATE_MINIGUN_WINDUP;
+				m_fSpin = UTIL_WeaponTimeBase() + 0.87;
+				SendWeaponAnim(MINIGUN_WIND_UP, UseDecrement() != FALSE);
+				//EMIT_SOUND(ENT(m_pPlayer->pev) , CHAN_WEAPON, "CKF_III/minigun_wind_up.wav", 1.0, 0.80); 
+				PLAYBACK_EVENT_FULL(FEV_NOTHOST, m_pPlayer->edict(), m_usFireScript, 0, (float*)&g_vecZero, (float*)&g_vecZero, 0, 0, STATE_MINIGUN_WINDUP, 0, 0, 0);
 
-					m_pPlayer->pev->flags |= FL_LOCK_DUCK;
-					m_pPlayer->pev->flags |= FL_LOCK_JUMP;
-					//m_pPlayer->SetAnimation(PLAYER_RELOAD);
-					m_pPlayer->ResetMaxSpeed();
-				}
+				m_pPlayer->pev->flags |= FL_LOCK_DUCK;
+				m_pPlayer->pev->flags |= FL_LOCK_JUMP;
+				//m_pPlayer->SetAnimation(PLAYER_RELOAD);
+				m_pPlayer->ResetMaxSpeed();
 				break;
 			}
 			case STATE_MINIGUN_WINDUP:
@@ -271,7 +271,12 @@ void CMinigun::WeaponIdle(void)
 float CMinigun::GetMaxSpeed(void)
 {
 	if (m_iSpin != STATE_MINIGUN_NONE)
+	{
+		if (m_pPlayer->pev->bInDuck)
+			return 0.0f;
+
 		return 0.4935f;
+	}	
 
 	return 1;
 }

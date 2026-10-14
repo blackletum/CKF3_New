@@ -257,6 +257,8 @@ void HUD_Init(void)
 
 	cl_righthand = gEngfuncs.pfnGetCvarPointer("cl_righthand");
 
+	cl_viewmodel_fov = gEngfuncs.pfnGetCvarPointer("cl_viewmodel_fov");
+
 	gEngfuncs.pfnAddCommand("r_version", R_Version_f);
 }
 

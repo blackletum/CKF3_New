@@ -35,6 +35,7 @@ cvar_t *g_deathmsg_max;
 
 cvar_t *gl_wireframe;
 cvar_t *cl_righthand;
+cvar_t *cl_viewmodel_fov;
 cvar_t *r_decals;
 
 cvar_t *ckf3d_hitsound;
@@ -46,6 +47,7 @@ void Cvar_HudInit(void)
 	r_traceglow = gEngfuncs.pfnGetCvarPointer("r_traceglow");
 	gl_wireframe = gEngfuncs.pfnGetCvarPointer("gl_wireframe");
 	cl_righthand = gEngfuncs.pfnGetCvarPointer("cl_righthand");
+	cl_viewmodel_fov = gEngfuncs.pfnGetCvarPointer("cl_viewmodel_fov");
 	r_decals = gEngfuncs.pfnGetCvarPointer("r_decals");
 }
 

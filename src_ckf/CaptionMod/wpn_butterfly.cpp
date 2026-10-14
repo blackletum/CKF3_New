@@ -12,6 +12,7 @@ extern vec3_t g_vecHullMax;
 
 pmtrace_t *FindHullIntersection(float *vecSrc, float *vecEnd, pmtrace_t *tr, float *pflMins, float *pfkMaxs);
 BOOL IsBackFace(vec3_t anglesAttacker, vec3_t anglesVictim);
+BOOL IsBehindAndFacingTarget(vec3_t anglesAttacker, vec3_t anglesVictim, vec3_t posAttacker, vec3_t posVictim);
 
 void CClientButterfly::Precache(void)
 {
@@ -156,7 +157,7 @@ void CClientButterfly::Swing(void)
 
 		if(pEntity && pEntity->player)
 		{
-			if(pEntity->curstate.team == 3-g_iTeam && IsBackFace(gEngfuncs.GetLocalPlayer()->angles, pEntity->angles))
+			if(pEntity->curstate.team == 3-g_iTeam && IsBehindAndFacingTarget(gEngfuncs.GetLocalPlayer()->angles, pEntity->angles, gEngfuncs.GetLocalPlayer()->origin, pEntity->origin))
 			{
 				SendWeaponAnim(BUTTERFLY_STAB);
 			}

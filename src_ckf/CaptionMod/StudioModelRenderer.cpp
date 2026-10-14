@@ -10,6 +10,81 @@
 #include "qgl.h"
 #include "particle.h"
 #include "weapon.h"
+#include <math.h>
+
+#define VM_Z_NEAR 1.0f
+#define VM_Z_FAR_DEFAULT 4096.0f
+
+static bool g_bViewModelProjPushed = false;			
+
+static void R_SetViewModelProjection(void)
+{
+	g_bViewModelProjPushed = false;
+
+	if (!gpEngineStudio->IsHardware())
+		return;
+
+	if (!cl_viewmodel_fov || cl_viewmodel_fov->value <= 0.0f)
+		return;
+
+	// Use the real 3D viewport so the aspect ratio is right even when the
+	// view rect is not the full window.
+	GLint vp[4];
+	qglGetIntegerv(GL_VIEWPORT, vp);
+	if (vp[2] <= 0 || vp[3] <= 0)
+		return;
+
+	float aspect = (float)vp[2] / (float)vp[3];
+
+	// Keep the world's far plane, recovered from the current projection matrix:
+	//   m[2][2] = (f+n)/(n-f), m[3][2] = 2fn/(n-f)  =>  f = m[3][2] / (m[2][2] + 1)
+	float zfar = VM_Z_FAR_DEFAULT;
+	{
+		float cur[16];
+		qglGetFloatv(GL_PROJECTION_MATRIX, cur);
+		float denom = cur[10] + 1.0f;
+		if (fabsf(denom) > 1e-6f)
+		{
+			float f = cur[14] / denom;
+			if (f > VM_Z_NEAR + 1.0f && f < 1.0e6f)
+				zfar = f;
+		}
+	}
+
+	// csldr: the cvar is a horizontal FOV defined at 4:3. Vertical scale is
+	// derived from that, and the horizontal scale divides by the real aspect
+	// (Hor+ behaviour on widescreen).
+	const float DEG2RAD = 3.14159265358979f / 180.0f;
+	float t = 0.75f * tanf(cl_viewmodel_fov->value * DEG2RAD * 0.5f);
+	float f = 1.0f / t;
+	float fn = 1.0f / (VM_Z_NEAR - zfar);
+
+	float m[16] = { 0 };           // column-major, as glLoadMatrixf expects
+	m[0] = f / aspect;
+	m[5] = f;
+	m[10] = (VM_Z_NEAR + zfar) * fn;
+	m[11] = -1.0f;
+	m[14] = 2.0f * VM_Z_NEAR * zfar * fn;
+
+	qglMatrixMode(GL_PROJECTION);
+	qglPushMatrix();
+	qglLoadMatrixf(m);
+	qglMatrixMode(GL_MODELVIEW);
+
+	g_bViewModelProjPushed = true;
+}
+
+static void R_RestoreViewModelProjection(void)
+{
+	if (!g_bViewModelProjPushed)
+		return;
+
+	qglMatrixMode(GL_PROJECTION);
+	qglPopMatrix();
+	qglMatrixMode(GL_MODELVIEW);
+
+	g_bViewModelProjPushed = false;
+}
 
 extern CGameStudioModelRenderer g_StudioRenderer;
 
@@ -737,6 +812,11 @@ void CStudioModelRenderer::StudioSetupBones(void)
 				bonematrix[1][1] = -bonematrix[1][1];
 				bonematrix[1][2] = -bonematrix[1][2];
 				bonematrix[1][3] = -bonematrix[1][3];
+			}
+			
+			if (cl_viewmodel_fov && bIsViewModel)
+			{
+				cl_viewmodel_fov->value;
 			}
 
 			if (gpEngineStudio->IsHardware())
@@ -1627,6 +1707,7 @@ int R_StudioDrawModel(int flags)
 	if(*CurrentEntity == cl_viewent)
 	{
 		R_UpdateViewModel();
+		R_SetViewModelProjection();
 	}
 
 	if(pEntity->model && (flags & STUDIO_RENDER) && *CurrentEntity != cl_viewent)
@@ -1714,7 +1795,8 @@ int R_StudioDrawModel(int flags)
 	if(*CurrentEntity == cl_viewent)
 	{
 		SpyWatch_Draw(flags);
-	}	
+		R_RestoreViewModelProjection();
+	}
 
 	g_fLOD = 0;
 	return iResult;

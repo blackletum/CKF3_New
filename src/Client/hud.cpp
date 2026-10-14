@@ -22,6 +22,7 @@ extern vgui::HFont font;
 
 cvar_t *cl_lw = NULL;
 cvar_t *cl_righthand = NULL;
+cvar_t *cl_viewmodel_fov = NULL;
 cvar_t *cl_radartype = NULL;
 cvar_t *cl_dynamiccrosshair = NULL;
 cvar_t *cl_crosshair_color = NULL;
@@ -349,6 +350,7 @@ void CHud::Init(void)
 
 	cl_lw = gEngfuncs.pfnGetCvarPointer("cl_lw");
 	cl_righthand = gEngfuncs.pfnGetCvarPointer("cl_righthand");
+	cl_viewmodel_fov = gEngfuncs.pfnGetCvarPointer("cl_viewmodel_fov");
 	cl_minmodel = gEngfuncs.pfnGetCvarPointer("cl_minmodel");
 	cl_min_t = gEngfuncs.pfnGetCvarPointer("cl_min_t");
 	cl_min_ct = gEngfuncs.pfnGetCvarPointer("cl_min_ct");
@@ -370,6 +372,9 @@ void CHud::Init(void)
 
 	if (!cl_righthand)
 		cl_righthand = gEngfuncs.pfnRegisterVariable("cl_righthand", "1", FCVAR_ARCHIVE);
+
+	if (!cl_viewmodel_fov)
+		cl_viewmodel_fov = gEngfuncs.pfnRegisterVariable("cl_viewmodel_fov", "54", FCVAR_ARCHIVE);
 
 	gEngfuncs.pfnGetCvarFloat("developer");
 

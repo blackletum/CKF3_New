@@ -34,4 +34,5 @@ extern cvar_t *g_deathmsg_max;
 
 extern cvar_t *gl_wireframe;
 extern cvar_t *cl_righthand;
+extern cvar_t *cl_viewmodel_fov;
 extern cvar_t *r_decals;

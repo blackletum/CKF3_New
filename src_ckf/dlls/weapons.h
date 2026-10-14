@@ -1126,6 +1126,11 @@ public:
 public:
 	void Swing(void);
 	BOOL IsBackFace(Vector& anglesAttacker, Vector& anglesVictim);
+
+	BOOL CanPerformBackstabAgainstTarget( CBaseEntity* entity, CBaseEntity* attacker );
+	BOOL IsBehindAndFacingTarget( CBaseEntity* pTarget, CBaseEntity* attacker );
+
+	BOOL m_bReadyToBackstab;
 };
 
 class CSyringeGun : public CBasePlayerWeapon

@@ -775,6 +775,7 @@ public:
 extern CHud gHUD;
 
 extern struct cvar_s *cl_righthand;
+extern struct cvar_s *cl_viewmodel_fov;
 extern struct cvar_s *cl_radartype;
 extern struct cvar_s *cl_dynamiccrosshair;
 extern struct cvar_s *cl_crosshair_color;

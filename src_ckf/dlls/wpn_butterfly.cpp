@@ -7,6 +7,8 @@
 #define	KNIFE_BODYHIT_VOLUME 128
 #define	KNIFE_WALLHIT_VOLUME 512
 
+#define AngleVectors (*g_engfuncs.pfnAngleVectors)
+
 LINK_ENTITY_TO_CLASS(weapon_butterfly, CButterfly);
 
 enum butterfly_e
@@ -102,10 +104,53 @@ BOOL CButterfly::IsBackFace(Vector& anglesAttacker, Vector& anglesVictim)
 	// TF2'S CHECKS ARE SLIGHTLY DIFFERENT, AND THIS LOGIC ALLOWS FOR CERTAIN OLD TF2 EXPLOITS TO WORK
 }
 
+// grabbed from source sdk 
+BOOL CButterfly::IsBehindAndFacingTarget(CBaseEntity* pTarget, CBaseEntity* attacker)
+{
+	if (!pTarget || !attacker)
+		return FALSE;
+
+	// Get a vector from owner origin to target origin
+	Vector vecToTarget;
+	vecToTarget = pTarget->pev->origin - attacker->pev->origin;
+	vecToTarget.z = 0.0f;
+	vecToTarget.NormalizeInPlace();
+
+	// Get owner forward view vector
+	Vector vecOwnerForward;
+	AngleVectors(attacker->pev->angles, vecOwnerForward, NULL, NULL);
+	vecOwnerForward.z = 0.0f;
+	vecOwnerForward.NormalizeInPlace();
+	
+	// Get target forward view vector
+	Vector vecTargetForward;
+	AngleVectors(pTarget->pev->angles, vecTargetForward, NULL, NULL);
+	vecTargetForward.z = 0.0f;
+	vecTargetForward.NormalizeInPlace();
+
+	// Make sure owner is behind, facing and aiming at target's back
+	float flPosVsTargetViewDot = DotProduct(vecToTarget, vecTargetForward);	// Behind?
+	float flPosVsOwnerViewDot = DotProduct(vecToTarget, vecOwnerForward);		// Facing?
+	float flViewAnglesDot = DotProduct(vecTargetForward, vecOwnerForward);	// Facestab?
+
+	return (flPosVsTargetViewDot > 0.f && flPosVsOwnerViewDot > 0.5 && flViewAnglesDot > -0.3f);
+}
+
+BOOL CButterfly::CanPerformBackstabAgainstTarget(CBaseEntity* target, CBaseEntity* attacker)
+{
+	// eventually there will be stuff that will prevent backstabs here ( like razorbacks and other shit )
+	// for now, just keep this here as a way to access IsBehindAndFacingTarget
+
+	if (!target || !attacker)
+		return FALSE;
+
+	return IsBehindAndFacingTarget(target, attacker);
+}
+
 void CButterfly::Swing(void)
 {
 	UTIL_MakeVectors(m_pPlayer->pev->v_angle);
-	Vector vecSrc = m_pPlayer->GetGunPosition();
+	Vector vecSrc = m_pPlayer->pev->origin;
 	Vector vecEnd = vecSrc + gpGlobals->v_forward * 48;
 
 	PLAYBACK_EVENT_FULL(FEV_NOTHOST, m_pPlayer->edict(), m_usFireScript, 0, (float *)&g_vecZero, (float *)&g_vecZero, m_iMeleeCrit, 0, m_iId, 0, (m_iMeleeCrit >= 2) ? TRUE : FALSE, 0);
@@ -143,7 +188,6 @@ void CButterfly::Swing(void)
 
 			if(m_iMeleeCrit >= 2) fDmg *= 3;
 			else if(m_iMeleeCrit) fDmg *= 1.35f;
-			else fDmg += RANDOM_LONG(-12, 14);
 
 			ClearMultiDamage();
 
@@ -154,7 +198,7 @@ void CButterfly::Swing(void)
 				CBasePlayer *pPlayer = (CBasePlayer *)pEntity;
 				if( pPlayer->m_iTeam == 3-m_pPlayer->m_iTeam)
 				{
-					if(IsBackFace(m_pPlayer->pev->angles, pPlayer->pev->angles))
+					if(CanPerformBackstabAgainstTarget(pPlayer, m_pPlayer))
 					{
 						bBackStab = TRUE;
 						fDmg = pPlayer->pev->health * 6;					

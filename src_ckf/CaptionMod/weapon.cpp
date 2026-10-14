@@ -1096,3 +1096,51 @@ BOOL IsBackFace(vec3_t anglesAttacker, vec3_t anglesVictim)
 		return TRUE;
 	return FALSE;
 }
+
+inline float NormalizeInPlace(vec3_t vec)
+{
+	const float flLen = sqrt(vec[0] * vec[0] + vec[1] * vec[1] + vec[2] * vec[2]);
+	if (flLen == 0)
+	{
+		vec[0] = 0;
+		vec[1] = 0;
+		vec[2] = 1;
+		return 0;
+	}
+
+	const float flInv = 1 / flLen;
+	vec[0] *= flInv;
+	vec[1] *= flInv;
+	vec[2] *= flInv;
+	return flLen;
+}
+
+#define AngleVectors (*gEngfuncs.pfnAngleVectors)
+BOOL IsBehindAndFacingTarget(vec3_t anglesAttacker, vec3_t anglesVictim, vec3_t posAttacker, vec3_t posVictim)
+{
+	vec3_t vecToTarget;
+	vecToTarget[0] = posVictim[0] - posAttacker[0];
+	vecToTarget[1] = posVictim[1] - posAttacker[1];
+//	vecToTarget[2] = posVictim[2] - posAttacker[2];
+	vecToTarget[2] = 0.0f;
+	NormalizeInPlace(vecToTarget);
+
+	// Get owner forward view vector
+	vec3_t vecOwnerForward;
+	AngleVectors(anglesAttacker, vecOwnerForward, NULL, NULL);
+	vecOwnerForward[2] = 0.0f;
+	NormalizeInPlace(vecOwnerForward);
+
+	// Get target forward view vector
+	vec3_t vecTargetForward;
+	AngleVectors(anglesVictim, vecTargetForward, NULL, NULL);
+	vecTargetForward[2] = 0.0f;
+	NormalizeInPlace(vecTargetForward);
+
+	// Make sure owner is behind, facing and aiming at target's back
+	float flPosVsTargetViewDot = DotProduct(vecToTarget, vecTargetForward);	// Behind?
+	float flPosVsOwnerViewDot = DotProduct(vecToTarget, vecOwnerForward);		// Facing?
+	float flViewAnglesDot = DotProduct(vecTargetForward, vecOwnerForward);	// Facestab?
+
+	return (flPosVsTargetViewDot > 0.f && flPosVsOwnerViewDot > 0.5 && flViewAnglesDot > -0.3f);
+}

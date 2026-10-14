@@ -68,7 +68,7 @@ protected:
 };
 
 #define SENTRY_RANGE 1100
-#define SENTRY_TURNRATE 160
+#define SENTRY_TURNRATE 180 // was 160
 #define SENTRY_TURNRATE_SLOW 36
 #define SENTRY_MINPITCH -80
 #define SENTRY_MAXPITCH 80

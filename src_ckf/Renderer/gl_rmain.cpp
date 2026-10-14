@@ -162,6 +162,7 @@ cvar_t *v_brightness = NULL;
 cvar_t *v_gamma = NULL;
 
 cvar_t *cl_righthand = NULL;
+cvar_t *cl_viewmodel_fov = NULL;
 
 refdef_t *R_GetRefDef(void)
 {
