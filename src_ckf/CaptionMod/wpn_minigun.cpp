@@ -21,7 +21,6 @@ BOOL CClientMinigun::Deploy(void)
 void CClientMinigun::Holster(void)
 {
 	m_iSpin = STATE_MINIGUN_NONE;
-	g_Player.pev.flags &= ~FL_LOCK_DUCK;
 	g_Player.pev.flags &= ~FL_LOCK_JUMP;
 
 	PLAYBACK_EVENT_FULL(FEV_GLOBAL, NULL, m_usFireScript, 0, (float *)&g_vecZero, (float *)&g_vecZero, 0, 0, STATE_MINIGUN_NONE, 0, 0, 0);
@@ -101,17 +100,13 @@ void CClientMinigun::ItemPostFrame(void)
 		{
 			case STATE_MINIGUN_NONE:
 			{
-				if(!(iButton & IN_DUCK) && !(iOldButtons & IN_DUCK) && !g_Player.pev.bInDuck)
-				{
-					m_iSpin = STATE_MINIGUN_WINDUP;
-					m_fSpin = UTIL_WeaponTimeBase() + 0.87;
-					SendWeaponAnim(MINIGUN_WIND_UP);
-					PLAYBACK_EVENT_FULL(FEV_NOTHOST, NULL, m_usFireScript, 0, (float *)&g_vecZero, (float *)&g_vecZero, 0, 0, STATE_MINIGUN_WINDUP, 0, 0, 0);
+				m_iSpin = STATE_MINIGUN_WINDUP;
+				m_fSpin = UTIL_WeaponTimeBase() + 0.87;
+				SendWeaponAnim(MINIGUN_WIND_UP);
+				PLAYBACK_EVENT_FULL(FEV_NOTHOST, NULL, m_usFireScript, 0, (float*)&g_vecZero, (float*)&g_vecZero, 0, 0, STATE_MINIGUN_WINDUP, 0, 0, 0);
 
-					g_Player.pev.flags |= FL_LOCK_DUCK;
-					g_Player.pev.flags |= FL_LOCK_JUMP;
-					g_Player.ResetMaxSpeed();
-				}
+				g_Player.pev.flags |= FL_LOCK_JUMP;
+				g_Player.ResetMaxSpeed();
 				break;
 			}
 			case STATE_MINIGUN_WINDUP:
@@ -153,7 +148,6 @@ void CClientMinigun::ItemPostFrame(void)
 					m_iSpin = STATE_MINIGUN_NONE;
 					SendWeaponAnim(MINIGUN_IDLE1);					
 					g_Player.ResetMaxSpeed();
-					g_Player.pev.flags &= ~FL_LOCK_DUCK;
 					g_Player.pev.flags &= ~FL_LOCK_JUMP;
 				}
 				break;
@@ -175,7 +169,12 @@ void CClientMinigun::WeaponIdle(void)
 float CClientMinigun::GetMaxSpeed(void)
 {
 	if (m_iSpin != STATE_MINIGUN_NONE)
+	{
+		if (g_Player.pev.bInDuck)
+			return 0.0;
+
 		return 0.4935;
+	}
 
 	return 1;
 }

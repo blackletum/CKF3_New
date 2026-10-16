@@ -2042,6 +2042,8 @@ bool CBuildTeleporter::ShouldRun(void)
 {
 	if(!m_pLinkTele)
 		return false;
+	if (m_pLinkTele == m_pPlayer->m_pCarryBuild || m_pLinkTele->pev->solid == SOLID_NOT || m_pLinkTele->pev->effects & EF_NODRAW)
+		return false; // this fixes a bug, leave this be
 	if(m_iFlags & BUILD_BUILDING)
 		return false;
 	if(m_pLinkTele->m_iFlags & BUILD_BUILDING)

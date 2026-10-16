@@ -31,6 +31,19 @@ public:
 
 	const char *GetNavMapFilename( void ) const;	// return the filename for this map's .nav file
 
+	// performance shit
+	int m_AmountOfUpdates;	// bots will skip the update that frame if the amount of bot full updates is greater or equal to the max rate
+	int m_maxUpdates;		// use the cvar if you want to change this
+	bool CheckUpdateLimit()
+	{
+		if (m_AmountOfUpdates >= m_maxUpdates)
+			return false;
+
+		m_AmountOfUpdates++;
+
+		return true;
+	}
+
 private:
 	bool m_navLoaded;							// true if a nav mesh is loaded for the current map
 	NavEditCmdType m_editCmd;					// queued nav edit command, consumed each frame

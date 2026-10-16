@@ -24,6 +24,8 @@
 #include "bot/actions/tf_bot_get_health.h"
 #include "bot/actions/tf_bot_get_ammo.h"
 #include "bot/actions/tf_bot_retreat.h"
+#include "bot/actions/tf_bot_medic_heal.h"
+#include "bot/actions/tf_bot_engineer.h"
 
 #include "bot_names.h"
 
@@ -32,7 +34,8 @@
 extern cvar_t cv_bot_debug;
 
 static const float BotCommandInterval = 1.0f / 30.0f;
-static const float BotFullThinkInterval = 1.0f / 10.0f;
+static const float BotFullThinkInterval = BotCommandInterval * 10.0f; // for every 10 commands, one full think is applied
+// just ten ticks though so its fine
 
 CBot::CBot()
 	: m_actionInterface(new CTFBotIdle)
@@ -54,10 +57,17 @@ CBot::CBot()
 	m_actionInterface.m_scenarioMoniterInterface.SetHealthAction( new CTFBotGetHealth );
 	m_actionInterface.m_scenarioMoniterInterface.SetRetreatAction( new CTFBotRetreat );
 	m_actionInterface.m_scenarioMoniterInterface.SetAmmoAction( new CTFBotGetAmmo );
+	m_actionInterface.m_scenarioMoniterInterface.SetWinLostActions(new CTFBotSeekAndDestroy, new CTFBotRetreat);
 }
 
-CTFAction* CBot::DesiredAction(void)
+CTFAction* CBot::DesiredAction(int forceclass)
 {
+	if (m_iClass == CLASS_MEDIC)
+		return new CTFBotMedicHeal;
+
+	if (m_iClass == CLASS_ENGINEER)
+		return new CTFBotEngineerAction;
+
 	if (g_pGameRules->CPExist())
 	{
 	// CONSOLE_ECHO("DesiredAction is control point related\n");
@@ -67,14 +77,12 @@ CTFAction* CBot::DesiredAction(void)
 			// assume that it is koth related
 	//		return new CTFBotControlPointAttackKoth;
 	//	}
+		// doesnt matter
 
 		if (m_iClass != CLASS_ENGINEER)
 			return new CTFBotControlPointAttack;
 		else
 			return new CTFBotControlPointDefend;
-	// no reason for the defend point thing to exist...
-	// yet...
-	// i will do this with koth eventually but koth itself is buggy as fuuuuuuck rn
 	}
 
 	return new CTFBotSeekAndDestroy;
@@ -299,6 +307,54 @@ const CKnownEntity* CBot::GetPrimaryKnownThreat(bool onlyVisibleThreats)
 	return threat;
 }
 
+const CKnownEntity* CBot::GetPrimaryKnownTeammate(bool onlyVisibleThreats)
+{
+	if (m_knownEntityVector.Count() <= 0)
+	{
+		return NULL;
+	}
+
+	const CKnownEntity* threat = NULL;
+	float bestHealth = FLT_MAX;
+
+	// find the first valid entity
+	for (int i = 0; i < m_knownEntityVector.Count(); ++i)
+	{
+		const CKnownEntity& firstThreat = m_knownEntityVector[i];
+		if (!firstThreat.GetEntity()->IsPlayer())
+			continue;
+		
+		CBasePlayer* teammate = (CBasePlayer*)firstThreat.GetEntity();
+		
+		if (teammate->m_iHealerCount > 0)
+			continue;
+
+		bool isTeammate = firstThreat.GetTeam() == m_iTeam;
+
+		if (!isTeammate)
+		{
+			if (teammate->IsPlayerDisguised() && teammate->m_iDisguiseTeam == m_iTeam)
+				isTeammate = true;
+		}
+
+		// check in case status changes between updates
+		if ((firstThreat.GetTimeSinceBecameKnown() >= 0.0f) && !firstThreat.IsObsolete() && isTeammate)
+		{
+			if (!onlyVisibleThreats || firstThreat.IsVisibleRecently())
+			{
+				float hp = firstThreat.GetEntity()->pev->health;
+				if (hp < bestHealth)
+				{
+					bestHealth = hp;
+					threat = &firstThreat;
+				}
+			}
+		}
+	}
+
+	return threat;
+}
+
 CBot* CBot::CreateBot(const char* name, bool quotaManaged)
 {
 	if (UTIL_ClientsInGame() >= gpGlobals->maxClients)
@@ -403,6 +459,7 @@ void CBot::Think(void)
 		//CONSOLE_ECHO("%s is trying to pick a team.\n", STRING(pev->netname));
 		// if not on a team, bots automatically pick the team
 	}
+
 	if (!(CLASS_SPY >= m_iClass && m_iClass >= CLASS_SCOUT))
 	{
 		HandleMenu_ChooseClass(this, 0);
@@ -416,7 +473,7 @@ void CBot::Think(void)
 		m_hReevaluateClassTimer.Start(RANDOM_FLOAT(1.0f,5.0f));
 		int new_class = ChooseGoodClass();
 		NavAttributeType spawn = m_iTeam == TEAM_BLUE ? NAV_SPAWN_ROOM_BLUE : NAV_SPAWN_ROOM_RED;
-		if (m_iClass != new_class && ( m_lastNavArea->GetAttributes() & spawn ) )
+		if (m_iClass != new_class && m_lastNavArea && ( m_lastNavArea->GetAttributes() & spawn ) )
 		{
 			HandleMenu_ChooseClass(this, ChooseGoodClass());
 			ResetCommand();
@@ -444,8 +501,15 @@ void CBot::Think(void)
 
 	if (gpGlobals->time >= m_flNextFullBotThink)
 	{
-		m_flNextFullBotThink = gpGlobals->time + BotFullThinkInterval;
-		Update();
+		if (TheHLBots->CheckUpdateLimit()) // if there have been too much updates this cycle, then update the next tick
+		{
+			m_flNextFullBotThink = gpGlobals->time + BotFullThinkInterval;
+			Update();
+		}
+
+		// a potential bug with this is that bots at the end of the playerlist could be stalled forever due to them being last in line
+		// this would only happen if the bots all spawned at the same time and the BotFullThinkInterval was fast enough to catch up with the updatelimit
+		// doesnt happen with default settings though, so whatever.....
 	}
 
 	// maintains inbetween stuff
@@ -466,7 +530,7 @@ void CBot::Update(void)
 		// this shouldnt need to happen now that we ported the known entity system
 	}
 
-	if(m_hEnemyRecalculateTimer.IsElapsed())
+	if(m_hKnownEntityRecalculateTimer.IsElapsed())
 	{
 		UpdateKnownEntities();
 		GetPrimaryKnownThreat(); // caches m_hEnemy in here
@@ -481,9 +545,10 @@ void CBot::Update(void)
 			simple look, do not use this anymore
 		*/
 
-		m_hEnemyRecalculateTimer.Start(RANDOM_FLOAT(0.2f, 0.6f));
+		m_hKnownEntityRecalculateTimer.Start(RANDOM_FLOAT(0.2f, 0.6f));
 	}
 
+	m_actionInterface.Debug(cv_bot_debug.value == 1.0);
 	m_actionInterface.Update();
 }
 
@@ -514,10 +579,44 @@ void CBot::Upkeep(void)
 
 	Vector m_aimPosition = pev->origin;
 
+	const CKnownEntity* teammate = GetPrimaryKnownTeammate();
+	bool teammatefound = teammate && teammate->GetEntity()->IsPlayer();
+
 	bool enemyfound = GetPrimaryKnownThreat() && m_hEnemy->IsPlayer();
 	// this should run the GetPrimaryKnownThreat() before checking the m_hEnemy, so this should be fine to keep here
+	
+	bool teammateHelping = false;
+	if (teammatefound)
+	{
+		switch (m_iClass)
+		{
+			case CLASS_MEDIC:
+			{
+				CBasePlayerWeapon* pWeapon = (CBasePlayerWeapon*)m_pActiveItem;
 
-	if (enemyfound)
+				if (!pWeapon)
+					return;
+
+				if(pWeapon->m_iId != WEAPON_MEDIGUN)
+					SwitchSlotWeapon(WEAPON_SLOT_SECONDARY);
+				else
+				{
+					if (m_iUbercharge >= 100 && ( enemyfound || pev->health < (pev->max_health * 0.5) ))
+						PressSecondaryAttack();
+					else
+						PressPrimaryAttack();
+				}
+
+				teammateHelping = true;
+				break;
+			}
+		}
+
+		if(teammateHelping)
+			m_aimPosition = teammate->GetLastKnownPosition();
+	}
+	
+	if (enemyfound && !teammateHelping)
 	{
 		m_aimPosition = GetPrimaryKnownThreat()->GetLastKnownPosition();
 

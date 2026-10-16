@@ -249,7 +249,7 @@ void CNavArea::Save( int fd, unsigned int version )
 	_write( fd, &m_id, sizeof(unsigned int) );
 
 	// save attribute flags
-	_write( fd, &m_attributeFlags, sizeof(unsigned char) );
+	_write( fd, &m_attributeFlags, sizeof(unsigned int) );
 
 	// save extent of area
 	_write( fd, &m_extent, 6*sizeof(float) );
@@ -420,7 +420,7 @@ void CNavArea::Load( SteamFile *file, unsigned int version )
 		m_nextID = m_id+1;
 
 	// load attribute flags
-	file->Read( &m_attributeFlags, sizeof(unsigned char) );
+	file->Read( &m_attributeFlags, sizeof(unsigned int) );
 
 	// load extent of area
 	file->Read( &m_extent, 6*sizeof(float) );

@@ -33,7 +33,7 @@ static xy_t g_xyFontMetal[4];
 
 static xy_t g_xyFontBlock[4];
 
-static int g_iMetalNeed[4] = {135, 100, 125, 125};
+static int g_iMetalNeed[4] = {135, 100, 50, 50};
 
 static color24 g_ubColor[] = {{236,227,203},{193,21,0},{108,107,94},{42,39,37}};
 static flcol24_t g_flColor[] = {{236/255.0f,227/255.0f,203/255.0f},{193/255.0f,21/255.0f,0},{42/255.0f,39/255.0f,37/255.0f}};

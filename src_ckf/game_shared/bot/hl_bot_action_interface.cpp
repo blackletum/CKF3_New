@@ -17,6 +17,8 @@ CTFBotActionInterface::CTFBotActionInterface(CTFAction* m_baseAction)
 	m_bAction = m_baseAction;
 	m_bot = NULL;
 	debug_info[0] = '\0';
+	m_isDebug = false;
+	m_flLastDebugUpdate = 0.0f;
 	m_scenarioMoniterInterface.SetBot(NULL);
 }
 
@@ -118,12 +120,51 @@ void CTFBotActionInterface::Update(void)
 
 		int check = m_scenarioMoniterInterface.Check();
 
-		if (!action->ShouldHurry(bot) && check)
+		if ( (!action->ShouldHurry(bot) && check) || g_pGameRules->m_iRoundStatus == ROUND_END)
 			m_scenarioMoniterInterface.Update(check);
 		else
+		{
 			action->Update(bot);
+			if (m_isDebug)
+			{
+				// SendDebugInfo(action->GetName());
+				// this doesnt wanna work right so just ignore
+				// this WOULD make a particle with the name of the action, like how nextbots show the debug text
+				// i could not figure it out so whatever
+				CONSOLE_ECHO(action->GetName());
+			}
+		}
 		
 		return;		// only one action runs per tick
+	}
+}
+
+void CTFBotActionInterface::SendDebugInfo(const char* text)
+{
+	if (m_flLastDebugUpdate > gpGlobals->time)
+		return;
+
+	m_flLastDebugUpdate = gpGlobals->time + 0.1;
+
+	if (!m_bot)
+		return;
+
+	for (int i = 1; i <= gpGlobals->maxClients; ++i)
+	{
+		CBasePlayer* player = static_cast<CBasePlayer*>(UTIL_PlayerByIndex(i));
+
+		if (!IsEntityValid(player))
+			continue;
+
+		if (!player->IsPlayer())
+			continue;
+
+		if (player->IsBot())
+			continue;
+
+		player->SendDebugText(m_bot->pev, text);
+
+		return;
 	}
 }
 
@@ -136,6 +177,7 @@ void CTFBotActionInterface::DestroyAction(CTFAction* action)
 void CTFBotActionInterface::Reset(CTFAction* first)
 {
 	CBot* bot = GetBot();
+	m_flLastDebugUpdate = 0.0f;
 
 	for (int i = m_Actions.Count() - 1; i >= 0; --i)
 	{
@@ -161,10 +203,24 @@ void CTFBotActionInterface::Reset(CTFAction* first)
 
 void CTFBotScenarioMoniterInterface::Update(int attrib)
 {
-	if (attrib & RESULT_HEALTH && m_hpAction)
-		m_hpAction->Update(m_bot);
-	else if (attrib & RESULT_RETREAT && m_retreatAction)
+	if (g_pGameRules->m_iRoundStatus == ROUND_END)
+	{
+		if (g_pGameRules->m_iRoundWinStatus != m_bot->m_iTeam && m_loseAction)
+		{
+			m_loseAction->Update(m_bot);
+			return;
+		}
+		else if(m_winAction)
+		{
+			m_winAction->Update(m_bot);
+			return;
+		}
+	}
+
+	if (attrib & RESULT_RETREAT && m_retreatAction)
 		m_retreatAction->Update(m_bot);
+	else if (attrib & RESULT_HEALTH && m_hpAction)
+		m_hpAction->Update(m_bot);
 	else if (attrib & RESULT_AMMO && m_ammoAction)
 		m_ammoAction->Update(m_bot);
 }
@@ -180,11 +236,11 @@ int CTFBotScenarioMoniterInterface::Check()	// TODO: add option to ignore certai
 
 	int attributes = 0;
 
-	const float lowhealthmulti = 0.6f;
+	const float lowhealthmulti = 0.4f;
 	if (m_bot->pev->health < (m_bot->pev->max_health * lowhealthmulti))
 		attributes = (attributes | RESULT_HEALTH);
 
-	const float superlowhealthmulti = 0.3f;
+	const float superlowhealthmulti = 0.5f;
 	if (m_bot->pev->health < (m_bot->pev->max_health * superlowhealthmulti))
 		attributes = (attributes | RESULT_RETREAT);
 

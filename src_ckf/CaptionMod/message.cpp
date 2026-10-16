@@ -61,6 +61,7 @@ void R_EmitTracer(vec3_t vecDst);
 void R_CritText(vec3_t vecSrc);
 void R_MiniCritText(vec3_t vecSrc);
 void R_HitDamageText(int damage, vec3_t vecSrc, int crit);
+void R_DebugText(const char* text, vec3_t vecSrc);
 void ShowHudMenu(int type, int keys);
 void HudFloatText_AddHealth(int iHealth);
 void HudFloatText_AddMetal(int iMetal);
@@ -760,6 +761,20 @@ int MF_DrawFX_HitDamage(void)
 	return 1;
 }
 
+int MF_DrawFX_DebugText(void)
+{
+	READ_ENTITY();
+
+	vec3_t vecSrc;
+
+	VectorCopy(pEntity->origin, vecSrc);
+	vecSrc[2] += 32;
+
+	const char* text = READ_STRING();
+
+	R_DebugText(text, vecSrc);
+}
+
 int MF_DrawFX_AddHealth(void)
 {
 	HudFloatText_AddHealth(READ_SHORT());
@@ -871,7 +886,8 @@ pfnMF_DrawFX gDrawFXList[] = {
 	MF_DrawFX_KillAllTrail,
 	MF_DrawFX_CritPlayerWeapon,
 	NULL,
-	MF_DrawFX_AirBlast
+	MF_DrawFX_AirBlast,
+	MF_DrawFX_DebugText
 };
 
 int MsgFunc_DrawFX(const char *pszName, int iSize, void *pbuf)

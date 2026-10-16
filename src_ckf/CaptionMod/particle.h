@@ -82,7 +82,8 @@ enum PartSysEnum
 	PS_CritPlayerWeapon,
 	PS_CritFirstWeaponGlow,
 	PS_CritFirstWeapon,
-	PS_AirBlast
+	PS_AirBlast,
+	PS_DebugText
 };
 
 typedef struct

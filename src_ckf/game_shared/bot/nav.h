@@ -7,9 +7,6 @@
 
 #pragma warning( disable : 4530 )					// STL uses exceptions, but we are not compiling with them - ignore warning
 
-// NOTE: TheNavAreaList/TheNavAreaGrid externs live in nav_area.h, where their
-// types are declared. Having them here broke files that include nav.h alone.
-
 const float GenerationStepSize = 25.0f;		// (30) was 20, but bots can't fit always fit
 const float StepHeight = 18.0f;						///< if delta Z is greater than this, we have to jump to get up
 const float JumpHeight = 48.8f;						///< if delta Z is less than this, we can jump up on it. Originally was 41.8f, but we can jump higher then that!!!
@@ -50,14 +47,24 @@ enum NavErrorType
 
 enum NavAttributeType
 {
-	NAV_CROUCH			= (1 << 0),											///< must crouch to use this node/area
-	NAV_JUMP			= (1 << 1),											///< must jump to traverse this area
-	NAV_PRECISE			= (1 << 2),											///< do not adjust for obstacles, just move along area
-	NAV_NO_JUMP			= (1 << 3),											///< inhibit discontinuity jumping
-	NAV_SPAWN_ROOM_RED	= (1 << 4),											///< RED spawn rooms
-	NAV_SPAWN_ROOM_BLUE	= (1 << 5),											///< BLU spawn rooms
-	NAV_SPAWN_ROOM_EXIT = (1 << 6),											///< spawn room exits
-	NAV_NO_BUILD_ZONE	= (1 << 7),											///< cannot build here!!!
+	NAV_CROUCH				= (1 << 0),											///< must crouch to use this node/area
+	NAV_JUMP				= (1 << 1),											///< must jump to traverse this area
+	NAV_PRECISE				= (1 << 2),											///< do not adjust for obstacles, just move along area
+	NAV_NO_JUMP				= (1 << 3),											///< inhibit discontinuity jumping
+	NAV_NO_BUILD_ZONE		= (1 << 4),											///< cannot build here!!!
+	NAV_SPAWN_ROOM_RED		= (1 << 5),											///< RED spawn rooms
+	NAV_SPAWN_ROOM_BLUE		= (1 << 6),											///< BLU spawn rooms
+	NAV_SPAWN_ROOM_RED_EXIT = (1 << 7),											///< RED spawn room exits
+	NAV_SPAWN_ROOM_BLU_EXIT = (1 << 8),											///< BLU spawn room exits
+
+	// NOTE: these four only exist for the engineer bot LOLOL
+	// these are also hidden from the debug text thingy
+	// this TECHNICALLY is not the best way to measure things, as you COULD place buildings on the side of buildings or smth..
+	// the bot never does this though....
+	NAV_NO_SENTRY			= (1 << 9),											///< a sentry can never fit at the center of this area
+	NAV_NO_DISPENSER		= (1 << 10),										///< a dispenser can never fit at the center of this area
+	NAV_NO_TELE_ENTRANCE	= (1 << 11),										///< a teleporter entrance can never fit at the center of this area
+	NAV_NO_TELE_EXIT		= (1 << 12),										///< a teleporter exit can never fit at the center of this area
 };
 
 enum NavDirType

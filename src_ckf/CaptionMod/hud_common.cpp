@@ -23,7 +23,11 @@ static int g_sizeHudMaskEdge;
 //hit damage text
 static vgui::HFont g_hHitDamageFont;
 
+//bot debug text
+static vgui::HFont g_hDebugFont;
+
 int g_texFloatText;
+int g_texFloatTextDebug;
 
 int HudCommon_VidInit(void)
 {
@@ -52,7 +56,11 @@ int HudCommon_VidInit(void)
 	g_hHitDamageFont = g_pSurface->CreateFont();
 	g_pSurface->AddGlyphSetToFont(g_hHitDamageFont, "TF2", 96, 0, 0, 0, vgui::ISurface::FONTFLAG_CUSTOM | vgui::ISurface::FONTFLAG_ANTIALIAS, 0x0, 0xFFFF);
 
+	g_hDebugFont = g_pSurface->CreateFont();
+	g_pSurface->AddGlyphSetToFont(g_hDebugFont, "OCRA", 96, 0, 0, 0, vgui::ISurface::FONTFLAG_CUSTOM | vgui::ISurface::FONTFLAG_ANTIALIAS, 0x0, 0xFFFF);
+	
 	g_texFloatText = gRefExports.R_GLGenTexture(320, 240);
+	g_texFloatTextDebug = gRefExports.R_GLGenTexture(2048, 256);
 	return 1;
 }
 
@@ -300,6 +308,19 @@ void R_DrawHitDamageText(const wchar_t *text, int width, int height)
 	g_pSurface->DrawSetTextColor(255, 255, 255, 255);
 	g_pSurface->DrawSetTextFont(g_hHitDamageFont);
 	g_pSurface->DrawSetTextPos(width/2-w/2, height/2-h/2);
+	g_pSurface->DrawPrintText(text, wcslen(text));
+	g_pSurface->DrawFlushText();
+}
+
+void R_DrawDebugText(const wchar_t* text, int width, int height)
+{
+	int w, h;
+
+	g_pSurface->DrawSetTexture(0);
+	g_pSurface->GetTextSize(g_hDebugFont, text, w, h);
+	g_pSurface->DrawSetTextColor(255, 255, 255, 255);
+	g_pSurface->DrawSetTextFont(g_hDebugFont);
+	g_pSurface->DrawSetTextPos(width / 2 - w / 2, height / 2 - h / 2);
 	g_pSurface->DrawPrintText(text, wcslen(text));
 	g_pSurface->DrawFlushText();
 }

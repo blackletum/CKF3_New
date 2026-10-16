@@ -53,6 +53,8 @@ public:
 
 	void Optimize( void );
 	
+	bool BuildFromParentChain(const Vector* start, const Vector* goal, CNavArea* endArea);
+
 	/**
 	 * Compute shortest path from 'start' to 'goal' via A* algorithm
 	 */

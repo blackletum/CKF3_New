@@ -24,7 +24,8 @@ cvar_t cv_bot_nav_zdraw		= { "nav_zdraw", "4", FCVAR_SERVER };
 cvar_t cv_bot_debug			= { "bot_debug", "0", FCVAR_SERVER };
 cvar_t cv_bot_quicksave		= { "bot_quicksave", "0", FCVAR_SERVER };
 cvar_t cv_bot_quota			= { "bot_quota", "0", FCVAR_SERVER };
-
+cvar_t cv_bot_updatelimit	= { "bot_max_update_framelimit", "10", FCVAR_SERVER };
+// m_AmountOfUpdates // cv_bot_updatelimit
 cvar_t cv_bot_last_area_update_tolerance = { "bot_last_area_update_tolerance", "4.0", FCVAR_SERVER };
 
 void Bot_RegisterCvars( void )
@@ -39,6 +40,7 @@ void Bot_RegisterCvars( void )
 	CVAR_REGISTER( &cv_bot_quicksave );
 	CVAR_REGISTER( &cv_bot_last_area_update_tolerance );
 	CVAR_REGISTER( &cv_bot_quota );
+	CVAR_REGISTER( &cv_bot_updatelimit );
 }
 
 static unsigned int s_navPlace = UNDEFINED_PLACE;
@@ -114,6 +116,7 @@ CHLBotManager::CHLBotManager()
 	m_generationDir = NORTH;
 	m_seedIndex = 0;
 	m_editCmd = EDIT_NONE;
+	m_AmountOfUpdates = 0;
 }
 
 const char *CHLBotManager::GetNavMapFilename( void ) const
@@ -140,6 +143,7 @@ void CHLBotManager::ServerActivate( void )
 		CONSOLE_ECHO( "No navigation map for this map. Use 'bot_nav_generate' to create one.\n" );
 	else
 		CONSOLE_ECHO( "ERROR: Navigation map '%s' is unusable (error %d).\n", GetNavMapFilename(), (int)result );
+	m_AmountOfUpdates = 0;
 }
 
 void CHLBotManager::ServerDeactivate( void )
@@ -151,6 +155,7 @@ void CHLBotManager::ServerDeactivate( void )
 	m_isGenerating = false;
 	m_currentNode = NULL;
 	m_walkableSeeds.clear();
+	m_AmountOfUpdates = 0;
 }
 
 //--------------------------------------------------------------------------------------------------------------
@@ -311,6 +316,7 @@ void Quota_Think( int count, CBot* kicked = NULL )
 		g_nextBotAddQuota = gpGlobals->time + BOT_QUOTA_DELAY;
 		return;
 		// this should only happen when the value is brought from another map
+		// there is probably a better way to do this
 	}
 
 	if (g_nextBotAddQuota > gpGlobals->time)
@@ -350,6 +356,12 @@ void CHLBotManager::AddServerCommands( void )
 void CHLBotManager::StartFrame( void )
 {
 	// think all bots
+
+	m_AmountOfUpdates = 0;
+	m_maxUpdates = (int)cv_bot_updatelimit.value;
+	if (m_maxUpdates <= 0)
+		m_maxUpdates = 100; // basically turns this off
+
 
 	int quotaAmount = 0;
 	CBot* lastbot = NULL;
@@ -397,6 +409,7 @@ void CHLBotManager::StartFrame( void )
 		}
 	}
 
+	CONSOLE_ECHO("Bots not gated this tick: %i", m_AmountOfUpdates);
 	Quota_Think(quotaAmount, lastbot);
 
 	if (m_isGenerating)
@@ -431,7 +444,7 @@ void CHLBotManager::BeginNavGeneration( void )
 			m_walkableSeeds.push_back( spot->pev->origin );
 	}
 
-	static const char* deleteClassnames[] = { "func_door", "func_door_rotating", "func_pushable", "func_resupplycase", NULL};
+	static const char* deleteClassnames[] = { "func_door", "func_door_rotating", "func_pushable", "func_resupplycase", "func_wall", NULL};
 	for (int i = 0; deleteClassnames[i]; ++i)
 	{
 		CBaseEntity* spot = NULL;

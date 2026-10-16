@@ -217,8 +217,8 @@ public:
 
 	unsigned int GetID( void ) const						{ return m_id; }
 
-	void SetAttributes( unsigned char bits )		{ m_attributeFlags = bits; }
-	unsigned char GetAttributes( void ) const		{ return m_attributeFlags; }
+	void SetAttributes( unsigned int bits )		{ m_attributeFlags = bits; }
+	unsigned int GetAttributes( void ) const		{ return m_attributeFlags; }
 
 	void ComputeIncursionDistances(void);
 
@@ -351,7 +351,7 @@ private:
 	unsigned int m_id;										///< unique area ID
 	Extent m_extent;										///< extents of area in world coords (NOTE: lo.z is not necessarily the minimum Z, but corresponds to Z at point (lo.x, lo.y), etc
 	Vector m_center;										///< centroid of area
-	unsigned char m_attributeFlags;							///< set of attribute bit flags (see NavAttributeType)
+	unsigned int m_attributeFlags;							///< set of attribute bit flags (see NavAttributeType)
 	Place m_place;											///< place descriptor
 
 	/// height of the implicit corners
@@ -509,7 +509,7 @@ public:
 	CNavArea *GetNavArea( const Vector *pos, float beneathLimt = 120.0f ) const;	///< given a position, return the nav area that IsOverlapping and is *immediately* beneath it
 	CNavArea *GetNavAreaByID( unsigned int id ) const;
 	CNavArea *GetNearestNavArea( const Vector *pos, bool anyZ = false ) const;
-	CNavArea *GetNearestNavAreaAttributes(const Vector* pos, bool anyZ = false, NavAttributeType attributes = NAV_NO_JUMP) const;
+	CNavArea *GetNearestNavAreaAttributes(const Vector* pos, bool anyZ = false, unsigned int attributes = 0, unsigned int avoid_attrib = 0 ) const;
 
 	Place GetPlace( const Vector *pos ) const;				///< return radio chatter place for given coordinate
 

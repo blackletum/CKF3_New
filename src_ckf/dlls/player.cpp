@@ -5148,6 +5148,15 @@ void CBasePlayer::SendHitDamage(entvars_t *pevVictim, int iDamage, int iCrit)
 	MESSAGE_END();
 }
 
+void CBasePlayer::SendDebugText(entvars_t* pevVictim, const char* text)
+{
+	MESSAGE_BEGIN(MSG_ONE, gmsgDrawFX, NULL, pev);
+	WRITE_BYTE(FX_DEBUGTEXT);
+	WRITE_SHORT(ENTINDEX(ENT(pevVictim)));
+	WRITE_STRING(text);
+	MESSAGE_END();
+}
+
 void CBasePlayer::SendAddHealth(int iHeal)
 {
 	MESSAGE_BEGIN(MSG_ONE, gmsgDrawFX, NULL, pev);
@@ -7512,8 +7521,8 @@ BOOL CBasePlayer::Build_PreUndeploy(void)
 	if(m_iClass != CLASS_ENGINEER || m_iCarryBluePrint)
 		return FALSE;
 
-	if(!(pev->flags & FL_ONGROUND))
-		return FALSE;
+//	if(!(pev->flags & FL_ONGROUND))
+	//	return FALSE;
 
 	TraceResult tr;
 	Vector vecSrc, vecDst;

@@ -45,6 +45,8 @@ NavAreaList TheNavAreaList;
 CNavAreaGrid TheNavAreaGrid;
 
 extern void HintMessageToAllPlayers( const char *message );
+BOOL UTIL_IsHullDefaultEx(Vector vecOrigin, float size, float height, edict_t* pEnt);
+BOOL UTIL_IsHullInZone(edict_t* e, Vector vecMins, Vector vecMaxs);
 
 unsigned int CNavArea::m_nextID = 1;
 
@@ -1890,7 +1892,7 @@ static void MarkNoBuildZones(void)
 	if (!g_pGameRules)
 		return;
 
-	const float zSlack = 32.0f;		// areas sit on the floor which can be below the brush's lower z value
+	const float zSlack = 64.0f;		// areas sit on the floor which can be below the brush's lower z value
 
 	for (int i = 0; i < g_pGameRules->m_NoBuildZone.Count(); ++i)
 	{
@@ -1937,7 +1939,7 @@ static void MarkSpawnRooms(void)
 			continue;
 		// if theres no team with the spawnroom, theres no attribute to add
 
-		unsigned char flags = 0;
+		unsigned int flags = 0;
 		if (pRoom->pev->team == TEAM_RED)
 			flags = NAV_SPAWN_ROOM_RED;
 		else	// team blue
@@ -1967,7 +1969,13 @@ static void MarkSpawnRoomExits(void)
 	{
 		CNavArea* area = *iter;
 
-		if ((area->GetAttributes() & NAV_SPAWN_ROOM_BLUE) || (area->GetAttributes() & NAV_SPAWN_ROOM_RED))
+		unsigned int flags = 0;
+		if (area->GetAttributes() & NAV_SPAWN_ROOM_RED)
+			flags = NAV_SPAWN_ROOM_RED_EXIT;
+		else if (area->GetAttributes() & NAV_SPAWN_ROOM_BLUE)
+			flags = NAV_SPAWN_ROOM_BLU_EXIT;
+
+		if (flags > 0)
 		{	
 			for (int dir = 0; dir < NUM_DIRECTIONS; ++dir)
 			{
@@ -1982,11 +1990,112 @@ static void MarkSpawnRoomExits(void)
 							continue;
 
 						if ( !( adj->GetAttributes() & NAV_SPAWN_ROOM_BLUE || adj->GetAttributes() & NAV_SPAWN_ROOM_RED ) )
-							adj->SetAttributes(adj->GetAttributes() | NAV_SPAWN_ROOM_EXIT);
+							adj->SetAttributes(adj->GetAttributes() | flags);
 					}
 				}
 			}
 		}
+	}
+}
+
+unsigned int GetEngieNoBuildAttributes(CNavArea* area)
+{
+	// this is so bots can avoid small areas that they cant build in
+	// TODO: this could probably be changed. maybe just use Build_PreDeploy????
+
+	const unsigned int allNoBuild = NAV_NO_SENTRY | NAV_NO_DISPENSER | NAV_NO_TELE_ENTRANCE | NAV_NO_TELE_EXIT;
+
+	if (area->GetAttributes() & NAV_NO_BUILD_ZONE)
+		return allNoBuild;
+
+	const float hullSize = 16.0f;
+	const float probeStartHeight = 16.0f;
+	const float minFloorNormalZ = 0.866f;
+
+	const float heights[4] = { 24.0f, 26.0f, 6.0f, 6.0f };
+	const unsigned int noBuildBits[4] = { NAV_NO_SENTRY, NAV_NO_DISPENSER, NAV_NO_TELE_ENTRANCE, NAV_NO_TELE_EXIT };
+
+	static const int probeDir[8][2] = { {1, 1}, {1, -1}, {-1, -1}, {-1, 1}, {1, 0}, {-1, 0}, {0, 1}, {0, -1} };
+
+	Vector center = *area->GetCenter();
+	center.z += probeStartHeight;
+
+	float ground = -9999.0f;
+	TraceResult tr;
+
+	for (int i = 0; i < 9; ++i)
+	{
+		Vector probe = center;
+
+		if (i < 8)
+		{
+			probe.x += hullSize * probeDir[i][0];
+			probe.y += hullSize * probeDir[i][1];
+		}
+
+		UTIL_TraceLine(probe, probe + Vector(0, 0, -9999), ignore_monsters, NULL, &tr);
+
+		if (i == 8)
+		{
+			if (tr.fStartSolid || tr.fAllSolid || tr.flFraction == 1.0f)
+				return allNoBuild;
+		}
+		else if (tr.fStartSolid || tr.fAllSolid)
+		{
+			continue;
+		}
+
+		if (tr.vecEndPos.z > ground)
+			ground = tr.vecEndPos.z;
+	}
+
+	// this is the only real important part IMO
+	if (tr.vecPlaneNormal.z < minFloorNormalZ)
+		return allNoBuild;
+
+	Vector spot = tr.vecEndPos;
+	spot.z = ground;
+
+	unsigned int result = 0;
+
+	for (int b = 0; b < 4; ++b)
+	{
+		float height = heights[b];
+
+		if (!UTIL_IsHullDefaultEx(spot + Vector(0, 0, height), hullSize, height, NULL))
+		{
+			result |= noBuildBits[b];
+			continue;
+		}
+
+		// THIS MIGHT NOT BE NEEDED
+		// NAV_NO_BUILD_ZONE is already calculated... why do we need this
+		if (g_pGameRules)
+		{
+			Vector vecMins = spot + Vector(-hullSize, -hullSize, -height);
+			Vector vecMaxs = spot + Vector(hullSize, hullSize, height);
+
+			for (int z = 0; z < g_pGameRules->m_NoBuildZone.Count(); ++z)
+			{
+				if (UTIL_IsHullInZone(g_pGameRules->m_NoBuildZone[z], vecMins, vecMaxs))
+				{
+					result |= noBuildBits[b];
+					break;
+				}
+			}
+		}
+	}
+
+	return result;
+}
+
+static void MarkEngineerBuildSpots(void)
+{
+	for (NavAreaList::iterator iter = TheNavAreaList.begin(); iter != TheNavAreaList.end(); ++iter)
+	{
+		CNavArea* area = *iter;
+
+		area->SetAttributes(area->GetAttributes() | GetEngieNoBuildAttributes(area));
 	}
 }
 
@@ -2084,6 +2193,7 @@ void GenerateNavigationAreaMesh( void )
 	SquareUpAreas();
 	MarkJumpAreas();
 	MarkNoBuildZones();
+	MarkEngineerBuildSpots();
 	MarkSpawnRooms();
 	MarkSpawnRoomExits();
 	// TODO: MarkHealthPoints(), so bots can go to healthpacks without needing to keep finding them
@@ -4270,14 +4380,16 @@ void EditNavAreas( NavEditCmdType cmd )
 				char attrib[128];
 				// keep this number high, otherwise the game crashes
 
-				sprintf(attrib, "%s%s%s%s%s%s%s",
+				sprintf(attrib, "%s%s%s%s%s%s%s%s%s",
 					(area->GetAttributes()& NAV_CROUCH) ? "CROUCH " : "",
 					(area->GetAttributes()& NAV_JUMP) ? "JUMP " : "",
 					(area->GetAttributes()& NAV_PRECISE) ? "PRECISE " : "",
 					(area->GetAttributes()& NAV_NO_JUMP) ? "NO_JUMP " : "",
+					(area->GetAttributes()& NAV_NO_BUILD_ZONE) ? "NO_BUILD_ZONE " : "",
 					(area->GetAttributes() & NAV_SPAWN_ROOM_RED) ? "RED_SPAWN_ROOM " : "",
 					(area->GetAttributes() & NAV_SPAWN_ROOM_BLUE) ? "BLU_SPAWN_ROOM " : "",
-					(area->GetAttributes() & NAV_SPAWN_ROOM_EXIT) ? "SPAWN_ROOM_EXIT " : "");
+					(area->GetAttributes() & NAV_SPAWN_ROOM_RED_EXIT) ? "SPAWN_ROOM_RED_EXIT " : "",
+					(area->GetAttributes()& NAV_SPAWN_ROOM_BLU_EXIT) ? "SPAWN_ROOM_BLUE_EXIT " : "");
 
 			
 				sprintf( buffer, "Area %i %s\n", area->GetID(), attrib);
@@ -5289,9 +5401,22 @@ CNavArea *CNavAreaGrid::GetNearestNavArea( const Vector *pos, bool anyZ ) const
 	return close;
 }
 
+static bool AreaPassesAttributeFilter(const CNavArea* area, unsigned int required, unsigned int avoid)
+{
+	unsigned int flags = area->GetAttributes();
+
+	if (required && !(flags & required))
+		return false;
+
+	if (avoid && (flags & avoid))
+		return false;
+
+	return true;
+}
+
 //--------------------------------------------------------------------------------------------------------------
 // same as normal GetNearestNavArea but only for specific attributes
-CNavArea* CNavAreaGrid::GetNearestNavAreaAttributes(const Vector* pos, bool anyZ, NavAttributeType attributes) const
+CNavArea* CNavAreaGrid::GetNearestNavAreaAttributes(const Vector* pos, bool anyZ, unsigned int attributes, unsigned int avoid_attrib ) const
 {
 	if (m_grid == NULL)
 		return NULL;
@@ -5301,8 +5426,9 @@ CNavArea* CNavAreaGrid::GetNearestNavAreaAttributes(const Vector* pos, bool anyZ
 
 	// quick check
 	close = GetNavArea(pos);
-	if (close)
+	if (close && AreaPassesAttributeFilter(close, attributes, avoid_attrib))
 		return close;
+	close = NULL;
 
 	// ensure source position is well behaved
 	Vector source;
@@ -5320,7 +5446,7 @@ CNavArea* CNavAreaGrid::GetNearestNavAreaAttributes(const Vector* pos, bool anyZ
 	{
 		CNavArea* area = *iter;
 		
-		if ( !(area->GetAttributes() & attributes) )
+		if (!AreaPassesAttributeFilter(area, attributes, avoid_attrib))
 			continue;
 
 		Vector areaPos;

@@ -82,7 +82,6 @@ BOOL CMinigun::Deploy(void)
 void CMinigun::Holster(int skiplocal)
 {
 	m_iSpin = STATE_MINIGUN_NONE;
-	m_pPlayer->pev->flags &= ~FL_LOCK_DUCK;
 	m_pPlayer->pev->flags &= ~FL_LOCK_JUMP;
 
 	PLAYBACK_EVENT_FULL(FEV_GLOBAL, m_pPlayer->edict(), m_usFireScript, 0, (float *)&g_vecZero, (float *)&g_vecZero, 0, 0, STATE_MINIGUN_NONE, 0, 0, 0);
@@ -197,7 +196,6 @@ void CMinigun::ItemPostFrame(void)
 				//EMIT_SOUND(ENT(m_pPlayer->pev) , CHAN_WEAPON, "CKF_III/minigun_wind_up.wav", 1.0, 0.80); 
 				PLAYBACK_EVENT_FULL(FEV_NOTHOST, m_pPlayer->edict(), m_usFireScript, 0, (float*)&g_vecZero, (float*)&g_vecZero, 0, 0, STATE_MINIGUN_WINDUP, 0, 0, 0);
 
-				m_pPlayer->pev->flags |= FL_LOCK_DUCK;
 				m_pPlayer->pev->flags |= FL_LOCK_JUMP;
 				//m_pPlayer->SetAnimation(PLAYER_RELOAD);
 				m_pPlayer->ResetMaxSpeed();
@@ -245,7 +243,6 @@ void CMinigun::ItemPostFrame(void)
 					m_iSpin = STATE_MINIGUN_NONE;
 					SendWeaponAnim(MINIGUN_IDLE1, UseDecrement() != FALSE);					
 					m_pPlayer->ResetMaxSpeed();
-					m_pPlayer->pev->flags &= ~FL_LOCK_DUCK;
 					m_pPlayer->pev->flags &= ~FL_LOCK_JUMP;
 					//m_pPlayer->pev->button &= ~IN_ATTACK;
 					//m_pPlayer->pev->button &= ~IN_ATTACK2;

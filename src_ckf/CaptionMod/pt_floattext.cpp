@@ -10,7 +10,9 @@
 extern cl_entity_t ent;
 
 void R_DrawHitDamageText(const wchar_t *text, int width, int height);
+void R_DrawDebugText(const wchar_t* text, int width, int height);
 extern int g_texFloatText;
+extern int g_texFloatTextDebug;
 
 class CPSCritText : public CParticleSystem
 {
@@ -230,6 +232,99 @@ public:
 	wchar_t m_text[64];	
 };
 
+class CPSDebugText : public CParticleSystem
+{
+public:
+	CPSDebugText() {}
+	void Init(void)
+	{
+		CParticleSystem::Init(PS_DebugText, 1, 0);
+
+		m_frame.texcoord[0][0] = 0;
+		m_frame.texcoord[0][1] = 0;
+		m_frame.texcoord[1][0] = 0;
+		m_frame.texcoord[1][1] = 1;
+		m_frame.texcoord[2][0] = 1;
+		m_frame.texcoord[2][1] = 1;
+		m_frame.texcoord[3][0] = 1;
+		m_frame.texcoord[3][1] = 0;
+		m_sprite.frame = &m_frame;
+		m_sprite.w = 2048;
+		m_sprite.h = 256;
+		m_sprite.numframes = 1;
+		m_sprite.tex = g_texFloatTextDebug;
+	}
+	virtual void Movement(part_t* p, float* org)
+	{
+		R_ParticleMovementSimple(p, org);
+	}
+	virtual void Render(part_t* p, float* org)
+	{
+		if (gRefExports.R_GetDrawPass() != r_draw_normal)
+			return;
+
+		if (!(g_RefSupportExt & r_ext_fbo))
+			return;
+
+		CALC_FRACTION(p);
+
+		ent.curstate.rendermode = kRenderTransAlphaNoDepth;
+
+	//	if (frac2 < 0.2)
+	//		ent.curstate.scale = (1 + (frac - 0.8) / 0.2) * (0.05f * 320.0f / 2048.0f);// 0.05 * p->scale;
+	//	else
+		ent.curstate.scale = 1.0f;//(0.05f * 320.0f / 2048.0f);
+
+		COLOR_FADE(0, 0, 0);
+		//ALPHA_FADE_OUT(0.75);
+
+		ent.curstate.fuser1 = 1;
+		ent.curstate.frame = 0;
+
+		VectorCopy(org, ent.origin);
+		ent.angles[2] = 0;
+
+		gRefExports.R_PushFrameBuffer();
+
+		gRefExports.R_BeginDrawHUDInWorld(m_sprite.tex, m_sprite.w, m_sprite.h);
+
+		R_DrawDebugText(m_text, m_sprite.w, m_sprite.h);
+
+		gRefExports.R_FinishDrawHUDInWorld();
+
+		gRefExports.R_PopFrameBuffer();
+
+		R_DrawTGASprite(&ent, &m_sprite);
+	}
+	void AddParticle(const char* text, float* src)
+	{
+		part_t* p = AllocParticle();
+		if (!p) return;
+
+		p->life = 2;
+
+		VectorCopy(src, p->org);
+		p->vel[2] = 20;
+
+		p->col[0] = 255;
+		p->col[1] = 255;
+		p->col[2] = 255;
+		p->col[3] = 255;
+
+		p->scale = 1.0f;
+		
+		p->die = p->life + g_flClientTime;
+
+		wcsncpy(m_text, UTF8ToUnicode(text), 63);
+		m_text[63] = L'\0';
+	}
+public:
+	tgasprite_frame_t m_frame;
+	tgasprite_t m_sprite;
+
+	wchar_t m_text[64];
+};
+
 void R_HitDamageText(int damage, vec3_t vecSrc, int crit)
 {
 	if(!(g_RefSupportExt & r_ext_fbo))
@@ -239,5 +334,17 @@ void R_HitDamageText(int damage, vec3_t vecSrc, int crit)
 	pText->Init();
 	pText->SetDie(2.0);
 	pText->AddParticle(damage, vecSrc, crit);
+	R_AddPartSystem(pText);
+}
+
+void R_DebugText(const char* text, vec3_t vecSrc)
+{
+	if (!(g_RefSupportExt & r_ext_fbo))
+		return;
+
+	CPSDebugText* pText = new CPSDebugText;
+	pText->Init();
+	pText->SetDie(1.0);
+	pText->AddParticle(text, vecSrc);
 	R_AddPartSystem(pText);
 }

@@ -76,6 +76,12 @@ public:
 	void SetRetreatAction(CTFAction* action) { m_retreatAction = action; }
 	void SetAmmoAction(CTFAction* action) { m_ammoAction = action; }
 
+	void SetWinLostActions(CTFAction* win_action, CTFAction* lose_action)
+	{
+		m_winAction = win_action;
+		m_loseAction = lose_action;
+	}
+
 	int Check();
 	void Update(int attrib = 0);
 private:
@@ -83,6 +89,9 @@ private:
 	CTFAction* m_hpAction;
 	CTFAction* m_retreatAction;
 	CTFAction* m_ammoAction;
+
+	CTFAction* m_winAction;
+	CTFAction* m_loseAction;
 };
 
 class CTFBotActionInterface
@@ -99,10 +108,15 @@ public:
 	CTFAction* m_bAction;
 	CTFBotScenarioMoniterInterface m_scenarioMoniterInterface;	// Scenario moniter interface
 	void Reset(CTFAction* first = NULL);
-
+	void Debug(bool status) { m_isDebug = status; }			///< turn debugging on/off
 private:
 	CBot* m_bot;
+
 	char debug_info[512];
+	bool m_isDebug;
+	float m_flLastDebugUpdate;
+	void SendDebugInfo(const char* text);
+
 	void DestroyAction(CTFAction* action);
 };
 

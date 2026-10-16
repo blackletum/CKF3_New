@@ -52,7 +52,8 @@ enum fx_e
 	FX_KILLALLTRAIL,
 	FX_CRITPLAYERWEAPON,
 	FX_INVULNPLAYER,
-	FX_AIRBLAST
+	FX_AIRBLAST,
+	FX_DEBUGTEXT
 };
 
 enum
@@ -570,6 +571,9 @@ public:
 	void SendAddMetal(int iMetal);
 	void SendHitDamage(entvars_t *pevVictim, int iDamage, int iCrit);
 	void ClearSticky(void);
+
+	// bot debug
+	void SendDebugText(entvars_t* pevVictim, const char* text);
 
 	void Invulnerable_Add(float flDuration, qboolean bFlash);
 	void CritBoost_Add(float flDuration);

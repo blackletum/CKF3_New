@@ -332,6 +332,60 @@ bool CNavPath::BuildTrivialPath( const Vector *start, const Vector *goal )
 	return true;
 }
 
+// custom, not in original Valve code
+// mainly for the retreatpath
+bool CNavPath::BuildFromParentChain(const Vector* start, const Vector* goal, CNavArea* endArea)
+{
+	Invalidate();
+
+	if (start == NULL || goal == NULL || endArea == NULL)
+		return false;
+
+	// get count
+	int count = 0;
+	CNavArea* area;
+	for (area = endArea; area; area = area->GetParent())
+		++count;
+
+	// save room for endpoint
+	if (count > MAX_PATH_SEGMENTS - 1)
+		count = MAX_PATH_SEGMENTS - 1;
+
+	if (count == 0)
+		return false;
+
+	if (count == 1)
+		return BuildTrivialPath(start, goal);
+
+	// build path
+	m_segmentCount = count;
+	for (area = endArea; count && area; area = area->GetParent())
+	{
+		--count;
+		m_path[count].area = area;
+		m_path[count].how = area->GetParentHow();
+	}
+
+	// compute path positions
+	if (ComputePathPositions() == false)
+	{
+		Invalidate();
+		return false;
+	}
+
+	// append path end position
+	Vector pathEndPosition = *goal;
+	pathEndPosition.z = endArea->GetZ(&pathEndPosition);
+
+	m_path[m_segmentCount].area = endArea;
+	m_path[m_segmentCount].pos = pathEndPosition;
+	m_path[m_segmentCount].ladder = NULL;
+	m_path[m_segmentCount].how = NUM_TRAVERSE_TYPES;
+	++m_segmentCount;
+
+	return true;
+}
+
 //--------------------------------------------------------------------------------------------------------------
 /**
  * Draw the path for debugging.

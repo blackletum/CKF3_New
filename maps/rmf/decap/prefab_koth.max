@@ -1,0 +1,249 @@
+{
+"classname" "worldspawn"
+"defaultteam" "0"
+"newunit" "0"
+"gametitle" "0"
+"startdark" "0"
+"MaxRange" "4096"
+"sounds" "1"
+"mapversion" "220"
+"wad" "/Program Files (x86)/Steam/steamapps/common/ChickenFortressNew/ckf3/2fort.wad;/Program Files (x86)/Steam/steamapps/common/ChickenFortressNew/ckf3/canyon2.wad;/Program Files (x86)/Steam/steamapps/common/ChickenFortressNew/ckf3/ckf_brick.wad;/Program Files (x86)/Steam/steamapps/common/ChickenFortressNew/ckf3/ckf_coalmines.wad;/Program Files (x86)/Steam/steamapps/common/ChickenFortressNew/ckf3/ckf_concrete.wad;/Program Files (x86)/Steam/steamapps/common/ChickenFortressNew/ckf3/ckf_metal.wad;/Program Files (x86)/Steam/steamapps/common/ChickenFortressNew/ckf3/ckf_nature.wad;/Program Files (x86)/Steam/steamapps/common/ChickenFortressNew/ckf3/ckf_tile.wad;/Program Files (x86)/Steam/steamapps/common/ChickenFortressNew/ckf3/ckf_wood.wad;/Program Files (x86)/Steam/steamapps/common/ChickenFortressNew/ckf3/cp_dustbowl2.wad;/Program Files (x86)/Steam/steamapps/common/ChickenFortressNew/ckf3/cp_dustbowl3.wad;/Program Files (x86)/Steam/steamapps/common/ChickenFortressNew/ckf3/cp_egypt3.wad;/Program Files (x86)/Steam/steamapps/common/ChickenFortressNew/ckf3/cp_granary.wad;/Program Files (x86)/Steam/steamapps/common/ChickenFortressNew/ckf3/cr_fastlane.wad;/Program Files (x86)/Steam/steamapps/common/ChickenFortressNew/ckf3/ctf_turbine.wad;/Program Files (x86)/Steam/steamapps/common/ChickenFortressNew/ckf3/decals.wad;/Program Files (x86)/Steam/steamapps/common/ChickenFortressNew/ckf3/dustbowl.wad;/Program Files (x86)/Steam/steamapps/common/ChickenFortressNew/ckf3/egypt2.wad;/Program Files (x86)/Steam/steamapps/common/ChickenFortressNew/ckf3/halflife.wad;/Program Files (x86)/Steam/steamapps/common/ChickenFortressNew/ckf3/minecraft.wad;/Program Files (x86)/Steam/steamapps/common/ChickenFortressNew/ckf3/ravelin.wad;/Program Files (x86)/Steam/steamapps/common/ChickenFortressNew/ckf3/tempdecal.wad;/Program Files (x86)/Steam/steamapps/common/ChickenFortressNew/ckf3/tfc.WAD;/Program Files (x86)/Steam/steamapps/common/ChickenFortressNew/ckf3/tfc2.wad;/Program Files (x86)/Steam/steamapps/common/ChickenFortressNew/ckf3/turbine_decals.wad;/Program Files (x86)/Steam/steamapps/common/ChickenFortressNew/ckf3/xd_map.wad;/Program Files (x86)/Steam/steamapps/common/ChickenFortressNew/ckf3/basicsand.wad"
+"_generator" "J.A.C.K. 1.1.3773 Freeware (vpHalfLife)"
+{
+( 288 256 160 ) ( 288 256 0 ) ( 288 -256 160 ) NULL [ 0 1 0 0 ] [ 0 0 -1 0 ] 0 1 1
+( 256 -256 160 ) ( 256 -256 0 ) ( 256 256 160 ) C1A0_WX [ 0 1 0 0 ] [ 0 0 -1 0 ] 0 1 1
+( 288 -256 160 ) ( 288 -256 0 ) ( 256 -256 160 ) NULL [ 1 0 0 0 ] [ 0 0 -1 0 ] 0 1 1
+( 256 256 160 ) ( 256 256 0 ) ( 288 256 160 ) NULL [ 1 0 0 0 ] [ 0 0 -1 0 ] 0 1 1
+( 288 -256 160 ) ( 256 -256 160 ) ( 288 256 160 ) NULL [ 1 0 0 0 ] [ 0 -1 0 0 ] 0 1 1
+( 256 256 0 ) ( 256 -256 0 ) ( 288 256 0 ) NULL [ 1 0 0 0 ] [ 0 -1 0 0 ] 0 1 1
+}
+{
+( -256 256 160 ) ( -256 256 0 ) ( -256 -256 160 ) C1A0_WX [ 0 1 0 0 ] [ 0 0 -1 0 ] 0 1 1
+( -288 -256 160 ) ( -288 -256 0 ) ( -288 256 160 ) NULL [ 0 1 0 0 ] [ 0 0 -1 0 ] 0 1 1
+( -256 -256 160 ) ( -256 -256 0 ) ( -288 -256 160 ) NULL [ 1 0 0 0 ] [ 0 0 -1 0 ] 0 1 1
+( -288 256 160 ) ( -288 256 0 ) ( -256 256 160 ) NULL [ 1 0 0 0 ] [ 0 0 -1 0 ] 0 1 1
+( -256 -256 160 ) ( -288 -256 160 ) ( -256 256 160 ) NULL [ 1 0 0 0 ] [ 0 -1 0 0 ] 0 1 1
+( -288 256 0 ) ( -288 -256 0 ) ( -256 256 0 ) NULL [ 1 0 0 0 ] [ 0 -1 0 0 ] 0 1 1
+}
+{
+( 256 288 160 ) ( 256 288 0 ) ( 256 256 160 ) NULL [ 0 1 0 0 ] [ 0 0 -1 0 ] 0 1 1
+( -256 256 160 ) ( -256 256 0 ) ( -256 288 160 ) NULL [ 0 1 0 0 ] [ 0 0 -1 0 ] 0 1 1
+( 256 256 160 ) ( 256 256 0 ) ( -256 256 160 ) C1A0_WX [ 1 0 0 0 ] [ 0 0 -1 0 ] 0 1 1
+( -256 288 160 ) ( -256 288 0 ) ( 256 288 160 ) NULL [ 1 0 0 0 ] [ 0 0 -1 0 ] 0 1 1
+( 256 256 160 ) ( -256 256 160 ) ( 256 288 160 ) NULL [ 1 0 0 0 ] [ 0 -1 0 0 ] 0 1 1
+( -256 288 0 ) ( -256 256 0 ) ( 256 288 0 ) NULL [ 1 0 0 0 ] [ 0 -1 0 0 ] 0 1 1
+}
+{
+( 256 -256 160 ) ( 256 -256 0 ) ( 256 -288 160 ) NULL [ 0 1 0 0 ] [ 0 0 -1 0 ] 0 1 1
+( -256 -288 160 ) ( -256 -288 0 ) ( -256 -256 160 ) NULL [ 0 1 0 0 ] [ 0 0 -1 0 ] 0 1 1
+( 256 -288 160 ) ( 256 -288 0 ) ( -256 -288 160 ) NULL [ 1 0 0 0 ] [ 0 0 -1 0 ] 0 1 1
+( -256 -256 160 ) ( -256 -256 0 ) ( 256 -256 160 ) C1A0_WX [ 1 0 0 0 ] [ 0 0 -1 0 ] 0 1 1
+( 256 -288 160 ) ( -256 -288 160 ) ( 256 -256 160 ) NULL [ 1 0 0 0 ] [ 0 -1 0 0 ] 0 1 1
+( -256 -256 0 ) ( -256 -288 0 ) ( 256 -256 0 ) NULL [ 1 0 0 0 ] [ 0 -1 0 0 ] 0 1 1
+}
+{
+( 256 256 192 ) ( 256 256 160 ) ( 256 -256 192 ) NULL [ 0 1 0 0 ] [ 0 0 -1 0 ] 0 1 1
+( -256 -256 192 ) ( -256 -256 160 ) ( -256 256 192 ) NULL [ 0 1 0 0 ] [ 0 0 -1 0 ] 0 1 1
+( 256 -256 192 ) ( 256 -256 160 ) ( -256 -256 192 ) NULL [ 1 0 0 0 ] [ 0 0 -1 0 ] 0 1 1
+( -256 256 192 ) ( -256 256 160 ) ( 256 256 192 ) NULL [ 1 0 0 0 ] [ 0 0 -1 0 ] 0 1 1
+( 256 -256 192 ) ( -256 -256 192 ) ( 256 256 192 ) NULL [ 1 0 0 0 ] [ 0 -1 0 0 ] 0 1 1
+( -256 256 160 ) ( -256 -256 160 ) ( 256 256 160 ) C2A4E_W1 [ 1 0 0 0 ] [ 0 -1 0 0 ] 0 1 1
+}
+{
+( 256 256 0 ) ( 256 256 -32 ) ( 256 -256 0 ) NULL [ 0 1 0 0 ] [ 0 0 -1 0 ] 0 1 1
+( -256 -256 0 ) ( -256 -256 -32 ) ( -256 256 0 ) NULL [ 0 1 0 0 ] [ 0 0 -1 0 ] 0 1 1
+( 256 -256 0 ) ( 256 -256 -32 ) ( -256 -256 0 ) NULL [ 1 0 0 0 ] [ 0 0 -1 0 ] 0 1 1
+( -256 256 0 ) ( -256 256 -32 ) ( 256 256 0 ) NULL [ 1 0 0 0 ] [ 0 0 -1 0 ] 0 1 1
+( 256 -256 0 ) ( -256 -256 0 ) ( 256 256 0 ) C1A0_LABFLRC [ 1 0 0 0 ] [ 0 -1 0 0 ] 0 1 1
+( -256 256 -32 ) ( -256 -256 -32 ) ( 256 256 -32 ) NULL [ 1 0 0 0 ] [ 0 -1 0 0 ] 0 1 1
+}
+}
+{
+"classname" "info_player_start"
+"angles" "0 0 0"
+"origin" "-192 0 37"
+}
+{
+"classname" "light"
+"_falloff" "0"
+"_fade" "1.0"
+"style" "0"
+"_light" "255 255 128 200"
+"origin" "0 0 128"
+}
+{
+"classname" "func_wall"
+"renderamt" "255"
+"rendercolor" "0 0 0"
+"zhlt_invisible" "1"
+"angles" "0 0 0"
+{
+( 89 -37 0 ) ( 89 37 0 ) ( 37 -89 0 ) -0BABFL [ 1 0 0 123 ] [ 0 -1 0 58 ] 0 1 1
+( -19 -44 8 ) ( -44 -19 8 ) ( 20 -44 8 ) -0BABFL [ 1 0 0 123 ] [ 0 -1 0 58 ] 0 1 1
+( -19 44 8 ) ( -44 19 8 ) ( -37 89 0 ) -0BABFL [ 1 0 0 123 ] [ 0 -1 0 58 ] 0 1 1
+( 37 89 0 ) ( 19 44 8 ) ( -37 89 0 ) -0BABFL [ 1 0 0 123 ] [ 0 -1 0 58 ] 0 1 1
+( 89 37 0 ) ( 44 19 8 ) ( 37 89 0 ) -0BABFL [ 1 0 0 123 ] [ 0 -1 0 58 ] 0 1 1
+( 89 -37 0 ) ( 44 -20 8 ) ( 89 37 0 ) -0BABFL [ 1 0 0 123 ] [ 0 -1 0 58 ] 0 1 1
+( 20 -44 8 ) ( 44 -20 8 ) ( 37 -89 0 ) -0BABFL [ 1 0 0 123 ] [ 0 -1 0 58 ] 0 1 1
+( -19 -44 8 ) ( 20 -44 8 ) ( -37 -89 0 ) -0BABFL [ 1 0 0 123 ] [ 0 -1 0 58 ] 0 1 1
+( -44 -19 8 ) ( -19 -44 8 ) ( -89 -37 0 ) -0BABFL [ 1 0 0 123 ] [ 0 -1 0 58 ] 0 1 1
+( -44 19 8 ) ( -44 -19 8 ) ( -89 37 0 ) -0BABFL [ 1 0 0 123 ] [ 0 -1 0 58 ] 0 1 1
+}
+}
+{
+"classname" "cycler_sprite"
+"angles" "0 0 0"
+"model" "models/CKF_III/w_controlpoint.mdl"
+"renderamt" "255"
+"rendercolor" "0 0 0"
+"framerate" "10.0"
+"scale" "1.0"
+"targetname" "cpmdl"
+"origin" "0 0 0"
+}
+{
+"classname" "func_controlpoint"
+"capname" "Point-Neutral"
+"caprate" "10"
+"subentity" "cpmdl"
+"zhlt_invisible" "1"
+"hudpos" "0"
+"trigonredcap" "neured"
+"trigonblucap" "neublu"
+"targetname" "cpneu"
+"timeadded" "0"
+"team" "0"
+"locked" "0"
+"disabled" "0"
+"canredcap" "1"
+"canblucap" "1"
+"angles" "0 0 0"
+{
+( -96 32 64 ) ( -96 -32 64 ) ( -96 32 0 ) AAATRIGGER [ 0 1 0 -10 ] [ 0 0 -1 -0 ] 0 1 1
+( 96 -32 64 ) ( 96 32 64 ) ( 96 -32 0 ) AAATRIGGER [ 0 1 0 -10 ] [ 0 0 -1 -0 ] 0 1 1
+( 32 96 64 ) ( -32 96 64 ) ( 32 96 0 ) AAATRIGGER [ 1 0 0 11 ] [ 0 0 -1 -0 ] 0 1 1
+( -32 -96 64 ) ( 32 -96 64 ) ( -32 -96 0 ) AAATRIGGER [ 1 0 0 11 ] [ 0 0 -1 -0 ] 0 1 1
+( 32 -96 64 ) ( -32 -96 64 ) ( 96 -32 64 ) AAATRIGGER [ 1 0 0 11 ] [ 0 -1 0 10 ] 0 1 1
+( 32 96 0 ) ( -32 96 0 ) ( 96 32 0 ) AAATRIGGER [ 1 0 0 11 ] [ 0 -1 0 10 ] 0 1 1
+( -96 -32 64 ) ( -32 -96 64 ) ( -96 -32 0 ) AAATRIGGER [ 0 1 0 -10 ] [ 0 0 -1 -0 ] 0 1 1
+( 32 -96 64 ) ( 96 -32 64 ) ( 32 -96 0 ) AAATRIGGER [ 0 1 0 -10 ] [ 0 0 -1 -0 ] 0 1 1
+( 96 32 64 ) ( 32 96 64 ) ( 96 32 0 ) AAATRIGGER [ 0 1 0 -10 ] [ 0 0 -1 -0 ] 0 1 1
+( -32 96 64 ) ( -96 32 64 ) ( -32 96 0 ) AAATRIGGER [ 0 1 0 -10 ] [ 0 0 -1 -0 ] 0 1 1
+}
+}
+{
+"classname" "light_environment"
+"_light" "250 208 171 50"
+"_fade" "1.0"
+"angles" "0 226 0"
+"pitch" "-85"
+"_diffuse_light" "128 128 255 100"
+"origin" "0 0 176"
+}
+{
+"classname" "info_map_settings"
+"endtime" "15"
+"freezetime" "3"
+"setuptime" "60"
+"setupcondition" "1"
+"waittime" "30"
+"reddominatedaction" "0"
+"bludominatedaction" "0"
+"angles" "0 0 0"
+"origin" "0 0 240"
+}
+{
+"classname" "trigger_roundtimer"
+"timeoutaction" "1"
+"hudpos" "0"
+"totaltime" "180"
+"locked" "1"
+"disabled" "0"
+"announcetime" "0"
+"targetname" "rtred"
+"team" "1"
+"angles" "0 0 0"
+"origin" "64 0 240"
+}
+{
+"classname" "trigger_rtcontrols"
+"targetname" "neured"
+"lockedop" "1"
+"lockedarg" "0"
+"disabledop" "0"
+"disabledarg" "0"
+"timeop" "0"
+"timearg" "0"
+"target" "rtred"
+"angles" "0 0 0"
+"origin" "128 0 240"
+}
+{
+"classname" "trigger_rtcontrols"
+"targetname" "neured"
+"lockedop" "1"
+"lockedarg" "1"
+"disabledop" "0"
+"disabledarg" "0"
+"timeop" "0"
+"timearg" "0"
+"target" "rtblu"
+"angles" "0 0 0"
+"origin" "192 0 240"
+}
+{
+"classname" "trigger_cpcontrols"
+"targetname" "game_setup_expired"
+"lockedop" "1"
+"lockedarg" "0"
+"disabledop" "0"
+"disabledarg" "0"
+"canredcapop" "0"
+"canredcaparg" "0"
+"canblucapop" "0"
+"canblucaparg" "0"
+"teamop" "0"
+"teamarg" "0"
+"target" "cpneu"
+"angles" "0 0 0"
+"origin" "0 0 304"
+}
+{
+"classname" "trigger_roundtimer"
+"timeoutaction" "2"
+"hudpos" "1"
+"totaltime" "180"
+"locked" "1"
+"disabled" "0"
+"targetname" "rtblu"
+"announcetime" "0"
+"team" "2"
+"angles" "0 0 0"
+"origin" "-64 0 240"
+}
+{
+"classname" "trigger_rtcontrols"
+"targetname" "neublu"
+"lockedop" "1"
+"lockedarg" "0"
+"disabledop" "0"
+"disabledarg" "0"
+"timeop" "0"
+"timearg" "0"
+"target" "rtblu"
+"angles" "0 0 0"
+"origin" "-128 0 240"
+}
+{
+"classname" "trigger_rtcontrols"
+"targetname" "neublu"
+"lockedop" "1"
+"lockedarg" "1"
+"disabledop" "0"
+"disabledarg" "0"
+"timeop" "0"
+"timearg" "0"
+"target" "rtred"
+"angles" "0 0 0"
+"origin" "-192 0 240"
+}

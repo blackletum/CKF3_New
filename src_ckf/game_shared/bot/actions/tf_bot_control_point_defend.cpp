@@ -18,20 +18,6 @@ void CTFBotControlPointDefend::OnEnter(CBot* me)
 
 void CTFBotControlPointDefend::Update(CBot* me)
 {
-	if (g_pGameRules->m_iRoundStatus == ROUND_END)
-	{
-		if (g_pGameRules->m_iRoundWinStatus != me->m_iTeam)
-		{
-			Suspend_For(new CTFBotSeekAndDestroy, "We lost!");
-		}
-		else
-		{
-			// winners
-			Suspend_For(new CTFBotSeekAndDestroy, "Look for losers to kill!!");
-		}
-		return;
-	}
-
 	CControlPoint* controlpoint = GetClosestControlPoint(me);
 
 	if (controlpoint)
@@ -42,8 +28,8 @@ void CTFBotControlPointDefend::Update(CBot* me)
 		point.z = controlpoint->Center().z;
 		m_seekTimer.Invalidate();
 		me->SetPathToGoal(point);
-
-		if ((me->Center() - controlpoint->Center()).IsLengthLessThan( (controlpoint->pev->absmax - controlpoint->pev->absmin).Length() / 2.0f ))
+		
+		if (IsInside(me->pev->origin, controlpoint))//(me->Center() - controlpoint->Center()).IsLengthLessThan( (controlpoint->pev->absmax - controlpoint->pev->absmin).Length() / 2.0f ))
 		{
 			// inside point area already
 
@@ -54,9 +40,7 @@ void CTFBotControlPointDefend::Update(CBot* me)
 				CBasePlayerWeapon* pWeapon = (CBasePlayerWeapon*)me->m_pActiveItem;
 
 				if (!pWeapon)
-				{
 					return;
-				}
 				// this should never happen
 
 				if (pWeapon->m_iId == WEAPON_BUILDPDA && me->m_iCarryBluePrint)

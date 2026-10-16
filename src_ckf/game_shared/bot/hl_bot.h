@@ -48,6 +48,26 @@ public:
 	void SetPathToGoal(CBasePlayer* goal);
 	void SetPathToGoal(CBaseEntity* goal);
 	bool HasPath(void) { return m_path.IsValid(); }
+	void ForcePath(CNavPath path) { m_path = path; } // dont use this
+	bool MakePath(CNavArea* endArea)
+	{
+		// only use this if u know what ur doing
+		if (!endArea)
+			return false;
+
+		Vector start = pev->origin;
+		Vector goal = *endArea->GetCenter();
+
+		if (!m_path.BuildFromParentChain(&start, &goal, endArea))
+		{
+			m_path.Invalidate();
+			return false;
+		}
+
+		m_pathfollower.Reset();
+		m_pathGoal = goal;
+		return true;
+	}
 	void StopPath()
 	{
 		if (!HasPath())
@@ -55,6 +75,11 @@ public:
 
 		m_path.Invalidate();
 	}
+
+	CNavPath m_path;					// the path itself
+	CNavPathFollower m_pathfollower;	// pathfollower + the improv is in here
+	Vector m_pathGoal;					// where the current path leads
+	CountdownTimer m_repathTimer;		// limits how often we recompute the path
 
 	bool HasEnemy() { return m_hEnemy && m_hEnemy->IsPlayer(); }
 	CBaseEntity* GetEnemy()
@@ -70,6 +95,8 @@ public:
 	KickStatus m_kickStatus; // this could probably be done another way, but this was the only way i could get bots kicked without instantly crashing the game
 
 	CUtlVector< CKnownEntity > m_knownEntityVector;		// the set of enemies/friends we are aware of
+	const CKnownEntity* GetPrimaryKnownThreat(bool onlyVisibleThreats = true);
+	const CKnownEntity* GetPrimaryKnownTeammate(bool onlyVisibleThreats = true);
 private:
 	// decision logic
 	void Update(void);
@@ -80,12 +107,11 @@ private:
 	byte ThrottledMsec(void) const;
 	void UpdateStuckMonitor(void);
 
-	CTFAction* DesiredAction(void);
-
-	int ChooseGoodClass(void);
+	CTFAction* DesiredAction(int forceclass = 0);
 
 	void UpdateKnownEntities(void);
-	const CKnownEntity* GetPrimaryKnownThreat(bool onlyVisibleThreats = true);
+
+	int ChooseGoodClass(void);
 
 	float m_forwardSpeed;
 	float m_strafeSpeed;
@@ -99,18 +125,13 @@ private:
 	float m_lastVisionUpdateTimestamp;
 	IntervalTimer m_notVisibleTimer[3];		// for tracking interval since last saw a member of the given team
 
-	CNavPath m_path;					// the path itself
-	CNavPathFollower m_pathfollower;	// pathfollower + the improv is in here
-	Vector m_pathGoal;					// where the current path leads
-	CountdownTimer m_repathTimer;		// limits how often we recompute the path
-
 	Vector m_stuckSpot;					// where we were when the stuck check last ran
 	IntervalTimer m_stuckTimer;			// how long we have been near m_stuckSpot
 
 	CTFBotActionInterface m_actionInterface;					// Korozbot action interface
 
 	EHANDLE m_hEnemy;					// the target
-	CountdownTimer m_hEnemyRecalculateTimer;		// limits how often we change our target
+	CountdownTimer m_hKnownEntityRecalculateTimer;		// limits how often we change our target
 	CountdownTimer m_hReevaluateClassTimer;
 };
 

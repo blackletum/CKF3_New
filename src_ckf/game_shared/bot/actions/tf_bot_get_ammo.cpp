@@ -21,24 +21,40 @@ void CTFBotGetAmmo::Update(CBot* me)
 	if (!me)
 		return;
 
-	CBaseEntity* pSpot = NULL;
-	while (pSpot = UTIL_FindEntityByClassname(pSpot, "item_ammobox"))
+
+	CBaseEntity* pEnt = NULL;
+	CBaseEntity* pBest = NULL;
+	float flBest = 0;
+
+	while ((pEnt = UTIL_FindEntityByClassname(pEnt, "item_ammobox")) != NULL)
 	{
-		if (!FNullEnt(pSpot))
+		// "available and ready": on the ground and not respawning/invisible  
+		if (!(pEnt->pev->flags & FL_ONGROUND))
+			continue;
+		if (pEnt->pev->solid != SOLID_TRIGGER || (pEnt->pev->effects & EF_NODRAW))
+			continue;
+
+		float flDist = (pEnt->pev->origin - me->pev->origin).Length();
+		if (!pBest || flDist < flBest)
 		{
-			me->SetPathToGoal(pSpot->pev->origin);
-			break;
+			pBest = pEnt;
+			flBest = flDist;
 		}
 	}
-	if (FNullEnt(pSpot))
+
+	if (!FNullEnt(pBest) && pBest)
 	{
-		while (pSpot = UTIL_FindEntityByClassname(pSpot, "func_resupplycase"))
+		me->SetPathToGoal(pBest->pev->origin);
+		Continue();
+	}
+
+	pEnt = NULL;
+	while (pEnt = UTIL_FindEntityByClassname(pEnt, "func_resupplycase"))
+	{
+		if (pEnt->pev->team == TEAM_UNASSIGNED || pEnt->pev->team == me->m_iTeam)
 		{
-			if (!FNullEnt(pSpot))
-			{
-				me->SetPathToGoal(pSpot->pev->origin);
-				break;
-			}
+			me->SetPathToGoal(pEnt->pev->origin);
+			break;
 		}
 	}
 

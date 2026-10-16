@@ -18,20 +18,6 @@ void CTFBotControlPointAttack::OnEnter(CBot* me)
 
 void CTFBotControlPointAttack::Update(CBot* me)
 {
-	if (g_pGameRules->m_iRoundStatus == ROUND_END)
-	{
-		if (g_pGameRules->m_iRoundWinStatus != me->m_iTeam)
-		{
-			Suspend_For(new CTFBotRetreat, "We lost!");
-		}
-		else
-		{
-			// winners
-			Suspend_For(new CTFBotSeekAndDestroy, "Look for losers to kill!!");
-		}
-		return;
-	}
-
 	CControlPoint* controlpoint = GetClosestControlPoint(me);
 
 	if (controlpoint)
@@ -49,7 +35,6 @@ void CTFBotControlPointAttack::Update(CBot* me)
 	else
 	{
 		Suspend_For(new CTFBotSeekAndDestroy, "No control points to attack!");
-		// CONSOLE_ECHO("No control points to attack!");
 		return;
 	}
 
