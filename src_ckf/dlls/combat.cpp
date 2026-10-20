@@ -1235,7 +1235,7 @@ Vector CBaseEntity::CKFFireBullets(Vector vecSrc, Vector vecDirShooting, float f
 		{
 		case BULLET_PLAYER_SNIPER: case BULLET_PLAYER_SNIPER_NOHS:
 			{
-				iCurrentDamage = iDamage + (int)RANDOM_FLOAT(-iDamage*0.14, iDamage*0.14);
+				iCurrentDamage = iDamage;
 				if(tr.iHitgroup == HITGROUP_HEAD && iBulletType != BULLET_PLAYER_SNIPER_NOHS)
 					iCrit += 2;
 				break;
@@ -1254,7 +1254,7 @@ Vector CBaseEntity::CKFFireBullets(Vector vecSrc, Vector vecDirShooting, float f
 			}
 			default:
 			{
-				iCurrentDamage = iDamage;// + (int)RANDOM_FLOAT(-iDamage*0.14, iDamage*0.14)
+				iCurrentDamage = iDamage;
 				break;
 			}
 		}

@@ -308,7 +308,7 @@ void CHLBotManager::ServerCommand( const char *pcmd )
 }
 
 float g_nextBotAddQuota = 0.0f;
-#define BOT_QUOTA_DELAY 0.5f
+#define BOT_QUOTA_DELAY 1.0f
 void Quota_Think( int count, CBot* kicked = NULL )
 {
 	if (g_nextBotAddQuota > gpGlobals->time + (BOT_QUOTA_DELAY * 2.0f))
@@ -332,7 +332,7 @@ void Quota_Think( int count, CBot* kicked = NULL )
 			kicked->m_kickStatus = GOING_TO_BE_KICKED;
 		}
 	}
-	g_nextBotAddQuota = gpGlobals->time + BOT_QUOTA_DELAY;
+	g_nextBotAddQuota = gpGlobals->time + RANDOM_FLOAT((BOT_QUOTA_DELAY > 0.1f) ? 0.1f : BOT_QUOTA_DELAY, BOT_QUOTA_DELAY);
 }
 
 void CHLBotManager::AddServerCommand( const char *cmd )
@@ -376,11 +376,6 @@ void CHLBotManager::StartFrame( void )
 		// only bots can play
 			continue;
 
-		// TODO: maybe stagger the bot thinking per tick like tf2 does
-		// since we are in goldsrc FPS is good enough
-		// however when playing on a 24~ bot server on jakulo's shitty laptop, it started to get noticably worse ( 30~ fps on average, dipping below )
-		// this would be better for maintaining the fps anyway especially considering particles are starting to fuck us over
-
 		// jakulo: This Should Be Fine...
 		// Try not to make the bots use any other class other than CBot
 		// otherwise.... Shit Might Get Weird....
@@ -408,8 +403,8 @@ void CHLBotManager::StartFrame( void )
 			}
 		}
 	}
-
-	CONSOLE_ECHO("Bots not gated this tick: %i", m_AmountOfUpdates);
+//	if(m_AmountOfUpdates)
+	//	CONSOLE_ECHO("Bots not gated this tick: %i", m_AmountOfUpdates);
 	Quota_Think(quotaAmount, lastbot);
 
 	if (m_isGenerating)

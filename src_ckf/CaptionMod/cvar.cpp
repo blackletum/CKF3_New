@@ -39,6 +39,7 @@ cvar_t *cl_viewmodel_fov;
 cvar_t *r_decals;
 
 cvar_t *ckf3d_hitsound;
+cvar_t *ckf3d_killsound;
 
 void Cvar_HudInit(void)
 {
@@ -78,8 +79,9 @@ void Cvar_Init(void)
 	g_deathmsg_clean = gEngfuncs.pfnRegisterVariable("ckf_deathmsg_clean", "10.0", FCVAR_ARCHIVE | FCVAR_CLIENTDLL);
 	g_deathmsg_max = gEngfuncs.pfnRegisterVariable("ckf_deathmsg_max", "5", FCVAR_ARCHIVE | FCVAR_CLIENTDLL);
 
-	// ckf3 decap
+	// ckf3 decap //
 	ckf3d_hitsound = gEngfuncs.pfnRegisterVariable("ckf3d_hitsound", "1", FCVAR_ARCHIVE | FCVAR_CLIENTDLL);
+	ckf3d_killsound = gEngfuncs.pfnRegisterVariable("ckf3d_killsound", "1", FCVAR_ARCHIVE | FCVAR_CLIENTDLL);
 
 	chase_active = gEngfuncs.pfnGetCvarPointer("chase_active");
 }

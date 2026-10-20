@@ -5145,6 +5145,7 @@ void CBasePlayer::SendHitDamage(entvars_t *pevVictim, int iDamage, int iCrit)
 	WRITE_SHORT(ENTINDEX(ENT(pevVictim)));
 	WRITE_SHORT(iDamage);
 	WRITE_BYTE(iCrit);
+	WRITE_BYTE(pevVictim->health <= 0 ? 1 : 0); // TODO: when i add dead ringer make sure to fake this
 	MESSAGE_END();
 }
 

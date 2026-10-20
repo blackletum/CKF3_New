@@ -9,6 +9,7 @@
 #include "hud_localize.h"
 
 extern cvar_t* ckf3d_hitsound;
+extern cvar_t* ckf3d_killsound;
 
 pfnUserMsgHook pfnMsgFunc_Health;
 pfnUserMsgHook pfnMsgFunc_ResetHUD;
@@ -700,61 +701,90 @@ int MF_DrawFX_HitDamage(void)
 	vecSrc[2] += 32;
 
 	int crit = READ_BYTE();
+	int killed = READ_BYTE();
 
 	R_HitDamageText(damage, vecSrc, crit);
 
-	// TODO: killsounds
+	int killvalue = (int)ckf3d_killsound->value;
 
-	int value = (int)ckf3d_hitsound->value;
-	if (value)
+	if (killed && killvalue)
 	{
-		switch (value)
+		switch (killvalue)
 		{
 		case 2:
-			gEngfuncs.pfnPlaySoundByName("ckf_decap/hitsound/hitsound_beepo.wav", 1); break;
+			gEngfuncs.pfnPlaySoundByName("ckf_decap/killsound/killsound_beepo.wav", 1); break;
 		case 3:
-			gEngfuncs.pfnPlaySoundByName("ckf_decap/hitsound/hitsound_space.wav", 1); break;
+			gEngfuncs.pfnPlaySoundByName("ckf_decap/killsound/killsound_space.wav", 1); break;
 		case 4:
-			gEngfuncs.pfnPlaySoundByName("ckf_decap/hitsound/hitsound_squasher.wav", 1); break;
+			gEngfuncs.pfnPlaySoundByName("ckf_decap/killsound/killsound_squasher.wav", 1); break;
 		case 5:
-		{
-			char* hitsound = "";
-			sprintf(hitsound, "ckf_decap/hitsound/hitsound_electro%i.wav", RANDOM_LONG(1, 3));
-			gEngfuncs.pfnPlaySoundByName(hitsound, 1);
-			break;
-		}
+			gEngfuncs.pfnPlaySoundByName("ckf_decap/killsound/killsound_electro.wav", 1); break;
 		case 6:
-		{
-			char* hitsound = "";
-			int rnd = RANDOM_LONG(1, 9);
-			sprintf(hitsound, "ckf_decap/hitsound/hitsound_menu_note%i%s.wav", rnd, (RANDOM_LONG(0, 1) == 0 && rnd == 7) ? "b" : "");
-			gEngfuncs.pfnPlaySoundByName(hitsound, 1);
-			break;
-		}
+			gEngfuncs.pfnPlaySoundByName("ckf_decap/killsound/killsound_note.wav", 1); break;
 		case 7:
-		{
-			char* hitsound = "";
-			sprintf(hitsound, "ckf_decap/hitsound/hitsound_percussion%i.wav", RANDOM_LONG(1, 5));
-			gEngfuncs.pfnPlaySoundByName(hitsound, 1);
-			break;
-		}
+			gEngfuncs.pfnPlaySoundByName("ckf_decap/killsound/killsound_percussion.wav", 1); break;
 		case 8:
-		{
-			char* hitsound = "";
-			sprintf(hitsound, "ckf_decap/hitsound/hitsound_retro%i.wav", RANDOM_LONG(1, 5));
-			gEngfuncs.pfnPlaySoundByName(hitsound, 1);
-			break;
-		}
+			gEngfuncs.pfnPlaySoundByName("ckf_decap/killsound/killsound_retro.wav", 1); break;
 		case 9:
-		{
-			char* hitsound = "";
-			sprintf(hitsound, "ckf_decap/hitsound/hitsound_vortex%i.wav", RANDOM_LONG(1, 5));
-			gEngfuncs.pfnPlaySoundByName(hitsound, 1);
-			break;
-		}
+			gEngfuncs.pfnPlaySoundByName("ckf_decap/killsound/killsound_vortex.wav", 1); break;
 		default:
 		case 1:
-			gEngfuncs.pfnPlaySoundByName("ckf_decap/hitsound/hitsound.wav", 1); break;
+			gEngfuncs.pfnPlaySoundByName("ckf_decap/killsound/killsound.wav", 1); break;
+		}
+	}
+	else
+	{
+		int value = (int)ckf3d_hitsound->value;
+		if (value)
+		{
+			switch (value)
+			{
+			case 2:
+				gEngfuncs.pfnPlaySoundByName("ckf_decap/hitsound/hitsound_beepo.wav", 1); break;
+			case 3:
+				gEngfuncs.pfnPlaySoundByName("ckf_decap/hitsound/hitsound_space.wav", 1); break;
+			case 4:
+				gEngfuncs.pfnPlaySoundByName("ckf_decap/hitsound/hitsound_squasher.wav", 1); break;
+			case 5:
+			{
+				char* hitsound = "";
+				sprintf(hitsound, "ckf_decap/hitsound/hitsound_electro%i.wav", RANDOM_LONG(1, 3));
+				gEngfuncs.pfnPlaySoundByName(hitsound, 1);
+				break;
+			}
+			case 6:
+			{
+				char* hitsound = "";
+				int rnd = RANDOM_LONG(1, 9);
+				sprintf(hitsound, "ckf_decap/hitsound/hitsound_menu_note%i%s.wav", rnd, (RANDOM_LONG(0, 1) == 0 && rnd == 7) ? "b" : "");
+				gEngfuncs.pfnPlaySoundByName(hitsound, 1);
+				break;
+			}
+			case 7:
+			{
+				char* hitsound = "";
+				sprintf(hitsound, "ckf_decap/hitsound/hitsound_percussion%i.wav", RANDOM_LONG(1, 5));
+				gEngfuncs.pfnPlaySoundByName(hitsound, 1);
+				break;
+			}
+			case 8:
+			{
+				char* hitsound = "";
+				sprintf(hitsound, "ckf_decap/hitsound/hitsound_retro%i.wav", RANDOM_LONG(1, 5));
+				gEngfuncs.pfnPlaySoundByName(hitsound, 1);
+				break;
+			}
+			case 9:
+			{
+				char* hitsound = "";
+				sprintf(hitsound, "ckf_decap/hitsound/hitsound_vortex%i.wav", RANDOM_LONG(1, 5));
+				gEngfuncs.pfnPlaySoundByName(hitsound, 1);
+				break;
+			}
+			default:
+			case 1:
+				gEngfuncs.pfnPlaySoundByName("ckf_decap/hitsound/hitsound.wav", 1); break;
+			}
 		}
 	}
 

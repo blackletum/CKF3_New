@@ -120,7 +120,7 @@ void CFist::Swing(void)
 
 			if(m_iMeleeCrit >= 2) fDmg *= 3;
 			else if(m_iMeleeCrit) fDmg *= 1.35f;
-			else fDmg += RANDOM_LONG(-3, 4);
+			//else fDmg += RANDOM_LONG(-3, 4);
 
 			ClearMultiDamage();
 
