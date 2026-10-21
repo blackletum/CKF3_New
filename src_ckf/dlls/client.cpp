@@ -1760,6 +1760,11 @@ if (FStrEq(pcmd, "fullupdate"))
 		ShowVGUIMenu(pPlayer, (pPlayer->m_iTeam == TEAM_RED) ? MENU_CLASS_RED : MENU_CLASS_BLU, (pPlayer->m_iJoiningState != JOINED) ? KEY_1 : KEY_1 | KEY_0, "");
 	}
 
+	if (FStrEq(pcmd, "chooseloadout"))
+	{
+		// todo: make vgui loadout picker
+	}
+
 	if (FStrEq(pcmd, "chooseteam") || FStrEq(pcmd, "changeteam"))
 	{
 		if(pPlayer->m_iMenu == MENU_CLASS_RED || pPlayer->m_iMenu == MENU_CLASS_BLU)

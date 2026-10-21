@@ -21,6 +21,9 @@ LINK_ENTITY_TO_CLASS(weapon_grenadelauncher, CGrenadeLauncher);
 
 void CGrenadeLauncher::Spawn(void)
 {
+	if (!m_iItemIndex)
+		m_iItemIndex = -1;
+
 	pev->classname = MAKE_STRING("weapon_grenadelauncher");
 
 	Precache();

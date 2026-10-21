@@ -386,6 +386,8 @@ public:
 	BOOL m_bMeleeAttack;
 	BOOL m_bDelayedFire;// you must release then attack for this 2 work
 	int m_usFireScript;//event script
+
+	int m_iItemIndex;
 };
 
 class CBasePlayerAmmo : public CBaseEntity

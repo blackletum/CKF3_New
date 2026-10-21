@@ -23,6 +23,9 @@
 
 #include "bot/hl_bot_manager.h" // TheHLBots
 #include "bot/bot_util.h"
+
+#include "decap/ckf_econ_manager.h" // econ stuff
+
 extern cvar_t cv_bot_last_area_update_tolerance;
 
 extern DLL_GLOBAL BOOL g_fGameOver;
@@ -1261,9 +1264,23 @@ void CBasePlayer::GiveDefaultItems(void)
 	RemoveAllItems(FALSE);
 
 	//ckfgivedefaultitem
+	if (m_iClass <= 0 || m_iClass >= ARRAYSIZE(g_StockLoadout))
+		return;
+
+	for (int slot = 0; slot < MAX_WEAPON_SLOTS; slot++)
+	{
+		int iItem = m_iLoadoutEconIndex[m_iClass][slot];
+		if (iItem <= 0)
+			iItem = g_StockLoadout[m_iClass][slot];
+
+		if (iItem > ITEM_NULL)
+			GiveLoadoutItem(iItem);
+	}
+
+	/*
 	switch(m_iClass)
 	{
-	default:GiveNamedItem("weapon_rocketlauncher");GiveNamedItem("weapon_smg");GiveNamedItem("weapon_bottle");break;
+	default:GiveNamedItem("weapon_rocketlauncher");GiveNamedItem("weapon_smg");GiveNamedItem("weapon_bottle");break; // this shouldnt happen..hopefully...
 	case CLASS_SNIPER: GiveNamedItem("weapon_sniperifle");GiveNamedItem("weapon_smg");GiveNamedItem("weapon_kukri");break;
 	case CLASS_SOLDIER: GiveNamedItem("weapon_rocketlauncher");GiveNamedItem("weapon_shotgun");GiveNamedItem("weapon_shovel");break;
 	case CLASS_DEMOMAN: GiveNamedItem("weapon_grenadelauncher");GiveNamedItem("weapon_stickylauncher");GiveNamedItem("weapon_bottle");break;
@@ -1274,8 +1291,47 @@ void CBasePlayer::GiveDefaultItems(void)
 	case CLASS_MEDIC: GiveNamedItem("weapon_syringegun");GiveNamedItem("weapon_medigun");GiveNamedItem("weapon_bonesaw");break;
 	case CLASS_ENGINEER: GiveNamedItem("weapon_shotgun");GiveNamedItem("weapon_pistol");GiveNamedItem("weapon_wrench");GiveNamedItem("weapon_buildpda");GiveNamedItem("weapon_destroypda");break;
 	}
+	*/
 
 	m_bHasPrimaryWeapon = TRUE;
+}
+
+BOOL CBasePlayer::GiveLoadoutItem(int iItemID)
+{
+	if (!TheEconManager)
+		return FALSE;
+
+	const ItemDef* pDef = TheEconManager->GetItemDef(iItemID);
+	if (!pDef)
+		return FALSE;
+
+	if ( !(pDef->iAllowedClasses & ClassToAllowedBit(m_iClass)) )
+		return FALSE;
+
+	edict_t* pent = CREATE_NAMED_ENTITY(MAKE_STRING(pDef->szBaseClass));
+
+	if (FNullEnt(pent))
+	{
+		ALERT(at_console, "NULL Ent in GiveLoadoutItem!");
+		return FALSE;
+	}
+
+	pent->v.origin = pev->origin;
+	pent->v.spawnflags |= SF_NORESPAWN;
+
+	CBaseEntity* pReturn = CBaseEntity::Instance(pent);
+	if (!pReturn)
+		return FALSE;
+
+	CBasePlayerWeapon* pWeapon = ((CBasePlayerWeapon*)pReturn);
+	//if (!pWeapon)
+		//return;
+	pWeapon->m_iItemIndex = pDef->iIndex;
+
+	DispatchSpawn(pent);
+	DispatchTouch(pent, ENT(pev));
+
+	return TRUE;
 }
 
 void CBasePlayer::RemoveAllItems(BOOL removeSuit)

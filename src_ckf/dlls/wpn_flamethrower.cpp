@@ -27,6 +27,9 @@ LINK_ENTITY_TO_CLASS(weapon_flamethrower, CFlamethrower);
 
 void CFlamethrower::Spawn(void)
 {
+	if (!m_iItemIndex)
+		m_iItemIndex = -1;
+
 	pev->classname = MAKE_STRING("weapon_flamethrower");
 
 	Precache();

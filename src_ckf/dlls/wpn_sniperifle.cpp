@@ -16,6 +16,9 @@ LINK_ENTITY_TO_CLASS(weapon_sniperifle, CSniperifle);
 
 void CSniperifle::Spawn(void)
 {
+	if (!m_iItemIndex)
+		m_iItemIndex = -1;
+
 	pev->classname = MAKE_STRING("weapon_sniperifle");
 
 	Precache();

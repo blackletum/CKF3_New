@@ -24,6 +24,9 @@ enum fireaxe_e
 
 void CFireaxe::Spawn(void)
 {
+	if (!m_iItemIndex)
+		m_iItemIndex = -1;
+
 	Precache();
 	m_iId = WEAPON_FIREAXE;
 	SET_MODEL(ENT(pev), "models/CKF_III/wp_group_rf.mdl");

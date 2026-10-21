@@ -16,6 +16,9 @@ LINK_ENTITY_TO_CLASS(weapon_revolver, CRevolver);
 
 void CRevolver::Spawn(void)
 {
+	if (!m_iItemIndex)
+		m_iItemIndex = -1;
+
 	pev->classname = MAKE_STRING("weapon_revolver");
 
 	Precache();

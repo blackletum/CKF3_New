@@ -21,6 +21,9 @@ LINK_ENTITY_TO_CLASS(weapon_rocketlauncher, CRocketLauncher);
 
 void CRocketLauncher::Spawn(void)
 {
+	if(!m_iItemIndex)
+		m_iItemIndex = -1;
+
 	pev->classname = MAKE_STRING("weapon_rocketlauncher");
 
 	Precache();

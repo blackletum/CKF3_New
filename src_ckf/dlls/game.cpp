@@ -3,6 +3,7 @@
 #include "util.h"
 #include "game.h"
 #include "bot/hl_bot_manager.h"
+#include "decap/ckf_econ_manager.h"
 
 cvar_t *g_psv_gravity, *g_psv_aim;
 cvar_t *g_footsteps;
@@ -402,6 +403,7 @@ void GameDLLInit(void)
 {
 	Bot_RegisterCvars();
 	InstallBotControl();
+	InstallEconomyManager();
 
 	g_psv_gravity = CVAR_GET_POINTER("sv_gravity");
 	g_psv_aim = CVAR_GET_POINTER("sv_aim");

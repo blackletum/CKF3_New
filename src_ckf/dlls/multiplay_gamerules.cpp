@@ -1960,7 +1960,7 @@ void CHalfLifeMultiplay::PlayerSpawn(CBasePlayer *pPlayer)
 		addDefault = FALSE;
 	}
 
-	pPlayer->GiveDefaultItems();
+	pPlayer->GiveDefaultItems(); // this is where the exception occurs
 }
 
 BOOL CHalfLifeMultiplay::FPlayerCanRespawn(CBasePlayer *pPlayer)

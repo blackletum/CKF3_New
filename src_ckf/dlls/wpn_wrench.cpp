@@ -25,6 +25,9 @@ enum wrench_e
 
 void CWrench::Spawn(void)
 {
+	if (!m_iItemIndex)
+		m_iItemIndex = -1;
+
 	Precache();
 	m_iId = WEAPON_WRENCH;
 	SET_MODEL(ENT(pev), "models/CKF_III/wp_group_rf.mdl");

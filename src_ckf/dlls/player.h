@@ -456,10 +456,10 @@ public:
 	virtual int GetEnemyTeam(void);
 
 	void KillReward(void);
-
 	void UpdateLastKnownArea(void);
 	CNavArea* m_lastNavArea;
 	CAI_MoveMonitor m_NavAreaUpdateMonitor;
+
 public:
 	void Pain(int hitgroup);
 	void RenewItems(void);
@@ -526,6 +526,7 @@ public:
 	void SetPlayerModel();//(BOOL bIsBombGuy);
 	void Radio(const char *msg_id, const char *msg_verbose);
 	void GiveDefaultItems(void);
+	BOOL GiveLoadoutItem(int iItemID);
 	void SetBombIcon(BOOL bFlash);
 	void SetScoreboardAttributes(CBasePlayer *pPlayer = NULL);
 	int IsBombGuy(void);
@@ -573,6 +574,7 @@ public:
 	void ClearSticky(void);
 
 	// bot debug
+	// doesnt fucking work............
 	void SendDebugText(entvars_t* pevVictim, const char* text);
 
 	void Invulnerable_Add(float flDuration, qboolean bFlash);
@@ -880,6 +882,9 @@ public:
 	CBaseBuildable *m_pCarryBuild;
 	CBaseBuildable *m_pBuildable[4];
 	bool m_bAutoReload;
+
+	// ckf3decap
+	int m_iLoadoutEconIndex[CLASS_SPY + 1][MAX_WEAPON_SLOTS];
 };
 
 #define UC_INVULNERABLE (1<<0)
