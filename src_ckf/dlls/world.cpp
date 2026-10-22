@@ -475,6 +475,7 @@ void CWorld::Precache(void)
 	ClientPrecache();
 
 	BotPrecache();
+	ValidateItemDefs();
 
 	PRECACHE_SOUND("common/null.wav");
 	PRECACHE_SOUND("items/suitchargeok1.wav");

@@ -44,6 +44,13 @@ void CButterfly::Precache(void)
 	PRECACHE_SOUND("CKF_III/butterfly_swing.wav");
 
 	m_usFireScript = PRECACHE_EVENT(1, "events/ckf_melee.sc");
+
+	SetupMeleeValues();
+
+	// these are for the butterfly knife in particular
+	m_flBaseDamage = 40.0;
+	m_flBaseSmackTime = 0.05;
+	m_flBaseFiringRate = 0.8;
 }
 
 int CButterfly::GetItemInfo(ItemInfo *p)
@@ -67,7 +74,7 @@ BOOL CButterfly::Deploy(void)
 {
 	m_iShotsFired = 0;
 
-	return GroupDeploy("models/CKF_III/v_butterfly.mdl", "models/CKF_III/wp_group_rf.mdl", BUTTERFLY_DRAW, 0, 0, "knife", 42);
+	return GroupDeploy(TheEconManager->GetViewmodel(this, "models/CKF_III/v_butterfly.mdl"), "models/CKF_III/wp_group_rf.mdl", BUTTERFLY_DRAW, 0, 0, "knife", 42);
 }
 
 void CButterfly::Holster(int skiplocal)
@@ -77,14 +84,14 @@ void CButterfly::Holster(int skiplocal)
 
 void CButterfly::PrimaryAttack(void)
 {
-	m_flMeleeAttack = UTIL_WeaponTimeBase() + 0.05;
+	m_flMeleeAttack = UTIL_WeaponTimeBase() + m_flBaseSmackTime;
 	m_iMeleeCrit = m_pPlayer->GetCriticalFire(-1, m_pPlayer->random_seed);
 	m_bMeleeAttack = TRUE;
 
 	SendWeaponAnim(BUTTERFLY_SLASH1 + ((m_iShotsFired++) % 2), UseDecrement() != FALSE);
 
 	m_pPlayer->SetAnimation(PLAYER_ATTACK1);
-	m_flTimeWeaponIdle = m_flNextPrimaryAttack = m_flNextSecondaryAttack = UTIL_WeaponTimeBase() + 0.8;
+	m_flTimeWeaponIdle = m_flNextPrimaryAttack = m_flNextSecondaryAttack = UTIL_WeaponTimeBase() + GetFiringRate();
 
 	m_pPlayer->Disguise_Stop();
 }
@@ -187,7 +194,7 @@ void CButterfly::Swing(void)
 		{
 			m_iMeleeCrit += pEntity->GetCriticalHit();
 
-			float fDmg = 40;
+			float fDmg = GetDamage();
 
 			if(m_iMeleeCrit >= 2) fDmg *= 3;
 			else if(m_iMeleeCrit) fDmg *= 1.35f;

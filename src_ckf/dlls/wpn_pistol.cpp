@@ -39,6 +39,10 @@ void CPistol::Precache(void)
 	PRECACHE_SOUND("CKF_III/pistol_shoot.wav");
 
 	m_usFireScript = PRECACHE_EVENT(1, "events/ckf_pistol.sc");
+
+	m_flBaseFiringRate = 0.167;
+	m_flBaseDamage = 15.0;
+	m_flBaseReloadRate = 1.25;
 }
 
 int CPistol::GetItemInfo(ItemInfo *p)
@@ -64,7 +68,7 @@ int CPistol::iMaxAmmo1(void)
 
 BOOL CPistol::Deploy(void)
 {
-	return GroupDeploy((!m_bForEngineer) ? "models/CKF_III/v_pistol.mdl" : "models/CKF_III/v_pistol_engineer.mdl", "models/CKF_III/wp_group_rf.mdl", PISTOL_DRAW, 0, 0, "onehanded", 15);
+	return GroupDeploy(TheEconManager->GetViewmodel(this, (!m_bForEngineer) ? "models/CKF_III/v_pistol.mdl" : "models/CKF_III/v_pistol_engineer.mdl"), "models/CKF_III/wp_group_rf.mdl", PISTOL_DRAW, 0, 0, "onehanded", 15);
 }
 
 void CPistol::PrimaryAttack(void)
@@ -103,7 +107,7 @@ void CPistol::PistolFire()
 
 	UTIL_MakeVectors(vecAngles);
 	Vector vecSrc = m_pPlayer->GetGunPosition();
-	Vector vecDst = m_pPlayer->CKFFireBullets(vecSrc, gpGlobals->v_forward, flSpread, 8192, BULLET_PLAYER_TF2, 15, iCrit, m_pPlayer->pev, m_pPlayer->random_seed, TRUE);
+	Vector vecDst = m_pPlayer->CKFFireBullets(vecSrc, gpGlobals->v_forward, flSpread, 8192, BULLET_PLAYER_TF2, int(GetDamage()), iCrit, m_pPlayer->pev, m_pPlayer->random_seed, TRUE);
 
 	//Draw Tracer
 	int iTracerColor = (iCrit >= 2) ? m_pPlayer->m_iTeam : 0;//Draw
@@ -114,7 +118,7 @@ void CPistol::PistolFire()
 	m_pPlayer->m_iWeaponVolume = NORMAL_GUN_VOLUME;
 	m_pPlayer->m_iWeaponFlash = NORMAL_GUN_FLASH;
 
-	m_flNextPrimaryAttack = m_flNextSecondaryAttack = UTIL_WeaponTimeBase() + 0.167f;
+	m_flNextPrimaryAttack = m_flNextSecondaryAttack = UTIL_WeaponTimeBase() + GetFiringRate();
 
 	m_flTimeWeaponIdle = UTIL_WeaponTimeBase() + 1.9;
 
@@ -131,7 +135,7 @@ void CPistol::PistolFire()
 
 void CPistol::Reload(void)
 {
-	if (DefaultReload(PISTOL_MAX_CLIP, PISTOL_RELOAD, (!m_bForEngineer) ? 1.25 : 1.36))
+	if (DefaultReload(GetMaxClip(), PISTOL_RELOAD, GetReloadRate()))
 	{
 		m_pPlayer->SetAnimation(PLAYER_RELOAD);
 	}
@@ -157,6 +161,7 @@ void CPistol::WeaponIdle(void)
 void CPistol::PreAttachPlayer(CBasePlayer *pPlayer)
 {
 	m_bForEngineer = (pPlayer->m_iClass == CLASS_ENGINEER) ? TRUE : FALSE;
+	m_flBaseReloadRate = (m_bForEngineer) ? 1.36 : 1.25;
 	if(m_bForEngineer)
 	{
 		m_iDefaultAmmo = m_iDefaultAmmo + _PISTOL_MAX_CARRY_ENG - _PISTOL_MAX_CARRY;

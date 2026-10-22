@@ -43,6 +43,10 @@ void CShotgun::Precache(void)
 	PRECACHE_SOUND("CKF_III/shotgun_reload.wav");
 
 	m_usFireScript = PRECACHE_EVENT(1, "events/ckf_shotgun.sc");
+
+	m_flBaseFiringRate = 0.625;
+	m_flBaseDamage = 6.0;
+	m_flBaseReloadRate = 0.5;
 }
 
 int CShotgun::GetItemInfo(ItemInfo *p)
@@ -101,7 +105,7 @@ BOOL CShotgun::Deploy(void)
 {
 	m_fInSpecialReload = 0;
 	
-	return GroupDeploy("models/CKF_III/v_shotgunall.mdl", "models/CKF_III/wp_group_rf.mdl", SHOTGUN_DRAW, 0, 0, (m_bIsPrimary) ? "shotgun" : "onehanded", 3);
+	return GroupDeploy(TheEconManager->GetViewmodel(this, "models/CKF_III/v_shotgunall.mdl"), "models/CKF_III/wp_group_rf.mdl", SHOTGUN_DRAW, 0, 0, (m_bIsPrimary) ? "shotgun" : "onehanded", 3);
 }
 
 void CShotgun::PrimaryAttack(void)
@@ -132,12 +136,12 @@ void CShotgun::PrimaryAttack(void)
 
 	ClearMultiDamage();
 
-	if(!m_iShotsFired) m_pPlayer->CKFFireBullets(vecSrc, gpGlobals->v_forward, 0.0, 8192, BULLET_PLAYER_TF2, 6, iCrit, m_pPlayer->pev, m_pPlayer->random_seed, FALSE);
+	if(!m_iShotsFired) m_pPlayer->CKFFireBullets(vecSrc, gpGlobals->v_forward, 0.0, 8192, BULLET_PLAYER_TF2, int(GetDamage()), iCrit, m_pPlayer->pev, m_pPlayer->random_seed, FALSE);
 	int iMaxBurst = (m_iShotsFired) ? 10 : 9;
 
 	for(int iBurst = 0; iBurst < iMaxBurst; iBurst ++)
 	{
-		Vector vecDst = m_pPlayer->CKFFireBullets(vecSrc, gpGlobals->v_forward, flSpread, 8192, BULLET_PLAYER_TF2, 6, iCrit, m_pPlayer->pev, m_pPlayer->random_seed+iBurst, FALSE);
+		Vector vecDst = m_pPlayer->CKFFireBullets(vecSrc, gpGlobals->v_forward, flSpread, 8192, BULLET_PLAYER_TF2, int(GetDamage()), iCrit, m_pPlayer->pev, m_pPlayer->random_seed+iBurst, FALSE);
 	}
 
 	//Prepare to Draw Tracer
@@ -148,8 +152,8 @@ void CShotgun::PrimaryAttack(void)
 
 	ApplyMultiDamage(m_pPlayer->pev, m_pPlayer->pev);
 
-	m_flNextPrimaryAttack = UTIL_WeaponTimeBase() + 0.625;
-	m_flNextSecondaryAttack = UTIL_WeaponTimeBase() + 0.625;
+	m_flNextPrimaryAttack = UTIL_WeaponTimeBase() + GetFiringRate();
+	m_flNextSecondaryAttack = UTIL_WeaponTimeBase() + GetFiringRate();
 
 	m_flTimeWeaponIdle = UTIL_WeaponTimeBase() + 0.8;
 
@@ -174,7 +178,7 @@ void CShotgun::SecondaryAttack(void)
 
 void CShotgun::Reload(void)
 {
-	if (m_pPlayer->m_rgAmmo[m_iPrimaryAmmoType] <= 0 || m_iClip == SHOTGUN_MAX_CLIP)
+	if (m_pPlayer->m_rgAmmo[m_iPrimaryAmmoType] <= 0 || m_iClip >= GetMaxClip())
 		return;
 
 	if (m_flNextPrimaryAttack > UTIL_WeaponTimeBase())
@@ -194,7 +198,7 @@ void CShotgun::Reload(void)
 
 void CShotgun::Reloaded(void)
 {
-	if (m_pPlayer->m_rgAmmo[m_iPrimaryAmmoType] <= 0 || m_iClip == SHOTGUN_MAX_CLIP)//out of ammo or full of clip, stop reloading
+	if (m_pPlayer->m_rgAmmo[m_iPrimaryAmmoType] <= 0 || m_iClip >= GetMaxClip())//out of ammo or full of clip, stop reloading
 	{
 		SendWeaponAnim(SHOTGUN_AFTER_RELOAD, UseDecrement() != FALSE);
 		m_flTimeWeaponIdle = UTIL_WeaponTimeBase() + 20;
@@ -216,7 +220,7 @@ void CShotgun::Reloaded(void)
 
 		SendWeaponAnim(SHOTGUN_RELOAD, UseDecrement() != FALSE);
 		m_flTimeWeaponIdle = UTIL_WeaponTimeBase() + 20;
-		m_flNextReload = UTIL_WeaponTimeBase() + 0.50;		
+		m_flNextReload = UTIL_WeaponTimeBase() + GetReloadRate();		
 	}
 }
 

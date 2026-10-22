@@ -56,6 +56,10 @@ void CMinigun::Precache(void)
 	PRECACHE_SOUND("CKF_III/minigun_wind_down.wav");
 
 	m_usFireScript = PRECACHE_EVENT(1, "events/ckf_minigun.sc");
+
+	m_flBaseFiringRate = 0.1;
+	m_flBaseDamage = 9.0;
+	m_flBaseReloadRate = -1.0f;
 }
 
 int CMinigun::GetItemInfo(ItemInfo *p)
@@ -79,7 +83,7 @@ BOOL CMinigun::Deploy(void)
 {
 	m_iSpin = STATE_MINIGUN_NONE;
 	
-	return GroupDeploy("models/CKF_III/v_minigun.mdl", "models/CKF_III/wp_group_2bone.mdl", MINIGUN_DRAW, 0, 0, "shotgun", 3);
+	return GroupDeploy(TheEconManager->GetViewmodel(this, "models/CKF_III/v_minigun.mdl"), "models/CKF_III/wp_group_2bone.mdl", MINIGUN_DRAW, 0, 0, "shotgun", 3);
 }
 
 void CMinigun::Holster(int skiplocal)
@@ -130,7 +134,7 @@ void CMinigun::PrimaryAttack(void)
 
 	ClearMultiDamage();
 
-	if(!m_iShotsFired) m_pPlayer->CKFFireBullets(vecSrc, gpGlobals->v_forward, 0.0, 8192, BULLET_PLAYER_TF2, 9, iCrit, m_pPlayer->pev, m_pPlayer->random_seed, FALSE);
+	if(!m_iShotsFired) m_pPlayer->CKFFireBullets(vecSrc, gpGlobals->v_forward, 0.0, 8192, BULLET_PLAYER_TF2, int(GetDamage()), iCrit, m_pPlayer->pev, m_pPlayer->random_seed, FALSE);
 	int iMaxBurst = (m_iShotsFired) ? 4 : 3;
 
 	//Prepare to Draw Tracer
@@ -138,7 +142,7 @@ void CMinigun::PrimaryAttack(void)
 
 	for(int iBurst = 0; iBurst < iMaxBurst; iBurst ++)
 	{
-		Vector vecDst = m_pPlayer->CKFFireBullets(vecSrc, gpGlobals->v_forward, flSpread, 8192, BULLET_PLAYER_TF2, 9, iCrit, m_pPlayer->pev, m_pPlayer->random_seed+iBurst, FALSE);
+		Vector vecDst = m_pPlayer->CKFFireBullets(vecSrc, gpGlobals->v_forward, flSpread, 8192, BULLET_PLAYER_TF2, int(GetDamage()), iCrit, m_pPlayer->pev, m_pPlayer->random_seed+iBurst, FALSE);
 	}
 
 	ViewAnglesForPlayBack(vecAngles);
@@ -161,8 +165,8 @@ void CMinigun::PrimaryAttack(void)
 		PLAYBACK_EVENT_FULL(FEV_NOTHOST, m_pPlayer->edict(), m_usFireScript, 0, (float *)&g_vecZero, (float *)&g_vecZero, 0, 0, STATE_MINIGUN_FIRE, 0, 0, 0);
 	}
 
-	m_flNextPrimaryAttack = UTIL_WeaponTimeBase() + 0.1;
-	m_flNextSecondaryAttack = UTIL_WeaponTimeBase() + 0.1;
+	m_flNextPrimaryAttack = UTIL_WeaponTimeBase() + GetFiringRate();
+	m_flNextSecondaryAttack = UTIL_WeaponTimeBase() + GetFiringRate();
 
 	m_flDecreaseShotsFired = m_flNextPrimaryAttack + 0.2;
 

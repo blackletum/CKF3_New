@@ -301,6 +301,7 @@ private:
 #define CHAT_INTERVAL 1.0
 
 class CBaseBuildable;
+class CBasePlayerWeapon;
 
 typedef struct
 {
@@ -455,7 +456,10 @@ public:
 	virtual int GetCriticalHit(void);
 	virtual int GetEnemyTeam(void);
 
-	void KillReward(void);
+	void HitReward(void);															// on hit
+	void KillReward(void);															// on kill
+	bool HitConditionCheck(const CBasePlayerWeapon* pWeapon, CBasePlayer* pTarget);	// on hit, but for things that depend on the enemy ( crit burning players, crit markedfordeath players, etc )
+	bool HitConditionCheck(CBasePlayer* pTarget);
 	void UpdateLastKnownArea(void);
 	CNavArea* m_lastNavArea;
 	CAI_MoveMonitor m_NavAreaUpdateMonitor;

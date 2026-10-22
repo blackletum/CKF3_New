@@ -38,6 +38,10 @@ void CSyringeGun::Precache(void)
 	PRECACHE_SOUND("CKF_III/syringegun_shoot.wav");
 
 	m_usFireScript = PRECACHE_EVENT(1, "events/ckf_syringegun.sc");
+
+	m_flBaseFiringRate = 0.1;
+	m_flBaseDamage = 10.0;
+	m_flBaseReloadRate = 1.6;
 }
 
 int CSyringeGun::GetItemInfo(ItemInfo *p)
@@ -59,7 +63,7 @@ int CSyringeGun::GetItemInfo(ItemInfo *p)
 
 BOOL CSyringeGun::Deploy(void)
 {
-	return GroupDeploy("models/CKF_III/v_syringegun.mdl", "models/CKF_III/wp_group_rf.mdl", SYRINGEGUN_DRAW, 0, 0, "onehanded", 27);
+	return GroupDeploy(TheEconManager->GetViewmodel(this, "models/CKF_III/v_syringegun.mdl"), "models/CKF_III/wp_group_rf.mdl", SYRINGEGUN_DRAW, 0, 0, "onehanded", 27);
 }
 
 void CSyringeGun::PrimaryAttack(void)
@@ -96,6 +100,7 @@ void CSyringeGun::SyringeGunFire(void)
 
 	pSyringe->m_iCrit = iCrit;
 	pSyringe->m_iTeam = m_pPlayer->m_iTeam;
+	pSyringe->m_fDmg = GetDamage();
 	if(iCrit >= 2)
 	{
 		pSyringe->pev->rendermode = kRenderNormal;
@@ -109,7 +114,7 @@ void CSyringeGun::SyringeGunFire(void)
 
 	m_pPlayer->m_iWeaponVolume = NORMAL_GUN_VOLUME;
 
-	m_flNextPrimaryAttack = UTIL_WeaponTimeBase() + 0.1;
+	m_flNextPrimaryAttack = UTIL_WeaponTimeBase() + GetFiringRate();
 
 	if (m_iClip)
 		m_flTimeWeaponIdle = UTIL_WeaponTimeBase() + 2.5;
@@ -121,7 +126,7 @@ void CSyringeGun::SyringeGunFire(void)
 
 void CSyringeGun::Reload(void)
 {
-	if (DefaultReload(SYRINGE_MAX_CLIP, SYRINGEGUN_RELOAD, 1.6))
+	if (DefaultReload(GetMaxClip(), SYRINGEGUN_RELOAD, GetReloadRate()))
 	{
 		m_pPlayer->SetAnimation(PLAYER_RELOAD);
 	}

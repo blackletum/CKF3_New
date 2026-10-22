@@ -8,6 +8,8 @@ class CBasePlayerWeapon;
 enum
 {
     ITEM_NULL, // dont use this
+
+    // stock weapons
     ITEM_SCATTERGUN,
     ITEM_PISTOL,
     ITEM_BAT,
@@ -35,7 +37,13 @@ enum
     ITEM_BUTTERFLY,
     ITEM_DISGUISEKIT,
 
-    ITEM_COUNT
+    // unlocks
+    ITEM_BLACKBOX,
+    ITEM_AXTINGUISHER,
+
+    ITEM_VALVE_ROCKETLAUNCHER,
+
+    ITEM_COUNT  // ESPECIALLY dont use this
 };
 
 enum AllowedClasses
@@ -70,12 +78,49 @@ inline int ClassToAllowedBit(int iClass)
 
 enum
 {
-    ATK_NULL = 0,
+    ATK_NULL = 0,   // DO NOT USE THIS
+
+    //--------------------------/
+    // attributes that usually change base stats in the weapon itself
     ATK_CLIP,
     ATK_DAMAGE,
     ATK_FIRE_RATE,
+    ATK_RELOAD_RATE,
+    //--------------------------/
 
-    CUSTOM_MODEL, // dont do this yet
+
+
+    //--------------------------/
+    // on kill
+    // these are scanned on KillReward()
+    KILL_START, // dont use this
+    KILL_CRITS,
+    KILL_HEAL,
+    KILL_END,   // dont use this
+    //--------------------------/
+
+
+
+    //--------------------------/
+    // on hit
+    // these are in the TakeDamage thingy
+    HIT_START,  // dont use this
+    HIT_HEAL,
+    HIT_END,    // dont use this
+    //--------------------------/
+
+    //--------------------------/
+    // on hit checks
+    // this is specifically for things that require the target to be under specific conditions
+    // basically just a boolean
+    HITCOND_START,  // dont use this
+    HITCOND_CRIT_BURNING,
+    HITCOND_END,    // dont use this
+
+    //--------------------------/
+
+
+    ATTRIB_COUNT
 };
 
 struct WeaponAttr
@@ -88,9 +133,12 @@ struct ItemDef
 {
     int iIndex;                 // unique id. i will eventually make another way of doing this
     const char* szBaseClass;    // base class that the weapon is based on. eg: "weapon_rocketlauncher" for rocket launcher unlocks  
-    // const char* szViewmodel;    // custom viewmodel. Not implemented yet
-    WeaponAttr attrs[8];        // eg: {ATK_DAMAGE, 1.2}, {ATK_CLIP, -2}
-    int iAllowedClasses;
+    WeaponAttr attrs[8];        // eg: {ATK_DAMAGE, 1.2}, {ATK_CLIP, -2}, {ATK_FIRE_RATE, 0.1}
+    int iAllowedClasses;        // eg: ALLOWED_SCOUT | ALLOWED_ENGINEER for a weapon that is for both scout and engineer
+
+    // custom model shit. these get precached automatically, so just put the model here!!!
+    char* szViewmodel;          // custom viewmodel model path
+    char* szPlayermodel;        // custom player model path
 };
 
 extern ItemDef   g_ItemDefs[ITEM_COUNT];
@@ -101,18 +149,15 @@ class CEconAttributeMgr
 public:
     float GetAttributeValue(const CBasePlayerWeapon* pWeapon, int iAttrID, float flDefault);
     int GetAttributeInt(const CBasePlayerWeapon* pWeapon, int iAttrID, int iDefault);
+    bool GetAttributeBool(const CBasePlayerWeapon* pWeapon, int iAttrID);
     const ItemDef* GetItemDefFor(const CBasePlayerWeapon* pWeapon);
     const ItemDef* GetItemDef(int iIndex);
+    char* GetViewmodel(const CBasePlayerWeapon* pWeapon, char* szDefaultViewmodel);
+    char* GetPlayermodel(const CBasePlayerWeapon* pWeapon, char* szDefaultPlayermodel);
 };
 
-/*
-// in a virtual or where stats are consumed
-float GetDamage()     { return g_EconMgr.GetAttributeValue(this, ATK_DAMAGE, m_flBaseDamage); }
-int   iMaxClip()      { return g_EconMgr.GetAttributeInt(this, ATK_CLIP, m_iMaxClip); }
-float GetFireRate()   { return g_EconMgr.GetAttributeValue(this, ATK_FIRE_RATE, 1.0f); }
-*/
-
 void InstallEconomyManager(void);
+void ValidateItemDefs(void);
 
 extern CEconAttributeMgr* TheEconManager;
 

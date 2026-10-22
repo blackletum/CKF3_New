@@ -48,6 +48,9 @@ void CMedigun::Precache(void)
 	PRECACHE_SOUND("CKF_III/invulnerable_off.wav");
 
 	m_usFireScript = PRECACHE_EVENT(1, "events/ckf_medigun.sc");
+
+	m_flBaseFiringRate = 0.1;
+	m_flBaseReloadRate = -1.0f;
 }
 
 int CMedigun::GetItemInfo(ItemInfo *p)
@@ -68,7 +71,7 @@ int CMedigun::GetItemInfo(ItemInfo *p)
 
 BOOL CMedigun::Deploy(void)
 {
-	return GroupDeploy("models/CKF_III/v_medigun.mdl", "models/CKF_III/wp_group_rf.mdl", MEDIGUN_DRAW, 0, 0, "shotgun", 30);
+	return GroupDeploy(TheEconManager->GetViewmodel(this, "models/CKF_III/v_medigun.mdl"), "models/CKF_III/wp_group_rf.mdl", MEDIGUN_DRAW, 0, 0, "shotgun", 30);
 }
 
 void CMedigun::Holster(int skiplocal)
@@ -78,7 +81,7 @@ void CMedigun::Holster(int skiplocal)
 
 void CMedigun::PrimaryAttack(void)
 {
-	m_flNextPrimaryAttack = UTIL_WeaponTimeBase() + 0.1;
+	m_flNextPrimaryAttack = UTIL_WeaponTimeBase() + GetFiringRate();
 
 	CBaseEntity *pEntity = NULL;
 	TraceResult tr;

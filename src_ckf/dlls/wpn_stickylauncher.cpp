@@ -44,6 +44,10 @@ void CStickyLauncher::Precache(void)
 	PRECACHE_SOUND("CKF_III/stickylauncher_det.wav");
 
 	m_usFireScript = PRECACHE_EVENT(1, "events/ckf_launcher.sc");
+
+	m_flBaseFiringRate = 0.6;
+	m_flBaseDamage = 120.0;
+	m_flBaseReloadRate = 0.67;
 }
 
 int CStickyLauncher::GetItemInfo(ItemInfo *p)
@@ -67,7 +71,7 @@ BOOL CStickyLauncher::Deploy(void)
 {
 	m_fInSpecialReload = 0;
 
-	return GroupDeploy("models/CKF_III/v_stickylauncher.mdl", "models/CKF_III/wp_group_rf.mdl", STICKYLAUNCHER_DRAW, 0, 0, "onehanded", 24);
+	return GroupDeploy(TheEconManager->GetViewmodel(this, "models/CKF_III/v_stickylauncher.mdl"), "models/CKF_III/wp_group_rf.mdl", STICKYLAUNCHER_DRAW, 0, 0, "onehanded", 24);
 }
 
 void CStickyLauncher::Holster(int skiplocal)
@@ -235,6 +239,7 @@ void CStickyLauncher::StickyLauncherFire(void)
 	pSticky->pev->skin = m_pPlayer->m_iTeam-1;
 	if(iCrit >= 2) pSticky->pev->skin += 2;
 	pSticky->m_iPjFlags = PJ_AIRBLAST_DEFLECTABLE | PJ_AIRBLAST_UPWARD | PJ_AIRBLAST_ROTATE | PJ_AIRBLAST_TEMPOWNER;
+	pSticky->m_fDmg = GetDamage();
 
 	MESSAGE_BEGIN(MSG_PVS, gmsgDrawFX, pSticky->Center());
 	WRITE_BYTE(FX_STICKYTRAIL);
@@ -260,7 +265,7 @@ void CStickyLauncher::StickyLauncherFire(void)
 
 	PLAYBACK_EVENT_FULL(FEV_NOTHOST, m_pPlayer->edict(), m_usFireScript, 0, (float *)&g_vecZero, (float *)&g_vecZero, 0, 0, m_iId, 0, (iCrit >= 2) ? TRUE : FALSE, 0);
 
-	m_flNextPrimaryAttack = UTIL_WeaponTimeBase() + 0.6f;
+	m_flNextPrimaryAttack = UTIL_WeaponTimeBase() + GetFiringRate();
 	m_flNextSecondaryAttack = UTIL_WeaponTimeBase();
 
 	m_flTimeWeaponIdle = UTIL_WeaponTimeBase() + 0.80;
@@ -276,7 +281,7 @@ void CStickyLauncher::StickyLauncherFire(void)
 
 void CStickyLauncher::Reload(void)
 {
-	if (m_pPlayer->m_rgAmmo[m_iPrimaryAmmoType] <= 0 || m_iClip == STICKY_MAX_CLIP)
+	if (m_pPlayer->m_rgAmmo[m_iPrimaryAmmoType] <= 0 || m_iClip >= GetMaxClip())
 		return;
 
 	if (m_flNextPrimaryAttack > UTIL_WeaponTimeBase())
@@ -299,7 +304,7 @@ void CStickyLauncher::Reload(void)
 
 void CStickyLauncher::Reloaded(void)
 {
-	if (m_pPlayer->m_rgAmmo[m_iPrimaryAmmoType] <= 0 || m_iClip == STICKY_MAX_CLIP)//out of ammo or full of clip, stop reloading
+	if (m_pPlayer->m_rgAmmo[m_iPrimaryAmmoType] <= 0 || m_iClip >= GetMaxClip())//out of ammo or full of clip, stop reloading
 	{
 		SendWeaponAnim(STICKYLAUNCHER_AFTER_RELOAD, UseDecrement() != FALSE);
 		m_flTimeWeaponIdle = UTIL_WeaponTimeBase() + 20;
@@ -319,7 +324,7 @@ void CStickyLauncher::Reloaded(void)
 
 		SendWeaponAnim(STICKYLAUNCHER_RELOAD, UseDecrement() != FALSE);
 		m_flTimeWeaponIdle = UTIL_WeaponTimeBase() + 20;
-		m_flNextReload = UTIL_WeaponTimeBase() + 0.67;		
+		m_flNextReload = UTIL_WeaponTimeBase() + GetReloadRate();		
 	}
 }
 

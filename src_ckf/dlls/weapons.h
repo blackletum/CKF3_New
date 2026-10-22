@@ -3,6 +3,7 @@
 
 #include "effects.h"
 #include "buildable.h"
+#include "decap/ckf_econ_manager.h" // econ stuff. i put it here so that all the weapons automatically get the econ shit instead of me needing to paste it everywhere
 
 class CBasePlayer;
 extern int gmsgWeapPickup;
@@ -361,7 +362,7 @@ public:
 	BOOL AddSecondaryAmmo(int iCount, char *szName, int iMaxCarry);
 	int PrimaryAmmoIndex(void);
 	int SecondaryAmmoIndex(void);
-	//bool HasAnyAmmo( void );
+	//bool HasAnyAmmo( void ); iMaxClip
 public:
 	int m_iPlayEmptySound;
 	int m_fFireOnEmpty;
@@ -388,6 +389,21 @@ public:
 	int m_usFireScript;//event script
 
 	int m_iItemIndex;
+	float m_flBaseDamage;
+	float m_flBaseFiringRate;
+	float m_flBaseSmackTime;
+	float m_flBaseReloadRate;
+	float GetMaxClip() { return TheEconManager->GetAttributeValue(this, ATK_CLIP, iMaxClip()); }
+	float GetDamage() { return TheEconManager->GetAttributeValue(this, ATK_DAMAGE, m_flBaseDamage); }
+	float GetFiringRate() { return TheEconManager->GetAttributeValue(this, ATK_FIRE_RATE, m_flBaseFiringRate); }
+	float GetReloadRate() { return TheEconManager->GetAttributeValue(this, ATK_RELOAD_RATE, m_flBaseReloadRate); }
+	void SetupMeleeValues()
+	{
+		m_flBaseDamage = 65.0;
+		m_flBaseSmackTime = 0.2;
+		m_flBaseFiringRate = m_flBaseSmackTime + 0.6;
+		m_flBaseReloadRate = -1.0f;
+	}
 };
 
 class CBasePlayerAmmo : public CBaseEntity

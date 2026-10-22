@@ -35,6 +35,10 @@ void CSMG::Precache(void)
 	PRECACHE_MODEL("models/CKF_III/v_smg.mdl");
 	PRECACHE_SOUND("CKF_III/smg_shoot.wav");
 	m_usFireScript = PRECACHE_EVENT(1, "events/ckf_smg.sc");
+
+	m_flBaseFiringRate = 0.1;
+	m_flBaseDamage = 8.0;
+	m_flBaseReloadRate = 1.4;
 }
 
 int CSMG::GetItemInfo(ItemInfo *p)
@@ -55,7 +59,7 @@ int CSMG::GetItemInfo(ItemInfo *p)
 
 BOOL CSMG::Deploy(void)
 {
-	return GroupDeploy("models/CKF_III/v_smg.mdl", "models/CKF_III/wp_group_rf.mdl", SMG_DRAW, 0, 0, "onehanded", 54);
+	return GroupDeploy(TheEconManager->GetViewmodel(this, "models/CKF_III/v_smg.mdl"), "models/CKF_III/wp_group_rf.mdl", SMG_DRAW, 0, 0, "onehanded", 54);
 	//return DefaultDeploy("models/CKF_III/v_smg.mdl", "models/CKF_III/wp_smg.mdl", SMG_DRAW, "onehanded", UseDecrement() != FALSE);
 }
 
@@ -87,7 +91,7 @@ void CSMG::SMGFire(void)
 	Vector vecAngles = m_pPlayer->pev->v_angle + m_pPlayer->pev->punchangle;
 	UTIL_MakeVectors(vecAngles);
 	Vector vecSrc = m_pPlayer->GetGunPosition();
-	Vector vecDst = m_pPlayer->CKFFireBullets(vecSrc, gpGlobals->v_forward, flSpread, 8192, BULLET_PLAYER_TF2, 8, iCrit, m_pPlayer->pev, m_pPlayer->random_seed, TRUE);
+	Vector vecDst = m_pPlayer->CKFFireBullets(vecSrc, gpGlobals->v_forward, flSpread, 8192, BULLET_PLAYER_TF2, int(GetDamage()), iCrit, m_pPlayer->pev, m_pPlayer->random_seed, TRUE);
 
 	int iTracerColor = (iCrit >= 2) ? m_pPlayer->m_iTeam : 0;//Draw
 
@@ -97,7 +101,7 @@ void CSMG::SMGFire(void)
 	m_pPlayer->m_iWeaponVolume = NORMAL_GUN_VOLUME;
 	m_pPlayer->m_iWeaponFlash = NORMAL_GUN_FLASH;
 
-	m_flNextPrimaryAttack = m_flNextSecondaryAttack = UTIL_WeaponTimeBase() + 0.1;
+	m_flNextPrimaryAttack = m_flNextSecondaryAttack = UTIL_WeaponTimeBase() + GetFiringRate();
 
 	m_flTimeWeaponIdle = UTIL_WeaponTimeBase() + 1.9;
 
@@ -113,7 +117,7 @@ void CSMG::SMGFire(void)
 
 void CSMG::Reload(void)
 {
-	if (DefaultReload(SMG_MAX_CLIP, SMG_RELOAD, 1.4))
+	if (DefaultReload(GetMaxClip(), SMG_RELOAD, GetReloadRate()))
 	{
 		m_pPlayer->SetAnimation(PLAYER_RELOAD);
 	}

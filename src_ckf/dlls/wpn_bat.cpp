@@ -42,6 +42,12 @@ void CBat::Precache(void)
 	PRECACHE_SOUND("CKF_III/bat_draw.wav");
 
 	m_usFireScript = PRECACHE_EVENT(1, "events/ckf_melee.sc");
+
+	SetupMeleeValues();
+
+	// these are for the bat in particular
+	m_flBaseDamage = 35.0;
+	m_flBaseFiringRate = m_flBaseSmackTime + 0.3;
 }
 
 int CBat::GetItemInfo(ItemInfo *p)
@@ -65,7 +71,7 @@ BOOL CBat::Deploy(void)
 {
 	m_iShotsFired = 0;
 
-	return GroupDeploy("models/CKF_III/v_bat.mdl", "models/CKF_III/wp_group_rf.mdl", BAT_DRAW, 0, 0, "knife", 12);
+	return GroupDeploy(TheEconManager->GetViewmodel(this, "models/CKF_III/v_bat.mdl"), "models/CKF_III/wp_group_rf.mdl", BAT_DRAW, 0, 0, "knife", 12);
 }
 
 void CBat::Holster(int skiplocal)
@@ -75,7 +81,7 @@ void CBat::Holster(int skiplocal)
 
 void CBat::PrimaryAttack(void)
 {
-	m_flMeleeAttack = UTIL_WeaponTimeBase() + 0.2;
+	m_flMeleeAttack = UTIL_WeaponTimeBase() + m_flBaseSmackTime;
 	m_iMeleeCrit = m_pPlayer->GetCriticalFire(2, m_pPlayer->random_seed);
 	m_bMeleeAttack = TRUE;
 	switch ((m_iShotsFired++) % 2)
@@ -84,7 +90,7 @@ void CBat::PrimaryAttack(void)
 		case 1: SendWeaponAnim(BAT_SLASH2, UseDecrement() != FALSE); break;
 	}
 	m_pPlayer->SetAnimation(PLAYER_ATTACK1);
-	m_flNextPrimaryAttack = UTIL_WeaponTimeBase() + 0.5;
+	m_flNextPrimaryAttack = UTIL_WeaponTimeBase() + GetFiringRate();
 }
 
 void CBat::Swing(void)
@@ -124,7 +130,15 @@ void CBat::Swing(void)
 		{
 			m_iMeleeCrit += pEntity->GetCriticalHit();
 
-			float fDmg = 35;
+			float fDmg = GetDamage();
+
+			if (pEntity->Classify() == CLASS_PLAYER)
+			{
+				CBasePlayer* pPlayer = (CBasePlayer*)pEntity;
+
+				if (m_pPlayer->HitConditionCheck(this, pPlayer))
+					m_iMeleeCrit += 2;
+			}
 
 			if(m_iMeleeCrit >= 2) fDmg *= 3;
 			else if(m_iMeleeCrit) fDmg *= 1.35f;

@@ -1541,7 +1541,7 @@ if (FStrEq(pcmd, "fullupdate"))
 		if(CVAR_GET_FLOAT("sv_cheats") != 0)
 		{
 			g_pGameRules->Cmd_AddCondition(pPlayer);
-		}
+		}			
 		return;
 	}
 
@@ -1763,6 +1763,90 @@ if (FStrEq(pcmd, "fullupdate"))
 	if (FStrEq(pcmd, "chooseloadout"))
 	{
 		// todo: make vgui loadout picker
+
+		int argc = CMD_ARGC();
+		if (argc < 3)
+		{
+			ClientPrint(pPlayer->pev, HUD_PRINTCONSOLE, "Usage: chooseloadout <class> <slot> <new id>");
+			return;
+		}
+
+		int iClass = atoi(CMD_ARGV(1));
+		if (!iClass)
+		{
+			ClientPrint(pPlayer->pev, HUD_PRINTCONSOLE, "chooseloadout: invalid class");
+			return;
+		}
+
+		switch (iClass)
+		{
+			case 2:
+			{
+				// normally heavy
+				iClass = CLASS_SOLDIER;
+				break;
+			}
+			case 3:
+			{
+				// normally soldier
+				iClass = CLASS_PYRO;
+				break;
+			}
+			case 4:
+			{
+				// normally pyro
+				iClass = CLASS_DEMOMAN;
+				break;
+			}
+			case 5:
+			{
+				// normally sniper
+				iClass = CLASS_HEAVY;
+				break;
+			}
+			case 6:
+			{
+				// normally medic
+				iClass = CLASS_ENGINEER;
+				break;
+			}
+			case 7:
+			{
+				// normally engineer
+				iClass = CLASS_MEDIC;
+				break;
+			}
+			case 8:
+			{
+				// normally demoman
+				iClass = CLASS_SNIPER;
+				break;
+			}
+			case CLASS_SCOUT:
+			case CLASS_SPY:
+				// dont need to change anything as the numbers align right
+				break;
+			default:
+			{
+				ClientPrint(pPlayer->pev, HUD_PRINTCONSOLE, "chooseloadout: not a valid class");
+				return;
+			}
+		}
+
+		int slot = atoi(CMD_ARGV(2));
+		if (!slot || slot > WEAPON_SLOT_MELEE || slot < WEAPON_SLOT_PRIMARY)
+		{
+			ClientPrint(pPlayer->pev, HUD_PRINTCONSOLE, "chooseloadout: not a valid slot");
+			return;
+		}
+		slot = slot - 1; // slot--;
+
+		int newId = atoi(CMD_ARGV(3));
+		if(newId && newId < ITEM_COUNT)
+			pPlayer->m_iLoadoutEconIndex[iClass][slot] = newId;
+
+		ALERT(at_console, "index is set to %i on slot %i in class %i", newId, slot, iClass);
+		return;
 	}
 
 	if (FStrEq(pcmd, "chooseteam") || FStrEq(pcmd, "changeteam"))

@@ -41,6 +41,10 @@ void CGrenadeLauncher::Precache(void)
 	PRECACHE_SOUND("CKF_III/grenadelauncher_shoot.wav");
 
 	m_usFireScript = PRECACHE_EVENT(1, "events/ckf_launcher.sc");
+
+	m_flBaseFiringRate = 0.6;
+	m_flBaseDamage = 120.0;
+	m_flBaseReloadRate = 0.6;
 }
 
 int CGrenadeLauncher::GetItemInfo(ItemInfo *p)
@@ -63,7 +67,7 @@ int CGrenadeLauncher::GetItemInfo(ItemInfo *p)
 BOOL CGrenadeLauncher::Deploy(void)
 {
 	m_fInSpecialReload = 0;
-	return GroupDeploy("models/CKF_III/v_grenadelauncher.mdl", "models/CKF_III/wp_group_2bone.mdl", GRENADELAUNCHER_DRAW, 0, 0, "shotgun", 0);
+	return GroupDeploy(TheEconManager->GetViewmodel(this, "models/CKF_III/v_grenadelauncher.mdl"), "models/CKF_III/wp_group_2bone.mdl", GRENADELAUNCHER_DRAW, 0, 0, "shotgun", 0);
 }
 
 void CGrenadeLauncher::PrimaryAttack(void)
@@ -111,6 +115,7 @@ void CGrenadeLauncher::GrenadeLauncherFire()
 	pGrenade->pev->frame = (iCrit>=2) ? 1 : 0;
 	pGrenade->pev->skin = m_pPlayer->m_iTeam-1;
 	pGrenade->m_iPjFlags = PJ_AIRBLAST_DEFLECTABLE | PJ_AIRBLAST_UPWARD | PJ_AIRBLAST_OWNER | PJ_AIRBLAST_ROTATE;
+	pGrenade->m_fDmg = GetDamage();
 
 	MESSAGE_BEGIN(MSG_BROADCAST, gmsgDrawFX);
 	WRITE_BYTE(FX_GRENADETRAIL);
@@ -124,7 +129,7 @@ void CGrenadeLauncher::GrenadeLauncherFire()
 
 	PLAYBACK_EVENT_FULL(FEV_NOTHOST, m_pPlayer->edict(), m_usFireScript, 0, (float *)&g_vecZero, (float *)&g_vecZero, 0, 0, m_iId, 0, (iCrit >= 2) ? TRUE : FALSE, 0);
 
-	m_flNextPrimaryAttack = m_flNextSecondaryAttack = UTIL_WeaponTimeBase() + 0.6;
+	m_flNextPrimaryAttack = m_flNextSecondaryAttack = UTIL_WeaponTimeBase() + GetFiringRate();
 
 	m_flTimeWeaponIdle = UTIL_WeaponTimeBase() + 0.80;
 
@@ -136,7 +141,7 @@ void CGrenadeLauncher::GrenadeLauncherFire()
 
 void CGrenadeLauncher::Reload(void)
 {
-	if (m_pPlayer->m_rgAmmo[m_iPrimaryAmmoType] <= 0 || m_iClip == GRENADE_MAX_CLIP)
+	if (m_pPlayer->m_rgAmmo[m_iPrimaryAmmoType] <= 0 || m_iClip >= GetMaxClip())
 		return;
 
 	if (m_flNextPrimaryAttack > UTIL_WeaponTimeBase())
@@ -156,7 +161,7 @@ void CGrenadeLauncher::Reload(void)
 
 void CGrenadeLauncher::Reloaded(void)
 {
-	if (m_iClip == GRENADE_MAX_CLIP || m_pPlayer->m_rgAmmo[m_iPrimaryAmmoType] <= 0)//out of ammo or full of clip, stop reloading
+	if (m_iClip >= GetMaxClip() || m_pPlayer->m_rgAmmo[m_iPrimaryAmmoType] <= 0)//out of ammo or full of clip, stop reloading
 	{
 		SendWeaponAnim(GRENADELAUNCHER_AFTER_RELOAD, UseDecrement() != FALSE);
 		m_flTimeWeaponIdle = UTIL_WeaponTimeBase() + 20;
@@ -175,7 +180,7 @@ void CGrenadeLauncher::Reloaded(void)
 		m_fInSpecialReload = 2;//reloading stage
 
 		SendWeaponAnim(GRENADELAUNCHER_RELOAD, UseDecrement() != FALSE);
-		m_flNextReload = UTIL_WeaponTimeBase() + 0.60;
+		m_flNextReload = UTIL_WeaponTimeBase() + GetReloadRate();
 		m_flTimeWeaponIdle = UTIL_WeaponTimeBase() + 20;
 	}
 }

@@ -511,7 +511,7 @@ void CBasePlayerWeapon::ItemPostFrame(void)
 		m_bDelayedFire = FALSE;
 		m_fFireOnEmpty = FALSE;
 
-		if ( IsUseable() && m_pPlayer->m_rgAmmo[m_iPrimaryAmmoType] > 0 && (!m_iClip || (m_iClip < iMaxClip() && m_pPlayer->m_bAutoReload)) && !(iFlags() & ITEM_FLAG_NOAUTORELOAD) && m_flNextPrimaryAttack <= UTIL_WeaponTimeBase())
+		if ( IsUseable() && m_pPlayer->m_rgAmmo[m_iPrimaryAmmoType] > 0 && (!m_iClip || (m_iClip < GetMaxClip() && m_pPlayer->m_bAutoReload)) && !(iFlags() & ITEM_FLAG_NOAUTORELOAD) && m_flNextPrimaryAttack <= UTIL_WeaponTimeBase())
 		{
 			Reload();
 		}
@@ -898,7 +898,7 @@ int CBasePlayerWeapon::ExtractAmmo(CBasePlayerWeapon *pWeapon)
 
 	if (pszAmmo1())
 	{
-		iReturn = pWeapon->AddPrimaryAmmo(m_iDefaultAmmo, (char *)pszAmmo1(), iMaxClip(), iMaxAmmo1());
+		iReturn = pWeapon->AddPrimaryAmmo(m_iDefaultAmmo, (char *)pszAmmo1(), GetMaxClip(), iMaxAmmo1());
 		m_iDefaultAmmo = 0;
 	}
 
@@ -943,7 +943,7 @@ void CBasePlayerWeapon::Reloaded(void)
 	if(m_iPrimaryAmmoType < 0)
 		return;
 
-	int j = min(iMaxClip() - m_iClip, m_pPlayer->m_rgAmmo[m_iPrimaryAmmoType]);
+	int j = min(GetMaxClip() - m_iClip, m_pPlayer->m_rgAmmo[m_iPrimaryAmmoType]);
 
 	m_iClip += j;
 	m_pPlayer->m_rgAmmo[m_iPrimaryAmmoType] -= j;

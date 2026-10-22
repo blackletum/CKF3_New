@@ -24,8 +24,6 @@
 #include "bot/hl_bot_manager.h" // TheHLBots
 #include "bot/bot_util.h"
 
-#include "decap/ckf_econ_manager.h" // econ stuff
-
 extern cvar_t cv_bot_last_area_update_tolerance;
 
 extern DLL_GLOBAL BOOL g_fGameOver;
@@ -778,6 +776,15 @@ void CBasePlayer::DeathSound(void)
 
 int CBasePlayer::TakeHealth(float flHealth, int bitsDamageType)
 {
+	if (!bitsDamageType) // this is just here so that i dont have to go back and edit everything else LOLOLOL
+	{
+		int oldhp = pev->health;
+		int planned = min(pev->health + flHealth, pev->max_health);
+		int newhp = planned - oldhp;
+		if (newhp)
+			SendAddHealth(newhp);
+	}
+
 	return CBaseMonster::TakeHealth(flHealth, bitsDamageType);
 }
 
@@ -959,6 +966,8 @@ int CBasePlayer::TakeDamage(entvars_t *pevInflictor, entvars_t *pevAttacker, flo
 	if(m_Cond.Invulnerable.m_iStatus)
 		return 0;
 
+	int crits = iCrit;
+
 	BOOL bShowCritEffects = TRUE;
 	BOOL bShowDmgFText = TRUE;
 
@@ -977,6 +986,11 @@ int CBasePlayer::TakeDamage(entvars_t *pevInflictor, entvars_t *pevAttacker, flo
 			if(pevAttacker == pev)
 				bShowCritEffects = FALSE;
 		}
+		else
+		{
+			// only for enemies
+			plAttacker->HitReward();			
+		}
 	}
 	else if(pAttacker->Classify() == CLASS_PROJECTILE)
 	{
@@ -990,11 +1004,11 @@ int CBasePlayer::TakeDamage(entvars_t *pevInflictor, entvars_t *pevAttacker, flo
 	//show critical effects
 	if(m_iDisguise != DISGUISE_YES)
 	{
-		if(iCrit >= 2)
+		if(crits >= 2)
 		{
 			SendCriticalHit(bShowCritEffects, (pAttacker->pev != pev) ? true : false);
 		}
-		else if(iCrit == 1)
+		else if(crits == 1)
 		{			
 			SendMiniCritHit(bShowCritEffects, (pAttacker->pev != pev) ? true : false);
 		}
@@ -1041,14 +1055,14 @@ int CBasePlayer::TakeDamage(entvars_t *pevInflictor, entvars_t *pevAttacker, flo
 		//add hit damage to queue
 		if(bShowDmgFText && plAttacker && m_iDisguise != DISGUISE_YES && m_iCloak != CLOAK_YES)
 		{
-			AddHitDamage(pevAttacker, (int)flDamage, iCrit);
+			AddHitDamage(pevAttacker, (int)flDamage, crits);
 		}
 
 		m_flLastDamagedTime = gpGlobals->time;
 		if(plAttacker && pevAttacker != pev)
 			DmgRecord_Add(plAttacker, flDamage);
 
-		int fTookDamage = CBaseMonster::TakeDamage(pevInflictor, pevAttacker, (int)flDamage, bitsDamageType, iCrit);
+		int fTookDamage = CBaseMonster::TakeDamage(pevInflictor, pevAttacker, (int)flDamage, bitsDamageType, crits);
 
 		return fTookDamage;
 	}
@@ -1095,14 +1109,14 @@ int CBasePlayer::TakeDamage(entvars_t *pevInflictor, entvars_t *pevAttacker, flo
 
 	if(bShowDmgFText && plAttacker && m_iDisguise != DISGUISE_YES)
 	{
-		AddHitDamage(pevAttacker, (int)flDamage, iCrit);
+		AddHitDamage(pevAttacker, (int)flDamage, crits);
 	}
 
 	m_flLastDamagedTime = gpGlobals->time;
 	if(plAttacker && pevAttacker != pev)
 		DmgRecord_Add(plAttacker, flDamage);
 
-	return CBaseMonster::TakeDamage(pevInflictor, pevAttacker, (int)flDamage, bitsDamageType, iCrit);
+	return CBaseMonster::TakeDamage(pevInflictor, pevAttacker, (int)flDamage, bitsDamageType, crits);
 }
 
 const char *GetWeaponModelName(int iWeaponId);
@@ -1263,35 +1277,24 @@ void CBasePlayer::GiveDefaultItems(void)
 {
 	RemoveAllItems(FALSE);
 
-	//ckfgivedefaultitem
 	if (m_iClass <= 0 || m_iClass >= ARRAYSIZE(g_StockLoadout))
+	{
+		GiveNamedItem("weapon_smg"); 
+		GiveNamedItem("weapon_bottle");
+		// this should never happen... hopefully...
 		return;
+	}
 
 	for (int slot = 0; slot < MAX_WEAPON_SLOTS; slot++)
 	{
 		int iItem = m_iLoadoutEconIndex[m_iClass][slot];
-		if (iItem <= 0)
+		if (iItem <= ITEM_DISGUISEKIT)
 			iItem = g_StockLoadout[m_iClass][slot];
+		// every index lower than this is a stock item, so if a person uses this, then they wrongly put the stock option and should get the appropriate stock item for that slot
 
 		if (iItem > ITEM_NULL)
 			GiveLoadoutItem(iItem);
 	}
-
-	/*
-	switch(m_iClass)
-	{
-	default:GiveNamedItem("weapon_rocketlauncher");GiveNamedItem("weapon_smg");GiveNamedItem("weapon_bottle");break; // this shouldnt happen..hopefully...
-	case CLASS_SNIPER: GiveNamedItem("weapon_sniperifle");GiveNamedItem("weapon_smg");GiveNamedItem("weapon_kukri");break;
-	case CLASS_SOLDIER: GiveNamedItem("weapon_rocketlauncher");GiveNamedItem("weapon_shotgun");GiveNamedItem("weapon_shovel");break;
-	case CLASS_DEMOMAN: GiveNamedItem("weapon_grenadelauncher");GiveNamedItem("weapon_stickylauncher");GiveNamedItem("weapon_bottle");break;
-	case CLASS_SCOUT: GiveNamedItem("weapon_scattergun");GiveNamedItem("weapon_pistol");GiveNamedItem("weapon_bat");break;
-	case CLASS_HEAVY: GiveNamedItem("weapon_minigun");GiveNamedItem("weapon_shotgun");GiveNamedItem("weapon_fist");break;
-	case CLASS_PYRO: GiveNamedItem("weapon_flamethrower");GiveNamedItem("weapon_shotgun");GiveNamedItem("weapon_fireaxe");break;
-	case CLASS_SPY: GiveNamedItem("weapon_revolver");GiveNamedItem("weapon_sapper");GiveNamedItem("weapon_butterfly");GiveNamedItem("weapon_disguisekit");break;
-	case CLASS_MEDIC: GiveNamedItem("weapon_syringegun");GiveNamedItem("weapon_medigun");GiveNamedItem("weapon_bonesaw");break;
-	case CLASS_ENGINEER: GiveNamedItem("weapon_shotgun");GiveNamedItem("weapon_pistol");GiveNamedItem("weapon_wrench");GiveNamedItem("weapon_buildpda");GiveNamedItem("weapon_destroypda");break;
-	}
-	*/
 
 	m_bHasPrimaryWeapon = TRUE;
 }
@@ -1620,17 +1623,97 @@ void CBasePlayer::Killed(entvars_t *pevAttacker, int iGib)
 	}*/
 }
 
-void CBasePlayer::KillReward(void)
+bool CBasePlayer::HitConditionCheck(const CBasePlayerWeapon* pWeapon, CBasePlayer* pTarget)
 {
-	return;
+	if (!pWeapon)
+		return false;
 
-	// for weapons that do stuff on kill
+	for (int i = HITCOND_START; i < HITCOND_END; i++)
+	{
+		if (!TheEconManager->GetAttributeBool(pWeapon, i))
+			continue;
 
+		switch (i)
+		{
+		case HITCOND_CRIT_BURNING:
+		{
+			if (pTarget->m_Cond.AfterBurn.m_iStatus)
+				return true;
+
+			break;
+		}
+		default:
+			break;
+		}
+	}
+}
+
+bool CBasePlayer::HitConditionCheck(CBasePlayer* pTarget)
+{
+	CBasePlayerWeapon* pWeapon = (CBasePlayerWeapon*)m_pActiveItem;
+	if (!pWeapon)
+		return false;
+	return HitConditionCheck(pWeapon, pTarget);
+}
+
+void CBasePlayer::HitReward(void)
+{
 	CBasePlayerWeapon* pWeapon = (CBasePlayerWeapon*)m_pActiveItem;
 
 	if (pWeapon)
 	{
-		// TODO: call and check for weapons here using the economy id
+		for (int i = HIT_START; i < HIT_END; i++)
+		{
+			if (!TheEconManager->GetAttributeBool(pWeapon, i))
+				continue;
+
+			switch (i)
+			{
+				case HIT_HEAL:
+				{
+					float value = TheEconManager->GetAttributeValue(pWeapon, HIT_HEAL, 0.0);
+					if (value)
+						TakeHealth(value, 0);
+					break;
+				}
+				default:
+					break;
+			}
+		}
+	}
+}
+
+void CBasePlayer::KillReward(void)
+{
+	CBasePlayerWeapon* pWeapon = (CBasePlayerWeapon*)m_pActiveItem;
+
+	if (pWeapon)
+	{
+		for (int i = KILL_START; i < KILL_END; i++)
+		{
+			if (!TheEconManager->GetAttributeBool(pWeapon, i))
+				continue;
+
+			switch (i)
+			{
+				case KILL_CRITS:
+				{
+					float value = TheEconManager->GetAttributeValue(pWeapon, KILL_CRITS, 0.0);
+					if(value)
+						CritBoost_Add(value);
+					break;
+				}
+				case KILL_HEAL:
+				{
+					float value = TheEconManager->GetAttributeValue(pWeapon, KILL_HEAL, 0.0);
+					if (value)
+						TakeHealth(value, 0);
+					break;
+				}
+				default:
+					break;
+			}
+		}
 	}
 }
 
@@ -7165,7 +7248,7 @@ BOOL CBasePlayer::ResupplyCase(void)
 			iMaxAmmo = pWeapon->iMaxAmmo1();
 			pszAmmo = (char *)pWeapon->pszAmmo1();
 			if(pszAmmo && iMaxAmmo) GiveAmmo(iMaxAmmo, pszAmmo, iMaxAmmo);
-			(pWeapon)->m_iClip = pWeapon->iMaxClip();
+			(pWeapon)->m_iClip = pWeapon->GetMaxClip();
 		}
 		pWeapon->Reset();
 	}

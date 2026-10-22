@@ -35,6 +35,10 @@ void CRevolver::Precache(void)
 	PRECACHE_MODEL("models/CKF_III/v_revolver.mdl");
 	PRECACHE_SOUND("CKF_III/revolver_shoot.wav");
 	m_usFireScript = PRECACHE_EVENT(1, "events/ckf_revolver.sc");
+
+	m_flBaseFiringRate = 0.58;
+	m_flBaseDamage = 40;
+	m_flBaseReloadRate = 1.16;
 }
 
 int CRevolver::GetItemInfo(ItemInfo *p)
@@ -55,7 +59,7 @@ int CRevolver::GetItemInfo(ItemInfo *p)
 
 BOOL CRevolver::Deploy(void)
 {
-	return GroupDeploy("models/CKF_III/v_revolver.mdl", "models/CKF_III/wp_group_rf.mdl", REVOLVER_DRAW, 0, 0, "shotgun", 48);
+	return GroupDeploy(TheEconManager->GetViewmodel(this, "models/CKF_III/v_revolver.mdl"), "models/CKF_III/wp_group_rf.mdl", REVOLVER_DRAW, 0, 0, "shotgun", 48);
 }
 
 void CRevolver::PrimaryAttack(void)
@@ -86,7 +90,7 @@ void CRevolver::RevolverFire(void)
 	Vector vecAngles = m_pPlayer->pev->v_angle + m_pPlayer->pev->punchangle;
 	UTIL_MakeVectors(vecAngles);
 	Vector vecSrc = m_pPlayer->GetGunPosition();
-	Vector vecDst = m_pPlayer->CKFFireBullets(vecSrc, gpGlobals->v_forward, flSpread, 8192, BULLET_PLAYER_TF2, 40, iCrit, m_pPlayer->pev, m_pPlayer->random_seed, TRUE);
+	Vector vecDst = m_pPlayer->CKFFireBullets(vecSrc, gpGlobals->v_forward, flSpread, 8192, BULLET_PLAYER_TF2, int(GetDamage()), iCrit, m_pPlayer->pev, m_pPlayer->random_seed, TRUE);
 
 	//Draw Tracer
 	int iTracerColor = (iCrit >= 2) ? m_pPlayer->m_iTeam : 0;
@@ -96,7 +100,7 @@ void CRevolver::RevolverFire(void)
 
 	m_pPlayer->m_iWeaponVolume = NORMAL_GUN_VOLUME;
 	m_pPlayer->m_iWeaponFlash = NORMAL_GUN_FLASH;
-	m_flNextPrimaryAttack = m_flNextSecondaryAttack = UTIL_WeaponTimeBase() + 0.58f;
+	m_flNextPrimaryAttack = m_flNextSecondaryAttack = UTIL_WeaponTimeBase() + GetFiringRate();
 
 	m_flTimeWeaponIdle = UTIL_WeaponTimeBase() + 1.9;
 
@@ -122,7 +126,7 @@ void CRevolver::SecondaryAttack(void)
 
 void CRevolver::Reload(void)
 {
-	if (DefaultReload(REVOLVER_MAX_CLIP, REVOLVER_RELOAD, 1.16))
+	if (DefaultReload(GetMaxClip(), REVOLVER_RELOAD, GetReloadRate()))
 	{
 		m_pPlayer->SetAnimation(PLAYER_RELOAD);
 	}

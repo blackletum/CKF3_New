@@ -52,6 +52,10 @@ void CFlamethrower::Precache(void)
 	PRECACHE_SOUND("CKF_III/flamethrower_redirect.wav");
 
 	m_usFireScript = PRECACHE_EVENT(1, "events/ckf_flamethrower.sc");
+
+	m_flBaseFiringRate = 0.04;
+	m_flBaseDamage = 6.2;
+	m_flBaseReloadRate = -1.0f;
 }
 
 int CFlamethrower::GetItemInfo(ItemInfo *p)
@@ -76,7 +80,7 @@ BOOL CFlamethrower::Deploy(void)
 	m_iAmmoConsumption = 0;
 	m_iState = STATE_FLAMETHROWER_IDLE;
 
-	return GroupDeploy("models/CKF_III/v_flamethrower.mdl", "models/CKF_III/wp_group_rf.mdl", FLAMETHROWER_DRAW, 0, 0, "shotgun", 66);
+	return GroupDeploy(TheEconManager->GetViewmodel(this, "models/CKF_III/v_flamethrower.mdl"), "models/CKF_III/wp_group_rf.mdl", FLAMETHROWER_DRAW, 0, 0, "shotgun", 66);
 }
 
 void CFlamethrower::Holster(int skiplocal)
@@ -143,8 +147,9 @@ void CFlamethrower::FlamethrowerFire(void)
 
 	pFlame->m_iCrit = iCrit;
 	pFlame->m_iTeam = m_pPlayer->m_iTeam;
+	pFlame->m_fDmg = GetDamage();
 
-	m_flNextPrimaryAttack = UTIL_WeaponTimeBase() + 0.04;
+	m_flNextPrimaryAttack = UTIL_WeaponTimeBase() + GetFiringRate();
 	m_flTimeWeaponIdle = UTIL_WeaponTimeBase() + 0.15;
 
 	if(m_iState == STATE_FLAMETHROWER_IDLE)

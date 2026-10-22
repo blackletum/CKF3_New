@@ -46,6 +46,7 @@ void CShovel::Precache(void)
 	PRECACHE_SOUND("CKF_III/draw_shovel.wav");
 
 	m_usFireScript = PRECACHE_EVENT(1, "events/ckf_melee.sc");
+	SetupMeleeValues();
 }
 
 int CShovel::GetItemInfo(ItemInfo *p)
@@ -69,7 +70,7 @@ BOOL CShovel::Deploy(void)
 {
 	m_iShotsFired = 0;
 
-	return GroupDeploy("models/CKF_III/v_shovel.mdl", "models/CKF_III/wp_group_rf.mdl", SHOVEL_DRAW, 0, 0, "knife", 0);
+	return GroupDeploy(TheEconManager->GetViewmodel(this, "models/CKF_III/v_shovel.mdl"), "models/CKF_III/wp_group_rf.mdl", SHOVEL_DRAW, 0, 0, "knife", 0);
 }
 
 void CShovel::Holster(int skiplocal)
@@ -79,12 +80,12 @@ void CShovel::Holster(int skiplocal)
 
 void CShovel::PrimaryAttack(void)
 {
-	m_flMeleeAttack = UTIL_WeaponTimeBase() + 0.3;
+	m_flMeleeAttack = UTIL_WeaponTimeBase() + m_flBaseSmackTime;
 	m_iMeleeCrit = m_pPlayer->GetCriticalFire(2, m_pPlayer->random_seed);
 	m_bMeleeAttack = TRUE;
 	SendWeaponAnim(SHOVEL_SLASH1 + (m_iShotsFired++) % 2, UseDecrement() != FALSE);
 	m_pPlayer->SetAnimation(PLAYER_ATTACK1);
-	m_flNextPrimaryAttack = UTIL_WeaponTimeBase() + 0.8;
+	m_flNextPrimaryAttack = UTIL_WeaponTimeBase() + GetFiringRate();
 }
 
 void CShovel::Swing(void)
@@ -124,7 +125,15 @@ void CShovel::Swing(void)
 		{
 			m_iMeleeCrit += m_pPlayer->GetCriticalHit();
 
-			float fDmg = 65;
+			float fDmg = GetDamage();
+
+			if (pEntity->Classify() == CLASS_PLAYER)
+			{
+				CBasePlayer* pPlayer = (CBasePlayer*)pEntity;
+
+				if (m_pPlayer->HitConditionCheck(this, pPlayer))
+					m_iMeleeCrit += 2;
+			}
 
 			if(m_iMeleeCrit >= 2) fDmg *= 3;
 			else if(m_iMeleeCrit) fDmg *= 1.35f;

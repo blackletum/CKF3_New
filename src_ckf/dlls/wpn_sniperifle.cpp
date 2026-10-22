@@ -36,6 +36,10 @@ void CSniperifle::Precache(void)
 	PRECACHE_SOUND("CKF_III/sniperifle_shoot.wav");
 
 	m_usFireScript = PRECACHE_EVENT(1, "events/ckf_sniperifle.sc");
+
+	m_flBaseFiringRate = 1.5;
+	m_flBaseDamage = 50.0;
+	m_flBaseReloadRate = -1.0f;
 }
 
 int CSniperifle::GetItemInfo(ItemInfo *p)
@@ -60,7 +64,7 @@ BOOL CSniperifle::Deploy(void)
 	m_iWeaponState &= ~WEAPONSTATE_CHARGING;
 	m_fSpotActive = 0;
 
-	return GroupDeploy("models/CKF_III/v_sniperifle.mdl", "models/CKF_III/wp_group_rf.mdl", SNIPERIFLE_DRAW, 0, 0, "shotgun", 57);
+	return GroupDeploy(TheEconManager->GetViewmodel(this, "models/CKF_III/v_sniperifle.mdl"), "models/CKF_III/wp_group_rf.mdl", SNIPERIFLE_DRAW, 0, 0, "shotgun", 57);
 }
 
 BOOL CSniperifle::CanHolster(void)
@@ -168,7 +172,7 @@ void CSniperifle::SniperifleFire(void)
 	Vector vecAngles = m_pPlayer->pev->v_angle + m_pPlayer->pev->punchangle;
 	UTIL_MakeVectors(vecAngles);
 	Vector vecSrc = m_pPlayer->GetGunPosition();
-	Vector vecDir = m_pPlayer->CKFFireBullets(vecSrc, gpGlobals->v_forward, 0.0, 8192, (m_fCharge > 10) ? BULLET_PLAYER_SNIPER : BULLET_PLAYER_SNIPER_NOHS, (m_fCharge > 25) ? int((1+2.0f*m_fCharge/100.0f)*50.0f) : 50, iCrit, m_pPlayer->pev, m_pPlayer->random_seed, TRUE);
+	Vector vecDir = m_pPlayer->CKFFireBullets(vecSrc, gpGlobals->v_forward, 0.0, 8192, (m_fCharge > 10) ? BULLET_PLAYER_SNIPER : BULLET_PLAYER_SNIPER_NOHS, (m_fCharge > 25) ? int((1+2.0f*m_fCharge/100.0f)*GetDamage()) : int(GetDamage()), iCrit, m_pPlayer->pev, m_pPlayer->random_seed, TRUE);
 
 	ViewAnglesForPlayBack(vecAngles);
 	PLAYBACK_EVENT_FULL(FEV_NOTHOST, m_pPlayer->edict(), m_usFireScript, 0, vecSrc, vecAngles, 0, 0, iCrit, 0, 0, 0);
@@ -176,9 +180,9 @@ void CSniperifle::SniperifleFire(void)
 	m_pPlayer->m_iWeaponVolume = BIG_EXPLOSION_VOLUME;
 	m_pPlayer->m_iWeaponFlash = BRIGHT_GUN_FLASH;
 
-	m_flNextPrimaryAttack = UTIL_WeaponTimeBase() + 1.5;
+	m_flNextPrimaryAttack = UTIL_WeaponTimeBase() + GetFiringRate();
 
-	m_flTimeWeaponIdle = UTIL_WeaponTimeBase() + 1.9;
+	m_flTimeWeaponIdle = UTIL_WeaponTimeBase() + GetFiringRate() + 0.4;
 
 	m_fSpotActive = 0;
 	m_iWeaponState &= ~WEAPONSTATE_CHARGING;

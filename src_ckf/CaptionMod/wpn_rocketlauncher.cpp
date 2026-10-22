@@ -48,7 +48,7 @@ void CClientRocketLauncher::PrimaryAttack(void)
 
 void CClientRocketLauncher::Reload(void)
 {
-	if (m_iAmmo <= 0 || m_iClip == ROCKET_MAX_CLIP)
+	if (m_iAmmo <= 0 || m_iClip >= ROCKET_MAX_CLIP)
 		return;
 
 	if (m_flNextPrimaryAttack > UTIL_WeaponTimeBase())
@@ -66,7 +66,7 @@ void CClientRocketLauncher::Reload(void)
 
 void CClientRocketLauncher::Reloaded(void)
 {
-	if (m_iAmmo <= 0 || m_iClip == ROCKET_MAX_CLIP)//out of ammo or full of clip, stop reloading
+	if (m_iAmmo <= 0 || m_iClip >= ROCKET_MAX_CLIP)//out of ammo or full of clip, stop reloading
 	{
 		SendWeaponAnim(ROCKETLAUNCHER_AFTER_RELOAD);
 		m_flTimeWeaponIdle = UTIL_WeaponTimeBase() + 20;

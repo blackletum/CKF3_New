@@ -33,6 +33,9 @@ void CSapper::Precache(void)
 {
 	PRECACHE_MODEL("models/CKF_III/v_sapper.mdl");
 	PRECACHE_SOUND("CKF_III/sapper_plant.wav");
+
+	m_flBaseDamage = 12.5;
+	m_flBaseReloadRate = -1.0f;
 }
 
 int CSapper::GetItemInfo(ItemInfo *p)
@@ -53,7 +56,7 @@ int CSapper::GetItemInfo(ItemInfo *p)
 
 BOOL CSapper::Deploy(void)
 {
-	return GroupDeploy("models/CKF_III/v_sapper.mdl", "models/CKF_III/wp_group_rf.mdl", (m_pPlayer->m_iCloak == CLOAK_NO) ? SAPPER_DRAW : SAPPER_DRAW2, 0, 0, "onehanded", 51);
+	return GroupDeploy(TheEconManager->GetViewmodel(this, "models/CKF_III/v_sapper.mdl"), "models/CKF_III/wp_group_rf.mdl", (m_pPlayer->m_iCloak == CLOAK_NO) ? SAPPER_DRAW : SAPPER_DRAW2, 0, 0, "onehanded", 51);
 }
 
 void CSapper::PrimaryAttack(void)
@@ -89,7 +92,8 @@ void CSapper::PrimaryAttack(void)
 	if(pBuild->m_pSapper)
 		return;
 
-	CBuildSapper::CreateBuildSapper(pBuild, m_pPlayer);
+	CBuildSapper *pSapper = CBuildSapper::CreateBuildSapper(pBuild, m_pPlayer);
+	pSapper->m_fDmg = GetDamage();
 	EMIT_SOUND(ENT(pev), CHAN_WEAPON, "CKF_III/sapper_plant.wav", VOL_NORM, ATTN_NORM);
 }
 

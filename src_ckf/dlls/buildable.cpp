@@ -1938,7 +1938,7 @@ void CBuildTeleporter::TelePlayer(void)
 		CBasePlayer *pVictim = (CBasePlayer *)pEntity;
 		if(pVictim->m_iTeam != m_pTelePlayer->m_iTeam)
 		{
-			pVictim->TakeDamage(pev, m_pTelePlayer->pev, pev->max_health * 6, DMG_GENERIC | DMG_NEVERGIB, 0);
+			pVictim->TakeDamage(pev, m_pTelePlayer->pev, pev->max_health * 6, DMG_GENERIC | DMG_ALWAYSGIB, 0);
 		}
 	}
 

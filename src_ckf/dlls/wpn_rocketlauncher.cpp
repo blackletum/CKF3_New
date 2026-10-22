@@ -42,6 +42,10 @@ void CRocketLauncher::Precache(void)
 	PRECACHE_SOUND("CKF_III/rocketlauncher_shoot.wav");
 
 	m_usFireScript = PRECACHE_EVENT(1, "events/ckf_launcher.sc");
+
+	m_flBaseFiringRate = 0.8;
+	m_flBaseDamage = 90.0;
+	m_flBaseReloadRate = 0.7;
 }
 
 int CRocketLauncher::GetItemInfo(ItemInfo *p)
@@ -65,7 +69,7 @@ BOOL CRocketLauncher::Deploy(void)
 {
 	m_fInSpecialReload = 0;
 	
-	return GroupDeploy("models/CKF_III/v_rocketlauncher.mdl", "models/CKF_III/wp_group_rf.mdl", ROCKETLAUNCHER_DRAW, 0, 0, "shotgun", 6);
+	return GroupDeploy(TheEconManager->GetViewmodel(this, "models/CKF_III/v_rocketlauncher.mdl"), "models/CKF_III/wp_group_rf.mdl", ROCKETLAUNCHER_DRAW, 0, 0, "shotgun", 6);
 }
 
 void CRocketLauncher::PrimaryAttack(void)
@@ -103,6 +107,7 @@ void CRocketLauncher::RocketLauncherFire()
 	pRocket->pev->frame = (iCrit>=2) ? 1 : 0;
 	pRocket->pev->skin = m_pPlayer->m_iTeam-1;
 	pRocket->m_iPjFlags = PJ_AIRBLAST_DEFLECTABLE | PJ_AIRBLAST_OWNER;
+	pRocket->m_fDmg = GetDamage();
 
 	MESSAGE_BEGIN(MSG_BROADCAST, gmsgDrawFX);
 	WRITE_BYTE(FX_ROCKETTRAIL);
@@ -115,17 +120,16 @@ void CRocketLauncher::RocketLauncherFire()
 	m_pPlayer->pev->effects |= EF_MUZZLEFLASH;
 
 	PLAYBACK_EVENT_FULL(FEV_NOTHOST, m_pPlayer->edict(), m_usFireScript, 0, (float *)&g_vecZero, (float *)&g_vecZero, 0, 0, m_iId, 0, (iCrit >= 2) ? TRUE : FALSE, 0);
-
-	m_flNextPrimaryAttack = m_flNextSecondaryAttack = UTIL_WeaponTimeBase() + 0.8;
-
-	m_flTimeWeaponIdle = UTIL_WeaponTimeBase() + 0.80;
+	
+	m_flNextPrimaryAttack = m_flNextSecondaryAttack = UTIL_WeaponTimeBase() + GetFiringRate();
+	m_flTimeWeaponIdle = UTIL_WeaponTimeBase() + GetFiringRate();
 
 	m_fInSpecialReload = 0;
 }
 
 void CRocketLauncher::Reload(void)
 {
-	if (m_pPlayer->m_rgAmmo[m_iPrimaryAmmoType] <= 0 || m_iClip == ROCKET_MAX_CLIP)
+	if (m_pPlayer->m_rgAmmo[m_iPrimaryAmmoType] <= 0 || m_iClip >= GetMaxClip())
 		return;
 
 	if (m_flNextPrimaryAttack > UTIL_WeaponTimeBase())
@@ -145,7 +149,7 @@ void CRocketLauncher::Reload(void)
 
 void CRocketLauncher::Reloaded(void)
 {
-	if (m_pPlayer->m_rgAmmo[m_iPrimaryAmmoType] <= 0 || m_iClip == ROCKET_MAX_CLIP)//out of ammo or full of clip, stop reloading
+	if (m_pPlayer->m_rgAmmo[m_iPrimaryAmmoType] <= 0 || m_iClip >= GetMaxClip())//out of ammo or full of clip, stop reloading
 	{
 		SendWeaponAnim(ROCKETLAUNCHER_AFTER_RELOAD, UseDecrement() != FALSE);
 		m_flTimeWeaponIdle = UTIL_WeaponTimeBase() + 20;
@@ -157,7 +161,7 @@ void CRocketLauncher::Reloaded(void)
 		m_pPlayer->m_rgAmmo[m_iPrimaryAmmoType]--;
 
 		m_fInSpecialReload = 1;//go back to start stage
-		Reloaded();//have the next try now so weapon anim will be played immediately 
+		Reloaded();//have the next try now so weapon anim will be played immediately
 	}
 	else
 	{
@@ -165,7 +169,7 @@ void CRocketLauncher::Reloaded(void)
 
 		SendWeaponAnim(ROCKETLAUNCHER_RELOAD, UseDecrement() != FALSE);
 		m_flTimeWeaponIdle = UTIL_WeaponTimeBase() + 20;
-		m_flNextReload = UTIL_WeaponTimeBase() + 0.70;		
+		m_flNextReload = UTIL_WeaponTimeBase() + GetReloadRate();
 	}
 }
 
