@@ -21,7 +21,7 @@ const int g_StockLoadout[CLASS_SPY + 1][MAX_WEAPON_SLOTS] =
     { ITEM_SHOTGUN, ITEM_PISTOL, ITEM_WRENCH, ITEM_BUILDPDA, ITEM_DESTROYPDA },
     { ITEM_GRENADELAUNCHER, ITEM_STICKYBOMBLAUNCHER, ITEM_BOTTLE },
     { ITEM_REVOLVER, ITEM_SAPPER, ITEM_BUTTERFLY, ITEM_DISGUISEKIT },
-    // these are based off the class enums so LEAVE THIS ALONE!!!!!!!!!!!!!!
+    // these are based off the class enums. the ordering may look weird but trust me its fine
 };
 
 ItemDef g_ItemDefs[ITEM_COUNT] =
@@ -54,17 +54,31 @@ ItemDef g_ItemDefs[ITEM_COUNT] =
     { ITEM_BUTTERFLY,         "weapon_butterfly",        {}, ALLOWED_SPY },
     { ITEM_DISGUISEKIT,       "weapon_disguisekit",      {}, ALLOWED_SPY },
 
-    { ITEM_BLACKBOX,          "weapon_rocketlauncher",   { {ATK_CLIP, 3}, {HIT_HEAL, 20.0} }, ALLOWED_SOLDIER, "models/chicken_fortress_2/v_blackbox.mdl" },
-    { ITEM_AXTINGUISHER,      "weapon_fireaxe",          { {HITCOND_CRIT_BURNING, 1.0}, {ATK_DAMAGE, 44.0} }, ALLOWED_PYRO, "models/chicken_fortress_2/v_extinguisher.mdl", "models/chicken_fortress_2/p_extinguisher.mdl" },
+    { ITEM_BLACKBOX,          
+    "weapon_rocketlauncher",   
+    { {ATK_CLIP, 3}, {HIT_HEAL, 20.0} }, 
+    ALLOWED_SOLDIER, 
+    "models/chicken_fortress_2/v_blackbox.mdl" },
 
-    { ITEM_VALVE_ROCKETLAUNCHER,    "weapon_rocketlauncher",   { {ATK_CLIP, 512}, {ATK_FIRE_RATE, 0.1}, {ATK_RELOAD_RATE, 0.1}, {ATK_DAMAGE, 120}, {KILL_CRITS, 10.0} }, ALLOWED_SCOUT | ALLOWED_SOLDIER | ALLOWED_SPY },
-    
-    // teehee :3                                                                                                                                        //
-    // example of a unlockable weapon                                                                                                                   //
-    // { example_index,    "weapon_rocketlauncher",   { {ATK_CLIP, 2}, {ATK_FIRE_RATE, 0.1} }, ALLOWED_SOLDIER },                                       //
-    // this would give you a rocket launcher with a max clip of 2 and a firing rate of 0.1, and it would only be allowed on soldier                     //
-    // { example_index,    "weapon_shotgun",   { {ATK_CLIP_MULTI, 2.5}, {ATK_FIRE_RATE, 1} }, ALLOWED_SOLDIER | ALLOWED_SPY },                          //
-    // this would give you a shotgun with a clip multiplier increase of 250%, a firing rate of 1.0 seconds, and it would be allowed on soldier and spy  //
+    { ITEM_AXTINGUISHER,      
+    "weapon_fireaxe",          
+    { {HITCOND_CRIT_BURNING, 1.0}, {ATK_DAMAGE, 44.0} }, 
+    ALLOWED_PYRO, 
+    "models/chicken_fortress_2/v_extinguisher.mdl", 
+    "models/chicken_fortress_2/p_extinguisher.mdl" },
+
+    { ITEM_ETERNAL_REWARD,    
+    "weapon_butterfly",        
+    { {KILL_DISGUISE, 1.0} }, 
+    ALLOWED_SPY, 
+    "models/chicken_fortress_2/v_ereward.mdl" },
+
+    // unlock table :3
+    // this was fun to make. it didnt take long either! the main thing is the attributes LOL
+    // 
+    // example of a unlockable weapon
+    // { example_index,    "weapon_rocketlauncher",   { {ATK_CLIP, 2}, {ATK_FIRE_RATE, 0.1} }, ALLOWED_SOLDIER },
+    // this would give you a rocket launcher with a max clip of 2 and a firing rate of 0.1, and it would only be allowed on soldier
 };
 static_assert(ARRAYSIZE(g_ItemDefs) == ITEM_COUNT, "g_ItemDefs out of sync with enum");
 // this is equal to items_game.txt in tf2

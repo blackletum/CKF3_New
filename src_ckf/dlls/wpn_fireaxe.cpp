@@ -29,7 +29,7 @@ void CFireaxe::Spawn(void)
 
 	Precache();
 	m_iId = WEAPON_FIREAXE;
-	SET_MODEL(ENT(pev), "models/CKF_III/wp_group_rf.mdl");
+	SET_MODEL(ENT(pev), TheEconManager->GetPlayermodel(this, "models/CKF_III/wp_group_rf.mdl"));
 	pev->sequence = 22;
 	m_iClip = WEAPON_NOCLIP;
 	FallInit();
@@ -66,8 +66,8 @@ int CFireaxe::GetItemInfo(ItemInfo *p)
 BOOL CFireaxe::Deploy(void)
 {
 	m_iShotsFired = 0;
-
-	return GroupDeploy(TheEconManager->GetViewmodel(this, "models/CKF_III/v_fireaxe.mdl"), "models/CKF_III/wp_group_rf.mdl", FIREAXE_DRAW, 0, 0, "knife", 63);
+	
+	return GroupDeploy(TheEconManager->GetViewmodel(this, "models/CKF_III/v_fireaxe.mdl"), TheEconManager->GetPlayermodel(this, "models/CKF_III/wp_group_rf.mdl"), FIREAXE_DRAW, 0, 0, "knife", 63);
 }
 
 void CFireaxe::Holster(int skiplocal)

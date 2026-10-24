@@ -1710,6 +1710,12 @@ void CBasePlayer::KillReward(void)
 						TakeHealth(value, 0);
 					break;
 				}
+				case KILL_DISGUISE:
+				{
+					m_bInstaDisguise = true;
+					Disguise_Start(GetEnemyTeam(), m_iReDisguise);
+					break;
+				}
 				default:
 					break;
 			}
@@ -7367,7 +7373,12 @@ void CBasePlayer::Disguise_Start(int iTeam, int iClass)
 
 	m_bDisguiseStart = true;
 
-	m_flDisguiseTimer = gpGlobals->time + DisguiseBegin_Duration;
+	if (m_bInstaDisguise) // your eternal reward
+		m_flDisguiseTimer = gpGlobals->time + 0.1;
+	else if(m_iDisguise == DISGUISE_YES) // if already disguised
+		m_flDisguiseTimer = gpGlobals->time + 0.5;
+	else
+		m_flDisguiseTimer = gpGlobals->time + DisguiseBegin_Duration;
 
 	EMIT_SOUND(ENT(pev) , CHAN_STATIC, "CKF_III/spy_disguise.wav", 1.0, 2.0);
 
@@ -7379,6 +7390,8 @@ void CBasePlayer::Disguise_Start(int iTeam, int iClass)
 		WRITE_BYTE(m_iDisguiseNewTeam);
 		MESSAGE_END();
 	}
+
+	m_bInstaDisguise = false;
 }
 
 void CBasePlayer::Disguise_Weapon(void)

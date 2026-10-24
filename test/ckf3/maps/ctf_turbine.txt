@@ -1,0 +1,9 @@
+Turbine - Capture the Flag
+by Meelooh
+
+community MundoMapper "https://www.mundomapper.net"
+community Alta Fruta "https://www.altafruta.net"
+
+Map port 07/08/2024
+
+Note: Map version beta.

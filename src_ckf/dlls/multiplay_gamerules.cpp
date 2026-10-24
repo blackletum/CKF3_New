@@ -1960,7 +1960,7 @@ void CHalfLifeMultiplay::PlayerSpawn(CBasePlayer *pPlayer)
 		addDefault = FALSE;
 	}
 
-	pPlayer->GiveDefaultItems(); // this is where the exception occurs
+	pPlayer->GiveDefaultItems();
 }
 
 BOOL CHalfLifeMultiplay::FPlayerCanRespawn(CBasePlayer *pPlayer)
@@ -2259,6 +2259,7 @@ void CHalfLifeMultiplay::PlayerKilled(CBasePlayer *pVictim, entvars_t *pevKiller
 
 		CalcPoints(plKiller, pevInflictor, pVictim);
 		FireTargets("game_playerkill", pKiller, pKiller, USE_TOGGLE, 0);
+		plKiller->m_iReDisguise = pVictim->m_iClass; // your eternal reward. there is probably a better way of doing this LOLOLOL
 		plKiller->KillReward(); // for on kill effects on weapons
 	}
 

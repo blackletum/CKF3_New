@@ -40,8 +40,7 @@ enum
     // unlocks
     ITEM_BLACKBOX,
     ITEM_AXTINGUISHER,
-
-    ITEM_VALVE_ROCKETLAUNCHER,
+    ITEM_ETERNAL_REWARD,
 
     ITEM_COUNT  // ESPECIALLY dont use this
 };
@@ -96,6 +95,7 @@ enum
     KILL_START, // dont use this
     KILL_CRITS,
     KILL_HEAL,
+    KILL_DISGUISE,
     KILL_END,   // dont use this
     //--------------------------/
 

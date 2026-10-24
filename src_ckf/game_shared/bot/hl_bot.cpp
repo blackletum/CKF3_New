@@ -413,6 +413,8 @@ CBot* CBot::CreateBot(const char* name, bool quotaManaged)
 
 void CBot::Spawn(void)
 {
+	//m_iLoadoutEconIndex[CLASS_SP][];
+
 	// let the game set everything up
 	CBasePlayer::Spawn();
 

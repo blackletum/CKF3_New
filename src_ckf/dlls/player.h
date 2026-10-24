@@ -865,6 +865,8 @@ public:
 	int m_iDisguiseMaxSpeed;
 	CBasePlayer *m_pDisguiseTarget;
 	int m_iDisguiseTarget;
+	int m_iReDisguise; // your eternal reward
+	bool m_bInstaDisguise;
 	//Status Bar Field
 	float m_flNextSBarUpdateTime;
 	int m_iClientSBarFlags;

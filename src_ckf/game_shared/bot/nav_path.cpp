@@ -707,8 +707,8 @@ void CNavPathFollower::Update( float deltaT, bool avoidObstacles )
 	if (node->area && (node->area->GetAttributes() & NAV_JUMP))
 		shouldjump = 999.0f;
 	// forces a jump in the pathfollower. alternatively, you could just force it to jump by using PressJump(). this is just to give the variable a reason to be used xddddd
-	else
-		shouldjump = (node->pos.z - m_improv->GetFeet().z);
+//	else
+	//	shouldjump = 1.0f;// (node->pos.z - m_improv->GetFeet().z);
 
 	// move improv along path
 	m_improv->TrackPath( m_goal, shouldjump );
