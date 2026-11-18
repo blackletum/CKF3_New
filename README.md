@@ -1,9 +1,10 @@
 # Chicken Fortress 3: Decapitated
 
-An updated version of the original Chicken Fortress 3. Managed by weyouthey and ( occasionally ) jakulo
+An updated version of the original Chicken Fortress 3. Managed by weyouthey and ( occasionally ) jakulo. This repo serves to hold the source code, as well as map conversions/experiments. The experiments will not be in the base releases.
+
 
 ## New changes compared to the original:
-##### Bots!
+Bots!!!!!!!!!!!!!!!!!!!!!!!!!!1!
 Nav-mesh system in general.
 Weapon fixes / readjustments to be more accurate to live Team Fortress 2.
 
